@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Centre Simulation Parameters</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; }
+        h1, h2 { color: #333; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .param-group { margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fdfdfd;}
+        .param-group h2 { margin-top: 0; font-size: 1.2em; color: #555; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+        label { display: inline-block; width: 300px; margin-bottom: 8px; font-weight: bold; color: #444;}
+        input[type="text"], input[type="number"], select {
+            width: 150px;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"], button { /* Style for all buttons */
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 5px; /* Add some margin between buttons */
+        }
+        input[type="submit"]:hover, button:hover {
+            background-color: #0056b3;
+        }
+        #launch-live-sim-button { /* Specific style for green button */
+            background-color: #28a745;
+        }
+        #launch-live-sim-button:hover {
+            background-color: #1e7e34;
+        }
+        .form-section { margin-bottom: 15px; }
+        .mode-selection { margin-bottom: 20px; padding-bottom:20px; border-bottom: 2px solid #007bff;}
+        .action-buttons { margin-top: 20px; } /* Container for action buttons */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Data Centre Simulation Parameters</h1>
+
+        <form method="POST" action="{{ url_for('index') }}" id="modeForm" class="mode-selection">
+            <label for="simulation_mode_select">Select Simulation Mode (to load defaults):</label>
+            <select name="simulation_mode_select" id="simulation_mode_select" onchange="document.getElementById('modeForm').submit();">
+                <option value="cool_down" {% if current_mode == 'cool_down' %}selected{% endif %}>Cool Down</option>
+                <option value="warm_up" {% if current_mode == 'warm_up' %}selected{% endif %}>Warm Up</option>
+            </select>
+        </form>
+
+        <form method="POST" action="{{ url_for('run_simulation_route') }}" id="mainSimForm">
+            <input type="hidden" name="simulation_mode" value="{{ current_mode }}">
+
+            {% for group_name, param_keys in parameter_groups.items() %}
+                <div class="param-group">
+                    <h2>{{ group_name }}</h2>
+                    {% for key in param_keys %}
+                        {% if key in params %} {# Check if key exists in the editable params #}
+                        <div class="form-section">
+                            <label for="{{ key }}">{{ key.replace('_', ' ').title() }}:</label>
+                            <input type="{{ get_param_type(params[key]) }}"
+                                   name="{{ key }}"
+                                   id="{{ key }}"
+                                   value="{{ '' if params[key] is none else params[key] }}"
+                                   {% if get_param_type(params[key]) == 'number' %}step="any"{% endif %}>
+                            <small><em>(Default: {{ '' if params[key] is none else params[key] }})</em></small>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <div class="action-buttons">
+                <input type="submit" value="Run Simulation">
+                <button type="button" id="launch-live-sim-button">Launch Live Animation</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('launch-live-sim-button').addEventListener('click', function() {
+            const formElement = document.getElementById('mainSimForm'); // Target form by ID
+            if (formElement) {
+                const formData = new FormData(formElement);
+                const params = {};
+                for (const [key, value] of formData.entries()) {
+                    params[key] = value;
+                }
+                sessionStorage.setItem('lastRunParamsForLiveSim', JSON.stringify(params));
+                window.open("{{ url_for('live_simulation_page_route') }}", '_blank');
+            } else {
+                alert("Could not find the main simulation form (ID: mainSimForm) to get parameters.");
+            }
+        });
+    </script>
+</body>
+</html>

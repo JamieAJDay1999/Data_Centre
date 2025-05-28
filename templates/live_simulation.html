@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Data Centre Animation</title>
+    <style>
+        /* General body styling for layout */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Styling for controls section */
+        #controls {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Styling for play button */
+        #play-button {
+            padding: 8px 15px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        /* Styling for time display */
+        #time-display {
+            display: inline-block;
+            margin-left: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Container for the simulation diagram and overlays */
+        #simulation-container {
+            position: relative;
+            /* Adjust these dimensions to match your DC_diagram.png aspect ratio or desired display size */
+            width: 1000px; /* Example width */
+            height: 670px; /* Example height (maintaining an example aspect ratio) */
+            border: 1px solid #ccc;
+            background-color: #fff; /* Fallback if image fails */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden; /* Ensures child absolute elements are clipped if they exceed bounds */
+        }
+
+        /* Data Centre Diagram Image */
+        #dc-diagram-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Ensures image is behind overlays */
+        }
+
+        /* Styling for data and power overlay boxes (text values) */
+        .data-overlay, .power-overlay {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.85); /* Slightly transparent white */
+            padding: 3px 6px;
+            border: 1px solid #bbb;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 3; /* Above the diagram and color boxes */
+            text-align: center;
+            min-width: 50px; /* Ensure some width for text */
+            white-space: nowrap; /* Prevent text from wrapping */
+        }
+
+        /* Styling for color-changing boxes */
+        .color-box {
+            position: absolute;
+            opacity: 0.4; /* Adjust for desired visibility */
+            z-index: 2; /* Behind text but above diagram */
+            border: 1px dashed #555; /* Optional: to see box boundaries during development */
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+
+        /* Status message styling */
+        #status-message {
+            margin-top: 10px;
+            font-style: italic;
+            color: #555;
+            height: 20px; /* Reserve space to prevent layout shift */
+        }
+    </style>
+</head>
+<body>
+    <h1>Data Centre Live Animation</h1>
+
+    <div id="controls">
+        <button id="play-button">Play</button>
+        <span id="time-display">Time: 93 min</span>
+    </div>
+
+    <div id="status-message">Paused. Press Play to resume.</div>
+
+    <div id="simulation-container">
+        <img id="dc-diagram-img" src="/static/images/DC_diagram.png" alt="Data Centre Diagram">
+
+        <div id="T1-val" class="data-overlay">18°C</div>
+        <div id="T2-val" class="data-overlay">19°C</div>
+        <div id="T3-val" class="data-overlay">24.5°C</div>
+        <div id="T4-val" class="data-overlay">25.3°C</div>
+        <div id="T5-val" class="data-overlay">24.5°C</div>
+        <div id="P_HVAC-val" class="power-overlay">3967 W</div>
+        <div id="P_IT-val" class="power-overlay">10000 W</div>
+
+        <div id="cold-aisle-box" class="color-box"></div>
+        <div id="rack-box" class="color-box"></div>
+        <div id="it-equip-box" class="color-box"></div>
+        <div id="hot-aisle-box" class="color-box"></div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const playButton = document.getElementById('play-button');
+        const timeDisplay = document.getElementById('time-display');
+        const statusMessage = document.getElementById('status-message');
+
+        const T1_val_el = document.getElementById('T1-val');
+        const T2_val_el = document.getElementById('T2-val');
+        const T3_val_el = document.getElementById('T3-val');
+        const T4_val_el = document.getElementById('T4-val');
+        const T5_val_el = document.getElementById('T5-val');
+        const P_HVAC_val_el = document.getElementById('P_HVAC-val');
+        const P_IT_val_el = document.getElementById('P_IT-val');
+
+        const coldAisleBoxEl = document.getElementById('cold-aisle-box');
+        const rackBoxEl = document.getElementById('rack-box');
+        const itEquipBoxEl = document.getElementById('it-equip-box');
+        const hotAisleBoxEl = document.getElementById('hot-aisle-box');
+
+        // --- Adjusted Element Positions and Sizes (in pixels) ---
+        // These coordinates are relative to the top-left corner of the #simulation-container
+        // Values updated based on the provided HTML
+        const elementCoordinates = {
+            // Temperature Text Values
+            'T1-val': { top: 387, left: 685 },
+            'T2-val': { top: 290, left: 608 },
+            'T3-val': { top: 150, left: 710 },
+            'T4-val': { top: 120, left: 710 },
+            'T5-val': { top: 290, left: 715 }, // Corrected `l;left` to `left`
+
+            // Power Text Values
+            'P_HVAC-val': { top: 420, left: 450 },
+            'P_IT-val':   { top: 155, left: 590 },
+
+            // Color-Changing Boxes
+            'cold-aisle-box': { top: 215, left: 590, width: 103, height: 75 },
+            'rack-box':       { top: 118, left: 665, width: 43, height: 25 },
+            'it-equip-box':   { top: 150, left: 670, width: 35, height: 25 },
+            'hot-aisle-box':  { top: 215, left: 695, width: 103, height: 75 }
+        };
+
+        // Apply initial positions and sizes when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            for (const id in elementCoordinates) {
+                const el = document.getElementById(id);
+                if (el) {
+                    const coords = elementCoordinates[id];
+                    el.style.top = coords.top + 'px';
+                    el.style.left = coords.left + 'px';
+                    if (coords.width) el.style.width = coords.width + 'px';
+                    if (coords.height) el.style.height = coords.height + 'px';
+                } else {
+                    console.warn(`Element with ID '${id}' not found for positioning.`);
+                }
+            }
+        });
+
+        // Animation State Variables
+        let simulationData = null;
+        let currentFrame = 0;
+        let animationIntervalId = null;
+        const frameDurationMs = 500; // 0.5 seconds per frame (displays 2 simulated minutes per real second)
+
+        // Function to map temperature to a color (Blue to Red, avoiding Green)
+        function getTempColor(temp, minTemp, maxTemp) {
+            if (temp === undefined || temp === null || minTemp === maxTemp) {
+                return 'rgba(200, 200, 200, 0.4)'; // Default grey for undefined or flat range
+            }
+            // Normalize temperature: 0 (coldest/blue) to 1 (hottest/red)
+            const normalized = Math.max(0, Math.min(1, (temp - minTemp) / (maxTemp - minTemp)));
+
+            const r = Math.round(255 * normalized);       // Red component increases with temp
+            const g = 0;                                   // Green component stays 0
+            const b = Math.round(255 * (1 - normalized));  // Blue component decreases with temp
+
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Function to update the display with the current frame's data
+        function updateFrameDisplay() {
+            if (!simulationData || currentFrame >= simulationData.time_steps_minutes.length) {
+                stopAnimation();
+                statusMessage.textContent = "Animation finished. Press Play to restart.";
+                if(simulationData && simulationData.time_steps_minutes.length > 0) {
+                    currentFrame = simulationData.time_steps_minutes.length - 1; // Keep last frame shown
+                } else {
+                    timeDisplay.textContent = `Time: -- min`; // Reset time if no data
+                    return;
+                }
+            }
+            
+            const minute = simulationData.time_steps_minutes[currentFrame];
+            timeDisplay.textContent = `Time: ${minute} min`;
+
+            T1_val_el.textContent = `${simulationData.T1_air_in[currentFrame]}°C`;
+            T2_val_el.textContent = `${simulationData.T2_cold_aisle[currentFrame]}°C`;
+            T3_val_el.textContent = `${simulationData.T3_rack_air[currentFrame]}°C`;
+            T4_val_el.textContent = `${simulationData.T4_it_equip[currentFrame]}°C`;
+            T5_val_el.textContent = `${simulationData.T5_hot_aisle[currentFrame]}°C`;
+            
+            P_HVAC_val_el.textContent = `${simulationData.P_HVAC[currentFrame]} W`;
+            P_IT_val_el.textContent = `${simulationData.P_IT_heat_source} W`;
+
+            const minObserved = simulationData.min_temp_observed;
+            const maxObserved = simulationData.max_temp_observed;
+
+            coldAisleBoxEl.style.backgroundColor = getTempColor(simulationData.T2_cold_aisle[currentFrame], minObserved, maxObserved);
+            rackBoxEl.style.backgroundColor = getTempColor(simulationData.T3_rack_air[currentFrame], minObserved, maxObserved);
+            itEquipBoxEl.style.backgroundColor = getTempColor(simulationData.T4_it_equip[currentFrame], minObserved, maxObserved);
+            hotAisleBoxEl.style.backgroundColor = getTempColor(simulationData.T5_hot_aisle[currentFrame], minObserved, maxObserved);
+            
+            if (animationIntervalId) { 
+                currentFrame++;
+            }
+        }
+
+        // Function to start the animation
+        function startAnimation() {
+            if (!simulationData) {
+                statusMessage.textContent = "Loading data...";
+                const paramsString = sessionStorage.getItem('lastRunParamsForLiveSim');
+                if (!paramsString) {
+                    statusMessage.textContent = "Error: Simulation parameters not found. Please run from main page.";
+                    playButton.disabled = false;
+                    return;
+                }
+                const simParams = JSON.parse(paramsString);
+
+                fetch("/get_animation_data", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(simParams)
+                })
+                .then(response => {
+                    if (!response.ok) { throw new Error(`HTTP error ${response.status}`); }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) { throw new Error(`Server error: ${data.error}`); }
+                    simulationData = data;
+                    if (!simulationData.time_steps_minutes || simulationData.time_steps_minutes.length === 0) {
+                        statusMessage.textContent = "No animation data points returned from simulation. Check parameters/duration.";
+                        playButton.textContent = 'Play';
+                        playButton.disabled = false;
+                        simulationData = null; 
+                        return;
+                    }
+                    currentFrame = 0;
+                    playButton.textContent = 'Pause';
+                    statusMessage.textContent = "Playing...";
+                    updateFrameDisplay(); 
+                    animationIntervalId = setInterval(updateFrameDisplay, frameDurationMs);
+                    playButton.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching/processing animation data:', error);
+                    statusMessage.textContent = `Error loading data: ${error.message}`;
+                    playButton.textContent = 'Play';
+                    playButton.disabled = false;
+                    simulationData = null; 
+                });
+            } else { 
+                if (currentFrame >= simulationData.time_steps_minutes.length) { 
+                    currentFrame = 0; // Loop back to start if already at the end
+                }
+                playButton.textContent = 'Pause';
+                statusMessage.textContent = "Playing...";
+                updateFrameDisplay(); // Update to current frame before interval starts
+                animationIntervalId = setInterval(updateFrameDisplay, frameDurationMs);
+                playButton.disabled = false;
+            }
+        }
+
+        // Function to stop the animation
+        function stopAnimation() {
+            clearInterval(animationIntervalId);
+            animationIntervalId = null;
+            playButton.textContent = 'Play';
+            if (simulationData && simulationData.time_steps_minutes && simulationData.time_steps_minutes.length > 0){
+                statusMessage.textContent = "Paused. Press Play to resume.";
+            } else {
+                statusMessage.textContent = "Animation stopped or no data. Try launching from main page.";
+            }
+        }
+
+        // Event listener for the play/pause button
+        playButton.addEventListener('click', () => {
+            playButton.disabled = true; 
+            if (animationIntervalId) { 
+                stopAnimation();
+                playButton.disabled = false;
+            } else { 
+                startAnimation();
+                // Button disabling is handled within startAnimation for async cases
+            }
+        });
+    </script>
+</body>
+</html>
