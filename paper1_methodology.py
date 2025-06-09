@@ -1,6 +1,7 @@
 # paper1_methodology.py (Modified plot_simulation_results function)
 import sys
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from parameters import setup_simulation_parameters
 import os # Added for path operations
@@ -45,19 +46,33 @@ def change_target_temp(p, num_begin_change, target_temp_change, i):
     return p, target_temp_change
 
 def _set_initial_simulation_conditions(p, T_IT_sim, T_Rack_sim, T_cAisle_sim, T_cWall_sim,\
-    T_hAisle_sim, T_Air_in_sim, P_HVAC_sim, P_TES_sim, E_TES_sim, P_Cooling_sim):
-    T_Air_in_sim[0] = p['T_Air_in_initial']
-    T_cAisle_sim[0] = p['T_cAisle_initial']
-    T_cWall_sim[0] = p['T_cWall_initial_Celsius']
-    T_Rack_sim[0] = p['T_Rack_initial_Celsius']
-    T_IT_sim[0] = p['T_IT_initial_Celsius']
-    T_hAisle_sim[0] = p['T_hAisle_initial']
-    P_HVAC_required_initial = (T_hAisle_sim[0] - p['T_target_Air_in_Celsius']) * \
-                              (p['m_dot_air'] * p['c_p_air']) / p['COP_HVAC']
-    P_HVAC_sim[0] = np.clip(P_HVAC_required_initial, p['P_HVAC_min_watts'], p['P_HVAC_max_watts'])
-    P_TES_sim[0] = (P_HVAC_required_initial - P_HVAC_sim[0]) * p['TES_discharge_efficiency']
-    E_TES_sim[0] = p['TES_initial_charge']
-    P_Cooling_sim[0] = P_HVAC_sim[0] + P_TES_sim[0]
+    T_hAisle_sim, T_Air_in_sim, P_HVAC_sim, P_TES_sim, E_TES_sim, P_Cooling_sim, p_init=None):
+    if p_init is None: 
+        T_Air_in_sim[0] = p['T_Air_in_initial']
+        T_cAisle_sim[0] = p['T_cAisle_initial']
+        T_cWall_sim[0] = p['T_cWall_initial_Celsius']
+        T_Rack_sim[0] = p['T_Rack_initial_Celsius']
+        T_IT_sim[0] = p['T_IT_initial_Celsius']
+        T_hAisle_sim[0] = p['T_hAisle_initial']
+        P_HVAC_required_initial = (T_hAisle_sim[0] - p['T_target_Air_in_Celsius']) * \
+                                (p['m_dot_air'] * p['c_p_air']) / p['COP_HVAC']
+        P_HVAC_sim[0] = np.clip(P_HVAC_required_initial, p['P_HVAC_min_watts'], p['P_HVAC_max_watts'])
+        P_TES_sim[0] = (P_HVAC_required_initial - P_HVAC_sim[0]) * p['TES_discharge_efficiency']
+        E_TES_sim[0] = p['TES_initial_charge_kWh']
+        P_Cooling_sim[0] = P_HVAC_sim[0] + P_TES_sim[0]
+    else:
+        T_Air_in_sim[0]  = p_init['T_in']          # column F in screenshot
+        T_cAisle_sim[0]  = p_init['T_c']           # column D
+        T_cWall_sim[0]   = p['T_cWall_initial_Celsius'] # use if column exists
+        T_Rack_sim[0]    = p_init['T_Rack']        # column C
+        T_IT_sim[0]      = p_init['T_IT']          # column B
+        T_hAisle_sim[0]  = p_init['T_h']           # column E
+
+        # HVAC and TES power can also come straight from the table … --------
+        P_HVAC_sim[0]    = p_init['P_HVAC']        # column H
+        P_TES_sim[0]     = p_init['P_ch'] - p_init['P_dis']  # net TES flow (I − J)
+        E_TES_sim[0]     = p_init['E_TES']         # column G
+        print(T_Rack_sim)
 
 def _get_previous_step_temperatures(i, T_IT_sim, T_Rack_sim, T_cAisle_sim, T_cWall_sim, T_hAisle_sim):
     T_IT_prev = T_IT_sim[i-1]
@@ -77,7 +92,7 @@ def _calculate_hvac_power_and_inlet_temp(p, T_hAisle_prev, T_cAisle_prev, i):
             p['warm_up'] = 'After'
     P_HVAC_current = np.clip(P_HVAC_required_current, p['P_HVAC_min_watts'], p['P_HVAC_max_watts'])
     P_TES_required_current = (P_HVAC_required_current - P_HVAC_current) * p['TES_discharge_efficiency']
-    P_TES_current = np.clip(P_TES_required_current, p['TES_kw_discharge_min'], p['TES_kw_discharge_max'])
+    P_TES_current = np.clip(P_TES_required_current, p['TES_w_discharge_min'], p['TES_w_discharge_max'])
     P_Cooling_current = P_HVAC_current + P_TES_current
     T_Air_in_current = T_hAisle_prev - (P_Cooling_current * p['COP_HVAC']) / \
                        (p['m_dot_air'] * p['c_p_air'])
@@ -104,7 +119,7 @@ def _update_current_step_temperatures(p, i, T_IT_sim, T_Rack_sim, T_cAisle_sim, 
     T_IT_sim[i] = T_IT_prev + dT_IT_dt * p['dt']
     T_Rack_sim[i] = T_Rack_prev + dT_Rack_dt * p['dt']
     T_cAisle_sim[i] = T_cAisle_prev + dT_cAisle_dt * p['dt']
-    T_cWall_sim[i] = T_cWall_prev + dT_cWall_dt * p['dt']
+    T_cWall_sim[i] =  p['T_out_Celsius']  #T_cWall_prev + dT_cWall_dt * p['dt']
     T_hAisle_sim[i] = T_hAisle_prev + dT_hAisle_dt * p['dt']
 
 def _update_tes_charge(p, i, E_TES_sim, P_TES_sim):
@@ -131,12 +146,12 @@ def _check_steady_state(derivatives, steady_iters, max_steady_iters):
         break_loop = True
     return steady_iters, break_loop
 
-def run_simulation(p):
+def run_simulation(p, p_init):
     p = simulation_params(p)
     T_IT_sim, T_Rack_sim, T_cAisle_sim, T_cWall_sim, T_hAisle_sim, T_Air_in_sim, P_HVAC_sim,\
         P_TES_sim, E_TES_sim, P_Cooling_sim = initialize_simulation_arrays(p['num_time_points'])
     _set_initial_simulation_conditions(p, T_IT_sim, T_Rack_sim, T_cAisle_sim, T_cWall_sim,
-        T_hAisle_sim, T_Air_in_sim, P_HVAC_sim, P_TES_sim, E_TES_sim, P_Cooling_sim)
+        T_hAisle_sim, T_Air_in_sim, P_HVAC_sim, P_TES_sim, E_TES_sim, P_Cooling_sim, p_init)
     steady_iters = 0
     max_steady_iters = 10
     target_temp_change = False
@@ -385,3 +400,18 @@ def plot_simulation_results(T_IT_sim, T_Rack_sim, T_cAisle_sim, T_hAisle_sim, T_
         traceback.print_exc()
 
     print(f"[PLOTTER] --- Finished plot_simulation_results ---")
+
+def main(init_data=False):
+    p = setup_simulation_parameters()
+    if init_data:
+        p_init = pd.read_csv('static/optimisation_results.csv').iloc[0].to_dict()  # Load initial conditions from CSV
+    else:
+        p_init = None
+    T_IT_sim, T_Rack_sim, T_cAisle_sim, T_hAisle_sim, T_Air_in_sim, P_HVAC_sim, E_TES_sim, P_TES_sim = run_simulation(p, p_init)
+    P_HVAC_steady_state = calculate_flexibility(P_HVAC_sim, p, p['simulation_mode'])
+    plot_simulation_results(T_IT_sim, T_Rack_sim, T_cAisle_sim, T_hAisle_sim, T_Air_in_sim,
+                            P_HVAC_sim, P_HVAC_steady_state, E_TES_sim, P_TES_sim, p)
+
+if __name__ == "__main__":
+    main(True)
+    

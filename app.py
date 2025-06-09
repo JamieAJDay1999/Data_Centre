@@ -31,8 +31,8 @@ PARAMETER_GROUPS = {
         'R_cold_K_per_W', 'C_cWall', 'T_out_Celsius'
     ],
     "Thermal Energy Storage (TES)": [
-        'TES_kwh_cap', 'TES_kw_discharge_max', 'TES_kw_discharge_min',
-        'TES_discharge_efficiency', 'TES_kw_charge_max', 'TES_kw_charge_min',
+        'TES_kwh_cap', 'TES_w_discharge_max',
+        'TES_discharge_efficiency', 'TES_w_charge_max',
         'TES_charge_efficiency', 'TES_initial_charge'
     ],
     "Physical Constants": ['rho_air', 'c_p_air']
@@ -88,23 +88,29 @@ def convert_form_value(key, value_str, default_params_for_type_inference):
         return None
     return str(value_str) # Default to string if no other type matches
 
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    """Handles the main page for parameter input."""
-    if request.method == 'POST': # User changed simulation mode via dropdown
+    selected_mode = session.get('simulation_mode', 'cool_down')
+
+    if request.method == 'POST': # If user changed mode via dropdown
         selected_mode = request.form.get('simulation_mode_select', 'cool_down')
         session['simulation_mode'] = selected_mode
+        # Always fetch fresh defaults when mode changes via POST
         default_params = setup_simulation_parameters(mode=selected_mode)
-        session['default_params'] = default_params # Store defaults in session
+        session['default_params'] = default_params
     else: # GET request or initial load
-        selected_mode = session.get('simulation_mode', 'cool_down')
-        if 'default_params' in session and session.get('simulation_mode') == selected_mode:
-            default_params = session['default_params']
-        else:
+        # In debug mode, always load fresh parameters from source on a GET request
+        # This ensures changes in parameters.py are picked up on browser refresh (GET)
+        if app.debug:
             default_params = setup_simulation_parameters(mode=selected_mode)
-            session['simulation_mode'] = selected_mode
-            session['default_params'] = default_params
+            session['default_params'] = default_params # Update session for consistency
+        else: # In production, rely on session for performance and consistency
+            if 'default_params' in session and session.get('simulation_mode') == selected_mode:
+                default_params = session['default_params']
+            else:
+                default_params = setup_simulation_parameters(mode=selected_mode)
+                session['simulation_mode'] = selected_mode
+                session['default_params'] = default_params
 
     editable_params = {k: v for k, v in default_params.items() if k not in NON_EDITABLE_PARAMS}
 
