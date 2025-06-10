@@ -25,6 +25,13 @@ def _calc_dc_wall_area(dc_dims):
             2 * dc_dims['dc_height'] * dc_dims['dc_width'] +
             dc_dims['dc_length'] * dc_dims['dc_width'])
 
+def calc_c_rack(it_params, params):
+    """Calculate the total heat capacity of a rack."""
+    free_space_volume = _calc_free_space_in_rack(it_params)
+    return (free_space_volume * it_params['n_racks'] * params['rho_air'] * params['c_p_air'] +
+            it_params['n_racks'] * it_params['mass_rack'] * it_params['c_rack'] +
+            it_params['n_racks'] * it_params['n_servers_per_rack'] * it_params['mass_server'] * it_params['c_server'])
+
 def setup_simulation_parameters(mode="cool_down"):
     """
     Sets up simulation parameters, tailored for the optimisation.py script.
@@ -72,13 +79,11 @@ def setup_simulation_parameters(mode="cool_down"):
     params['G_conv'] = np.round(_calc_g_conv(_it_specs), 3) # Convective heat conductance IT to Rack Air (W/K)
 
     _v_free_space_per_rack = np.round(_calc_free_space_in_rack(_it_specs), 3)
-    params['C_Rack'] = (_v_free_space_per_rack * _it_specs['n_racks'] *
-                        params['rho_air'] * params['c_p_air']) # Heat capacity of air in racks (J/K)
-
+    params['C_Rack'] = calc_c_rack(_it_specs, params)  # Total heat capacity of a rack (J/K)
     _v_cAisle = 2000.0  # Volume of cold aisle (m^3) - assumption
     params['C_cAisle'] = _v_cAisle * params['rho_air'] * params['c_p_air'] # (J/K)
 
-    _v_hAisle = 96.0    # Volume of hot aisle (m^3) - assumption
+    _v_hAisle = 1000#96.0    # Volume of hot aisle (m^3) - assumption
     params['C_hAisle'] = _v_hAisle * params['rho_air'] * params['c_p_air'] # (J/K)
 
     # For G_cold calculation
@@ -106,8 +111,8 @@ def setup_simulation_parameters(mode="cool_down"):
     params['TES_charge_efficiency'] = 0.9
     params['E_TES_min_kWh'] = 0.0  # Minimum charge state (kWh)
     params['TES_initial_charge_kWh'] = 0.5 * params['TES_kwh_cap'] # Initial charge (kWh)
-    params['TES_p_dis_ramp'] = 10000.0  # Max power ramp for TES discharge (W per dt)
-    params['TES_p_ch_ramp'] = 10000.0   # Max power ramp for TES charge (W per dt)
+    params['TES_p_dis_ramp'] = 1000000.0  # Max power ramp for TES discharge (W per dt)
+    params['TES_p_ch_ramp'] = 1000000.0   # Max power ramp for TES charge (W per dt)
 
     # === V. Initial Conditions & Operational Limits for "cool_down" mode ===
     # (as used by optimisation.py)
@@ -115,9 +120,10 @@ def setup_simulation_parameters(mode="cool_down"):
     params['T_Rack_initial_Celsius'] = 32
     params['T_cAisle_initial'] = 29.5
     params['T_hAisle_initial'] = 33
+    params['T_target_Air_in_Celsius'] = 14
     
     # This is used as the upBound for the T_c variable in optimisation.py
     # For "cool_down" mode in the original script, it was set to None.
-    params['T_cAisle_upper_limit_Celsius'] = None 
+    params['T_cAisle_upper_limit_Celsius'] = 32 
 
     return params

@@ -30,7 +30,7 @@ def setup_optimisation_parameters():
 
     # horizon & discretisation
     p['simulation_time_minutes'] = 1440    # 2-minute simulation
-    p['dt'] = 60               # 1-second step
+    p['dt'] = 60              # 1-second step
     p['simulation_time_seconds'] = p['simulation_time_minutes'] * 60
     p['num_time_points'] = int(p['simulation_time_seconds'] / p['dt'])
     p['dt_hours'] = p['dt'] / 3600.0
@@ -44,7 +44,7 @@ def setup_optimisation_parameters():
 
 def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
 
-    tarrif = pd.read_csv("uk_electricity_prices_hourly.csv")
+    tarrif = pd.read_csv("static/uk_electricity_prices_hourly.csv")
     tarrif['time'] = pd.date_range(start='2023-01-01', periods=len(tarrif), freq='h')
     tarrif = tarrif.set_index('time').resample('s').ffill()
     tarrif = tarrif[::dt_seconds]  # downsample to match dt_seconds
@@ -171,6 +171,7 @@ def run_optimisation(p, price):
         m += P_dis[t+1] - P_dis[t] <= p['TES_p_dis_ramp']  
         m += P_ch[t+1] - P_ch[t] <= p['TES_p_ch_ramp']
         m += P_HVAC[t+1] - P_HVAC[t] <= p['P_HVAC_ramp']  # ramping HVAC
+        m += P_HVAC[t+1] + P_ch[t+1] <= p['P_HVAC_max_watts']
 
     m += P_cool[N-1] == P_HVAC[N-1] + P_dis[N-1]
     m += T_in[N-1] == T_h[N-1] - P_cool[N-1]*p['COP_HVAC']/mcp
@@ -254,8 +255,9 @@ def plot_results(res, out_dir="static"):
     ax2.plot(t, res['E_TES'], label="E_TES kWh")
     ax2.set_ylabel("kWh"); ax2.set_xlabel("time [min]")
     ax22 = ax2.twinx()
-    ax22.plot(t, np.array(res['P_ch'])/1000, label="Charge kW",   linestyle='--')
-    ax22.plot(t, np.array(res['P_dis'])/1000,label="Discharge kW",linestyle='-.')
+    ax22.plot(t, np.array(res['P_ch'])/1000, label="TES Charge kW",   linestyle='--')
+    ax22.plot(t, np.array(res['P_dis'])/1000,label="TES Discharge kW",linestyle='-.')
+    ax22.plot(t, (np.array(res['P_ch']) + np.array(res['P_HVAC']))/1000, color='green', label="HVAC + TES kW", linestyle=':')
     ax2.legend(loc='upper left'); ax22.legend(loc='upper right')
     ax2.grid(True)
 
