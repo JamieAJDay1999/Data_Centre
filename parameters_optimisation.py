@@ -95,7 +95,7 @@ def setup_simulation_parameters(mode="cool_down"):
     _term1_Gcold_inv = 1.0 / (_alpha_cAisle * _a_cAisle) if (_alpha_cAisle * _a_cAisle) > 0 else float('inf')
     _denominator_g_cold = _term1_Gcold_inv + _r_cold_K_per_W
     params['G_cold'] = 1.0 / _denominator_g_cold if _denominator_g_cold > 0 else (_alpha_cAisle * _a_cAisle) # (W/K)
-
+    #params['G_cold'] = params['G_cold'] * 5 # testing sensitivity to G_cold
     # === IV. Cooling System Parameters ===
     # HVAC
     params['COP_HVAC'] = 6
@@ -116,14 +116,15 @@ def setup_simulation_parameters(mode="cool_down"):
 
     # === V. Initial Conditions & Operational Limits for "cool_down" mode ===
     # (as used by optimisation.py)
-    params['T_IT_initial_Celsius'] = 36
-    params['T_Rack_initial_Celsius'] = 32
-    params['T_cAisle_initial'] = 29.5
-    params['T_hAisle_initial'] = 33
+    params['T_IT_initial_Celsius'] = 28.5
+    params['T_Rack_initial_Celsius'] = 26
+    params['T_cAisle_initial'] = 20
+    params['T_hAisle_initial'] = 27
     params['T_target_Air_in_Celsius'] = 14
     
     # This is used as the upBound for the T_c variable in optimisation.py
     # For "cool_down" mode in the original script, it was set to None.
-    params['T_cAisle_upper_limit_Celsius'] = 32 
+    params['T_cAisle_lower_limit_Celsius'] = 15
+    params['T_cAisle_upper_limit_Celsius'] = 22
 
     return params

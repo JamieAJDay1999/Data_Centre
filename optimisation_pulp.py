@@ -29,7 +29,7 @@ def setup_optimisation_parameters():
     p = setup_simulation_parameters("cool_down")
 
     # horizon & discretisation
-    p['simulation_time_minutes'] = 1440    # 2-minute simulation
+    p['simulation_time_minutes'] = 1500    # 2-minute simulation
     p['dt'] = 60              # 1-second step
     p['simulation_time_seconds'] = p['simulation_time_minutes'] * 60
     p['num_time_points'] = int(p['simulation_time_seconds'] / p['dt'])
@@ -49,6 +49,9 @@ def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
     tarrif = tarrif.set_index('time').resample('s').ffill()
     tarrif = tarrif[::dt_seconds]  # downsample to match dt_seconds
     price = np.array(tarrif['Price'].values / 1000.0)[:-1]  # convert to £/kWh
+    price = np.array(len(price) * [price.mean()])  # use average price for all time steps
+    price = np.array(1500 * [price.mean()])  # use average price for all time steps
+    
     return price
 
 def _stamp(name: str, ext: str) -> pathlib.Path:
@@ -228,6 +231,9 @@ def run_optimisation(p, price):
 # -------------------------------------------------------------------------
 def plot_results(res, out_dir="static"):
     os.makedirs(out_dir, exist_ok=True)
+    res = pd.DataFrame(res)
+    res = res.iloc[30:-30,:].reset_index(drop=True)
+    res['t'] = res['t'] - 30
     t = res['t']
 
     fig1, ax1 = plt.subplots(figsize=(10, 8), nrows=3, sharex=True)
@@ -236,15 +242,16 @@ def plot_results(res, out_dir="static"):
     ax1[0].plot(t, res['T_c'],   label="T_cAisle")
     ax1[0].plot(t, res['T_h'],   label="T_hAisle")
     ax1[0].plot(t, res['T_in'],  label="T_Air_in", linestyle='--')
-    ax1[0].legend(); ax1[0].set_ylabel("°C"); ax1[0].grid(True)
+    ax1[0].legend(loc='upper right'); ax1[0].set_ylabel("°C", fontsize=14); ax1[0].grid(True)
 
     ax1[1].plot(t, np.array(res['P_HVAC'])/1000, label="HVAC kW")
     ax1[1].plot(t, (np.array(res['P_HVAC'])+np.array(res['P_dis']))/1000,
                 label="Total cooling kW", linestyle='--')
-    ax1[1].legend(); ax1[1].set_ylabel("kW"); ax1[1].grid(True)
+    ax1[1].legend(loc='upper right'); ax1[1].set_ylabel("kW", fontsize=14); ax1[1].grid(True)
+    ax1[1].set_ylim(0, 100)
 
     ax1[2].plot(t, res['price'], color='green')
-    ax1[2].set_ylabel("$ / kWh"); ax1[2].set_xlabel("time [min]")
+    ax1[2].set_ylabel("$ / kWh", fontsize=14); ax1[2].set_xlabel("time [min]", fontsize=14)
     ax1[2].grid(True)
 
     fig1.tight_layout()
@@ -253,11 +260,14 @@ def plot_results(res, out_dir="static"):
 
     fig2, ax2 = plt.subplots(figsize=(10, 5))
     ax2.plot(t, res['E_TES'], label="E_TES kWh")
-    ax2.set_ylabel("kWh"); ax2.set_xlabel("time [min]")
+    ax2.set_ylim(0, 300)
+    ax2.set_ylabel("kWh", fontsize=14); ax2.set_xlabel("time [min]", fontsize=14)
     ax22 = ax2.twinx()
     ax22.plot(t, np.array(res['P_ch'])/1000, label="TES Charge kW",   linestyle='--')
     ax22.plot(t, np.array(res['P_dis'])/1000,label="TES Discharge kW",linestyle='-.')
     ax22.plot(t, (np.array(res['P_ch']) + np.array(res['P_HVAC']))/1000, color='green', label="HVAC + TES kW", linestyle=':')
+    ax22.set_ylim(0, 80)
+    ax22.set_ylabel("kW", fontsize=14)
     ax2.legend(loc='upper left'); ax22.legend(loc='upper right')
     ax2.grid(True)
 
@@ -270,7 +280,7 @@ def plot_results(res, out_dir="static"):
 
     print(f"Plots saved to ./{out_dir}/")
 
-    res = pd.DataFrame(res)
+
     res.to_csv(os.path.join(out_dir, "optimisation_results.csv"), index=False)
 
 
