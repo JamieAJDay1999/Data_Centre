@@ -25,11 +25,17 @@ _DBGDIR.mkdir(exist_ok=True)
 
 
 
+def read_IT_optimisation_results():
+    df = pd.read_csv("AllResults_PuLP.csv")
+    itp = df['Optimized_Total_IT_Power_kW'].iloc[:96]
+    return np.repeat(itp.values, 15) * 1000.0  # convert kW to W, repeat for each time step
+
+
 def setup_optimisation_parameters():
     p = setup_simulation_parameters("cool_down")
 
     # horizon & discretisation
-    p['simulation_time_minutes'] = 1500    # 2-minute simulation
+    p['simulation_time_minutes'] = 1440    # 2-minute simulation
     p['dt'] = 60              # 1-second step
     p['simulation_time_seconds'] = p['simulation_time_minutes'] * 60
     p['num_time_points'] = int(p['simulation_time_seconds'] / p['dt'])
@@ -39,6 +45,10 @@ def setup_optimisation_parameters():
     p['m_dot_air'] = 100                 # kg/s
 
     p['TES_capacity_kWh']    = p['TES_kwh_cap'] 
+
+    #p['P_IT_heat_source'] = read_IT_optimisation_results()
+    #print(p['P_IT_heat_source'])
+    #print(len(p['P_IT_heat_source']))
     
     return p
 
@@ -50,7 +60,7 @@ def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
     tarrif = tarrif[::dt_seconds]  # downsample to match dt_seconds
     price = np.array(tarrif['Price'].values / 1000.0)[:-1]  # convert to £/kWh
     price = np.array(len(price) * [price.mean()])  # use average price for all time steps
-    price = np.array(1500 * [price.mean()])  # use average price for all time steps
+    #price = np.array(1440 * [price.mean()])  # use average price for all time steps
     
     return price
 
@@ -126,16 +136,13 @@ def run_optimisation(p, price):
                                    lowBound=p['E_TES_min_kWh'],
                                    upBound=p['TES_capacity_kWh'])
 
-    P_HVAC = pulp.LpVariable.dicts("P_HVAC", range(N),
-                                   lowBound=0, upBound=p['P_HVAC_max_watts'])
-    P_ch   = pulp.LpVariable.dicts("P_ch",   range(N),
-                                   lowBound=0, upBound=p['TES_w_charge_max'])
-    P_dis  = pulp.LpVariable.dicts("P_dis",  range(N),
-                                   lowBound=0, upBound=p['TES_w_discharge_max'])
-
     T_in   = pulp.LpVariable.dicts("T_in",   range(N), lowBound=14, upBound=30)
-    P_cool = pulp.LpVariable.dicts("P_cool", range(N), lowBound=0)
-
+    P_chiller_HVAC = pulp.LpVariable.dicts("P_HVAC", range(N), lowBound=0)
+    P_chiller_TES = pulp.LpVariable.dicts("P_cool", range(N), lowBound=0)
+    q_cool = pulp.LpVariable.dicts("q_cool", range(N), lowBound=0)
+    q_chiller_hvac = pulp.LpVariable.dicts("q_HVAC", range(N), lowBound=0)
+    q_dis  = pulp.LpVariable.dicts("q_dis",  range(N), lowBound=0, upBound=p['TES_w_discharge_max'])
+    q_ch = pulp.LpVariable.dicts("q_ch", range(N), lowBound=0, upBound=p['TES_w_charge_max'])
     # ----------- initial conditions --------------------------------------
     m += T_IT[0]   >= p['T_IT_initial_Celsius']
     m += T_Rack[0] >= p['T_Rack_initial_Celsius']
@@ -147,10 +154,13 @@ def run_optimisation(p, price):
 
     # ----------- dynamics -------------------------------------------------
     for t in range(N-1):
-        m += P_cool[t] == P_HVAC[t] + P_dis[t]
-        m += T_in[t] == T_h[t] - P_cool[t] * p['COP_HVAC'] / mcp
-        Tmax_drop = (T_h[t] - 14) * mcp / p['COP_HVAC']
-        m += P_cool[t] <= Tmax_drop
+        m += q_cool[t] == q_chiller_hvac[t] + q_dis[t]
+        m += q_chiller_hvac[t] == P_chiller_HVAC[t] * p['COP_HVAC']
+        m += q_ch[t] == P_chiller_TES[t] * p['COP_HVAC']
+
+        m += T_in[t] == T_h[t] - q_cool[t] / mcp
+        q_max_drop = (T_h[t] - p['T_cAisle_lower_limit_Celsius']) * mcp
+        m += q_cool[t] <= q_max_drop
 
         m += T_IT[t+1] == T_IT[t] + dt_s * (
              (p['P_IT_heat_source']
@@ -168,18 +178,18 @@ def run_optimisation(p, price):
              (p['m_dot_air']*p['kappa']*p['c_p_air']*(T_Rack[t]-T_h[t]))
              / p['C_hAisle'])
 
-        dE = (P_ch[t]*p['TES_charge_efficiency']
-              - P_dis[t]/p['TES_discharge_efficiency']) * dt_h / 1000.0
+        dE = (q_ch[t]*p['TES_charge_efficiency']
+              - q_dis[t]/p['TES_discharge_efficiency']) * dt_h / 1000.0
         m += E_TES[t+1] == E_TES[t] + dE
-        m += P_dis[t+1] - P_dis[t] <= p['TES_p_dis_ramp']  
-        m += P_ch[t+1] - P_ch[t] <= p['TES_p_ch_ramp']
-        m += P_HVAC[t+1] - P_HVAC[t] <= p['P_HVAC_ramp']  # ramping HVAC
-        m += P_HVAC[t+1] + P_ch[t+1] <= p['P_HVAC_max_watts']
+        m += q_dis[t+1] - q_dis[t] <= p['TES_p_dis_ramp']  
+        m += q_ch[t+1] - q_ch[t] <= p['TES_p_ch_ramp']
+        m += q_cool[t+1] - q_cool[t] <= p['P_HVAC_ramp']  # ramping HVAC
+        m += q_cool[t+1] <= p['P_HVAC_max_watts']
 
-    m += P_cool[N-1] == P_HVAC[N-1] + P_dis[N-1]
-    m += T_in[N-1] == T_h[N-1] - P_cool[N-1]*p['COP_HVAC']/mcp
+    m += q_cool[N-1] == q_chiller_hvac[N-1] + q_dis[N-1]
+    m += T_in[N-1] == T_h[N-1] - q_cool[N-1]*p['COP_HVAC']/mcp
     Tmax_drop_N_minus_1 = (T_h[N-1] - 14) * mcp / p['COP_HVAC']
-    m += P_cool[N-1] <= Tmax_drop_N_minus_1
+    m += q_cool[N-1] <= Tmax_drop_N_minus_1
 
     # --- cyclic-end conditions (PuLP) -----------------------------------------
     if CYCLE_TEMPERATURES:
@@ -194,7 +204,7 @@ def run_optimisation(p, price):
 
     # ----------- objective ------------------------------------------------
     cost_expr = pulp.lpSum(
-        (P_HVAC[t] + P_ch[t] + p['P_IT_heat_source']) * price[t] * dt_h
+        (P_chiller_HVAC[t] + P_chiller_TES[t] + p['P_IT_heat_source']) * price[t] * dt_h
         for t in range(N))
     m += cost_expr
 
@@ -214,9 +224,13 @@ def run_optimisation(p, price):
         'T_h':    [val(T_h[t])    for t in range(N)],
         'T_in':   [val(T_in[t])   for t in range(N)],
         'E_TES':  [val(E_TES[t])  for t in range(N)],
-        'P_HVAC': [val(P_HVAC[t]) for t in range(N)],
-        'P_ch':   [val(P_ch[t])   for t in range(N)],
-        'P_dis':  [val(P_dis[t])  for t in range(N)],
+        'P_chiller_HVAC': [val(P_chiller_HVAC[t]) for t in range(N)],
+        'P_chiller_TES': [val(P_chiller_TES[t]) for t in range(N)],
+        'P_Total': [val(P_chiller_HVAC[t] + P_chiller_TES[t]) for t in range(N)],
+        'q_chiller_hvac': [val(q_chiller_hvac[t])   for t in range(N)],
+        'q_ch':   [val(q_ch[t])   for t in range(N)],
+        'q_dis':  [val(q_dis[t])  for t in range(N)],
+        'q_cool':  [val(q_cool[t])  for t in range(N)],
         'price':  price,
         'cost':   val(cost_expr),
     }
@@ -232,11 +246,11 @@ def run_optimisation(p, price):
 def plot_results(res, out_dir="static"):
     os.makedirs(out_dir, exist_ok=True)
     res = pd.DataFrame(res)
-    res = res.iloc[30:-30,:].reset_index(drop=True)
-    res['t'] = res['t'] - 30
+    #res = res.iloc[30:-30,:].reset_index(drop=True)
+    #res['t'] = res['t'] - 30
     t = res['t']
 
-    fig1, ax1 = plt.subplots(figsize=(10, 8), nrows=3, sharex=True)
+    fig1, ax1 = plt.subplots(figsize=(10, 8), nrows=2, sharex=True)
     ax1[0].plot(t, res['T_IT'],  label="T_IT")
     ax1[0].plot(t, res['T_Rack'],label="T_Rack")
     ax1[0].plot(t, res['T_c'],   label="T_cAisle")
@@ -244,35 +258,58 @@ def plot_results(res, out_dir="static"):
     ax1[0].plot(t, res['T_in'],  label="T_Air_in", linestyle='--')
     ax1[0].legend(loc='upper right'); ax1[0].set_ylabel("°C", fontsize=14); ax1[0].grid(True)
 
-    ax1[1].plot(t, np.array(res['P_HVAC'])/1000, label="HVAC kW")
-    ax1[1].plot(t, (np.array(res['P_HVAC'])+np.array(res['P_dis']))/1000,
-                label="Total cooling kW", linestyle='--')
-    ax1[1].legend(loc='upper right'); ax1[1].set_ylabel("kW", fontsize=14); ax1[1].grid(True)
-    ax1[1].set_ylim(0, 100)
 
-    ax1[2].plot(t, res['price'], color='green')
+    ax1[1].plot(t, res['price'], color='green', label="Price (£/kWh)")
+    ax1[1].set_ylabel("£ / kWh", fontsize=14)
+    ax1[1].grid(True)
+    ax1[1].set_xlabel("time [min]", fontsize=14)
+
+    fig2, ax2 = plt.subplots(figsize=(10, 8), nrows=2, sharex=True)
+
+    ax2[0].plot(t, np.array(res['P_Total'])/1000, label="Total Electrical Power kW", color='red')
+    ax2[0].plot(t, np.array(res['P_chiller_HVAC'])/1000, label="Chiller,HVAC Electrical Power kW", linestyle='--', color='blue')
+    ax2[0].plot(t, np.array(res['P_chiller_TES'])/1000, label="Chiller,TES Electrical Power kW", linestyle='--', color='green')
+
+    ax2[0].legend(loc='upper right'); ax1[1].set_ylabel("kW", fontsize=14); ax1[1].grid(True)
+    ax2[0].set_ylim(0, 300)
+    ax2[0].legend(loc='upper left')
+    ax2[0].grid(True)
+
+    ax2[1].plot(t, np.array(res['q_cool'])/1000, label="Total Cooling Energy kW", color='red', linewidth=2)
+    ax2[1].plot(t, np.array(res['q_dis'])/1000, label='TES Discharge (Thermal) kW', linestyle='--', color='blue')
+    ax2[1].plot(t, np.array(res['q_chiller_hvac'])/1000, label="Chiller,HVAC (Thermal) kW", linestyle='--', color='green')
+
+    ax2[1].legend(loc='upper right'); ax1[1].set_ylabel("kW", fontsize=14); ax1[1].grid(True)
+    ax2[1].set_ylim(0, 1000)
+    ax2[1].legend(loc='upper left')
+    ax2[1].grid(True)
+
+    """ax1_2 = ax1[2].twinx()
+    ax1_2.plot(t, p['P_IT_heat_source']/1000, label="IT Power kW", linestyle='--', color='orange')
+    ax1_2.set_ylabel("IT Power (kW)", fontsize=14)
+    ax1_2.legend(loc='upper right')
     ax1[2].set_ylabel("$ / kWh", fontsize=14); ax1[2].set_xlabel("time [min]", fontsize=14)
-    ax1[2].grid(True)
+    ax1[2].grid(True)"""
 
     fig1.tight_layout()
     fig1.savefig(os.path.join(out_dir, "opt_plot_temps_power.png"))
     #plt.close(fig1)
 
-    fig2, ax2 = plt.subplots(figsize=(10, 5))
-    ax2.plot(t, res['E_TES'], label="E_TES kWh")
-    ax2.set_ylim(0, 300)
-    ax2.set_ylabel("kWh", fontsize=14); ax2.set_xlabel("time [min]", fontsize=14)
-    ax22 = ax2.twinx()
-    ax22.plot(t, np.array(res['P_ch'])/1000, label="TES Charge kW",   linestyle='--')
-    ax22.plot(t, np.array(res['P_dis'])/1000,label="TES Discharge kW",linestyle='-.')
-    ax22.plot(t, (np.array(res['P_ch']) + np.array(res['P_HVAC']))/1000, color='green', label="HVAC + TES kW", linestyle=':')
-    ax22.set_ylim(0, 80)
-    ax22.set_ylabel("kW", fontsize=14)
-    ax2.legend(loc='upper left'); ax22.legend(loc='upper right')
-    ax2.grid(True)
+    fig3, ax3 = plt.subplots(figsize=(10, 5))
+    ax3.plot(t, res['E_TES'], label="E_TES kWh")
+    ax3.set_ylim(0, 350)
+    ax3.set_ylabel("kWh", fontsize=14); ax3.set_xlabel("time [min]", fontsize=14)
+    ax33 = ax3.twinx()
+    ax33.plot(t, np.array(res['q_ch'])/1000, label="TES Charge (Thermal) kW",   linestyle='--')
+    ax33.plot(t, np.array(res['q_dis'])/1000,label="TES Discharge (Thermal) kW",linestyle='-.')
+    #ax22.plot(t, (np.array(res['q_cool']))/1000, color='green', label="Total Cooling (Thermal) kW", linestyle=':')
+    ax33.set_ylim(0, 600)
+    ax33.set_ylabel("kW", fontsize=14)
+    ax3.legend(loc='upper left'); ax33.legend(loc='upper right')
+    ax3.grid(True)
 
-    fig2.tight_layout()
-    fig2.savefig(os.path.join(out_dir, "opt_plot_tes.png"))
+    fig3.tight_layout()
+    fig3.savefig(os.path.join(out_dir, "opt_plot_tes.png"))
     #fig1.show()
     #fig2.show()
     plt.show()

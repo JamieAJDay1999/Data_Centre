@@ -46,6 +46,7 @@ def setup_simulation_parameters(mode="cool_down"):
     # === I. Core Physical Properties ===
     params['rho_air'] = 1.16  # Density of air (kg/m^3)
     params['c_p_air'] = 1005.45 # Specific heat capacity of air (J/kg*K)
+    params['m_dot_air'] = 100   
     params['T_out_Kelvin'] = 295.15 # Outside ambient temperature (K)
     params['T_out_Celsius'] = params['T_out_Kelvin'] - 273.15 # (derived, °C)
 
@@ -120,11 +121,11 @@ def setup_simulation_parameters(mode="cool_down"):
     params['T_Rack_initial_Celsius'] = 26
     params['T_cAisle_initial'] = 20
     params['T_hAisle_initial'] = 27
-    params['T_target_Air_in_Celsius'] = 14
+    params['T_target_Air_in_Celsius'] = 20
     
     # This is used as the upBound for the T_c variable in optimisation.py
     # For "cool_down" mode in the original script, it was set to None.
     params['T_cAisle_lower_limit_Celsius'] = 15
-    params['T_cAisle_upper_limit_Celsius'] = 22
+    params['T_cAisle_upper_limit_Celsius'] = 32
 
     return params
