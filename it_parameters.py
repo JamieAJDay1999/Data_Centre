@@ -1,4 +1,7 @@
 import pandas as pd
+import pathlib
+
+DATA_DIR = pathlib.Path("static/data")
 
 def get_load_and_price_profiles(TEXT_SLOTS, T_SLOTS):
     """
@@ -10,7 +13,8 @@ def get_load_and_price_profiles(TEXT_SLOTS, T_SLOTS):
 
     Returns:
         A tuple containing:
-        - inflexibleLoadProfile_T (pd.Series)
+        - inflexibleLoadProfile_TEXT (pd.Series)
+        - baseFlexibleLoadProfile_TEXT (pd.Series)
         - baseFlexibleLoadProfile_T (pd.Series)
         - shiftabilityProfile (dict)
         - spotPrice_data (dict)
@@ -187,19 +191,51 @@ def get_load_and_price_profiles(TEXT_SLOTS, T_SLOTS):
         106: 65.40, 107: 65.40, 108: 65.40
     }
 
-    return inflexibleLoadProfile_TEXT, baseFlexibleLoadProfile_TEXT, baseFlexibleLoadProfile_T,\
-            shiftabilityProfile, spotPrice_data
+    return (inflexibleLoadProfile_TEXT, baseFlexibleLoadProfile_TEXT,
+            baseFlexibleLoadProfile_T, shiftabilityProfile, spotPrice_data)
 
-# Example Usage (assuming TEXT_SLOTS and T_SLOTS are defined elsewhere)
-# TEXT_SLOTS = range(1, 109)
-# T_SLOTS = range(1, 97)
-#
-# inflexible_load, flexible_load, shift_profile, spot_prices = \
-#     get_load_and_price_profiles(TEXT_SLOTS, T_SLOTS)
-#
-# print("Inflexible Load Profile (T_SLOTS):\n", inflexible_load.head())
-# print("\nBase Flexible Load Profile (T_SLOTS):\n", flexible_load.head())
-# print("\nShiftability Profile (first few entries):\n",
-#       list(shift_profile.items())[:5])
-# print("\nSpot Prices (first few entries):\n",
-#       list(spot_prices.items())[:5])
+def main():
+    """
+    Main function to process load and price data and save to CSV.
+    """
+    # Define the time slots for the analysis
+    TEXT_SLOTS = range(1, 109)  # Corresponds to the full 108 data points
+    T_SLOTS = range(1, 97)      # Corresponds to the 96 data points for analysis
+
+    # Call the function to get the data profiles
+    (inflexible_load_series, flexible_load_series, _, shiftability_profile_dict,
+     spot_price_dict) = get_load_and_price_profiles(TEXT_SLOTS, T_SLOTS)
+
+    # --- Create the first DataFrame for load profiles ---
+    # Combine the two load series into a single DataFrame
+    load_profiles_df = pd.DataFrame({
+        'inflexible_load': inflexible_load_series,
+        'flexible_load': flexible_load_series
+    })
+    # Set the index name for clarity
+    load_profiles_df.index.name = 'time_slot'
+
+    # --- Create the second DataFrame for spot prices ---
+    # Convert the spot price dictionary to a DataFrame
+    spot_prices_df = pd.DataFrame.from_dict(spot_price_dict, orient='index', columns=['spot_price'])
+    # Set the index name
+    spot_prices_df.index.name = 'time_slot'
+
+    # --- Create the third DataFrame for the shiftability profile ---
+    # Convert the dictionary with tuple keys to a Series, then unstack to create the DataFrame
+    shiftability_df = pd.Series(shiftability_profile_dict).unstack()
+    # Set the index and column names for clarity
+    shiftability_df.index.name = 'time_slot'
+    shiftability_df.columns.name = 'category'
+
+
+    # --- Save the DataFrames to CSV files ---
+    load_profiles_df.to_csv(f'{DATA_DIR}/load_profiles.csv')
+    spot_prices_df.to_csv(f'{DATA_DIR}/spot_prices.csv')
+    shiftability_df.to_csv(f'{DATA_DIR}/shiftability_profile.csv')
+
+    print("Successfully created 'load_profiles.csv', 'spot_prices.csv', and 'shiftability_profile.csv'")
+
+# This ensures the main function is called only when the script is executed directly
+if __name__ == '__main__':
+    main()

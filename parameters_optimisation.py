@@ -47,8 +47,7 @@ def setup_simulation_parameters(mode="cool_down"):
     params['rho_air'] = 1.16  # Density of air (kg/m^3)
     params['c_p_air'] = 1005.45 # Specific heat capacity of air (J/kg*K)
     params['m_dot_air'] = 100   
-    params['T_out_Kelvin'] = 295.15 # Outside ambient temperature (K)
-    params['T_out_Celsius'] = params['T_out_Kelvin'] - 273.15 # (derived, °C)
+    params['T_out_Celsius'] = 22
 
     # === II. Data Center and IT Equipment Specifications ===
     # These values are used for internal calculations of thermal properties (C_IT, G_conv, C_Rack, G_cold)
@@ -101,11 +100,11 @@ def setup_simulation_parameters(mode="cool_down"):
     # HVAC
     params['COP_HVAC'] = 6
     params['kappa'] = 0.7663  # Air mixing factor / bypass factor for cooling coils
-    params['P_HVAC_max_watts'] = 1200000.0
+    params['P_chiller_max'] = 400000.0
     params['P_HVAC_ramp'] = 10000.0  # Max power ramp for HVAC (W per time step dt)
 
     # Thermal Energy Storage (TES)
-    params['TES_kwh_cap'] = 300.0  # Nominal capacity (kWh)
+    params['TES_kwh_cap'] = 1000.0  # Nominal capacity (kWh)
     params['TES_w_discharge_max'] = 300000.0  # Max discharge power (W)
     params['TES_discharge_efficiency'] = 0.9
     params['TES_w_charge_max'] = 300000.0  # Max charge power (W)
@@ -125,7 +124,7 @@ def setup_simulation_parameters(mode="cool_down"):
     
     # This is used as the upBound for the T_c variable in optimisation.py
     # For "cool_down" mode in the original script, it was set to None.
-    params['T_cAisle_lower_limit_Celsius'] = 15
-    params['T_cAisle_upper_limit_Celsius'] = 32
+    params['T_cAisle_lower_limit_Celsius'] = 18
+    params['T_cAisle_upper_limit_Celsius'] = 22
 
     return params

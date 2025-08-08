@@ -1,9 +1,0 @@
-{
-  "pulp_status": "Infeasible",
-  "rows": 20155,
-  "cols": 17280,
-  "solver": "CBC",
-  "logfile": "lp_debug\\2025-m-dT15-M-S_solver.log",
-  "lp_file": "lp_debug\\2025-m-dT15-M-S_model.lp",
-  "mps_file": "lp_debug\\2025-m-dT15-M-S_model.mps"
-}
