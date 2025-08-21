@@ -9,9 +9,9 @@ import seaborn as sns
 import time
 
 # --- Import user-provided dependency modules ---
-from parameters_optimisation import ModelParameters, generate_tariff
+from inputs.parameters_optimisation import ModelParameters, generate_tariff
 # This imported function will need to be updated separately to handle Pyomo model objects
-from flexibility_duration_results_and_plots import extract_detailed_results, plot_flex_contribution_grid, save_heatmap_from_results
+from plotting_and_saving.flexibility_duration_results_and_plots import extract_detailed_results, plot_flex_contribution_grid, save_heatmap_from_results
 
 # --- Path Configuration ------------------------------------------------------
 # Define base directories for data and images
@@ -301,7 +301,7 @@ def find_max_duration(params, data, baseline_df, start_timestep, flex_kw, search
     while low <= high:
         if search_type == 'binary':
             mid_duration = (low + high) // 2
-        elif search_type == 'linear_3':
+        elif search_type == 'linear':
             mid_duration = low + 6
         if mid_duration == 0: break
         print(f"\rTesting duration: {mid_duration} steps... ", end="")
@@ -411,8 +411,8 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
     )
 
 if __name__ == '__main__':
-    timesteps = [5]#[1]+ list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
-    flex_magnitudes = [-50]#[75, 50, 25, -100, -150, -200, -250, -300, -350, -400, -450, -500]
+    timesteps = [1, 40]#[1]+ list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
+    flex_magnitudes =  [-300, -200, -100] #[75, 50, 25, -100, -150, -200, -250, -300, -350, -400, -450, -500]
     include_banked_results = None #"flex_duration_results_new_all.csv"
-    main(flex_magnitudes, timesteps, include_banked_results, search_type='linear_3')#, generate_plots=True)
+    main(flex_magnitudes, timesteps, include_banked_results, search_type='binary', generate_plots=True)
     #[10, 20, 25, 30, 35, 40, 50, 55, 60, 70, 75, 80, 85, 90, 95]#

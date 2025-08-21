@@ -6,8 +6,9 @@ import numpy as np
 # MODIFIED: Switched from pulp to pyomo
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
-from parameters_optimisation import ModelParameters, generate_tariff
-
+from inputs.parameters_optimisation import ModelParameters, generate_tariff
+from constraints import add_it_and_job_constraints, add_ups_constraints, add_power_balance_constraints, add_cooling_constraints
+from plotting_and_saving.nom_opt_charts import gen_charts
 # --- Path Configuration ------------------------------------------------------
 DATA_DIR_INPUTS = pathlib.Path("static/data/inputs")
 DATA_DIR_OUTPUTS = pathlib.Path("static/data/nominal_outputs")
@@ -76,7 +77,7 @@ def build_model(params: ModelParameters, data: dict):
     add_it_and_job_constraints(m, params, data)
     add_ups_constraints(m, params)
     add_power_balance_constraints(m, params)
-    add_cooling_constraints(m, params)
+    add_cooling_constraints(m, params, CYCLE_TES_ENERGY)
 
     # --- Define Objective Function ---
     def objective_rule(mod):
@@ -96,91 +97,6 @@ def build_model(params: ModelParameters, data: dict):
 
     return m
 
-def add_it_and_job_constraints(m, params, data):
-  
-    m.JobCompletion = pyo.ConstraintList()
-    for t in m.T_SLOTS:
-        for k in m.K_TRANCHES:
-            # For nominal case, jobs are not shifted, so s must equal t.
-            if (t, k, t) in m.ut_ks_idx:
-                expr = m.ut_ks[(t, k, t)] * params.dt_hours
-                m.JobCompletion.add(expr == data['Rt'][t] * data['shiftabilityProfile'].get((t, k), 0))
-
-    m.CPUandPower = pyo.ConstraintList()
-    print(len(data['inflexibleLoadProfile_TEXT']))
-    for s in m.TEXT_SLOTS:
-        flexible_usage = sum(m.ut_ks[idx] for idx in m.ut_ks_idx if idx[2] == s)
-        m.CPUandPower.add(m.total_cpu[s] == data['inflexibleLoadProfile_TEXT'][s] + flexible_usage)
-        
-        # p_it_total_kw is in kW
-        power_expr = params.idle_power_kw + (params.max_power_kw - params.idle_power_kw) * m.total_cpu[s] ** 1.32
-        m.CPUandPower.add(m.p_it_total_kw[s] == power_expr)
-
-def add_ups_constraints(m, params):
-    m.UPS_Constraints = pyo.ConstraintList()
-    for s in m.TEXT_SLOTS:
-        # e_ups_kwh is in kWh, p_ups... variables are in kW
-        prev_energy = params.e_start_kwh if s == m.TEXT_SLOTS.first() else m.e_ups_kwh[s-1]
-        charge = params.eta_ch * m.p_ups_ch_kw[s] * params.dt_hours
-        discharge = (m.p_ups_disch_kw[s] / params.eta_disch) * params.dt_hours
-        m.UPS_Constraints.add(m.e_ups_kwh[s] == prev_energy + charge - discharge)
-        m.UPS_Constraints.add(m.p_ups_ch_kw[s] <= m.z_ch[s] * params.p_max_ch_kw)
-        m.UPS_Constraints.add(m.p_ups_ch_kw[s] >= m.z_ch[s] * params.p_min_ch_kw)
-        m.UPS_Constraints.add(m.p_ups_disch_kw[s] <= m.z_disch[s] * params.p_max_disch_kw)
-        m.UPS_Constraints.add(m.p_ups_disch_kw[s] >= m.z_disch[s] * params.p_min_disch_kw)
-        m.UPS_Constraints.add(m.z_ch[s] + m.z_disch[s] <= 1)
-    m.UPS_Constraints.add(m.e_ups_kwh[m.TEXT_SLOTS.last()] == params.e_start_kwh)
-
-def add_power_balance_constraints(m, params):
-    m.PowerBalance = pyo.ConstraintList()
-    for s in m.TEXT_SLOTS:
-        # All power variables in this balance are in kW
-        m.PowerBalance.add(m.p_it_total_kw[s] == m.p_grid_it_kw[s] + m.p_ups_disch_kw[s])
-        m.PowerBalance.add(m.p_grid_od_kw[s] == m.p_it_total_kw[s] * params.nominal_overhead_factor)
-
-def add_cooling_constraints(m, params):
-    m.CoolingConstraints = pyo.ConstraintList()
-    m.CoolingConstraints.add(m.t_it[1] >= params.T_IT_initial_Celsius)
-    m.CoolingConstraints.add(m.t_rack[1] >= params.T_Rack_initial_Celsius)
-    m.CoolingConstraints.add(m.t_cold_aisle[1] >= params.T_cAisle_initial)
-    m.CoolingConstraints.add(m.t_hot_aisle[1] >= params.T_hAisle_initial)
-    m.CoolingConstraints.add(m.e_tes_kwh[1] >= params.TES_initial_charge_kWh)
-    mcp = params.m_dot_air * params.c_p_air
-    
-    # This constraint can cause issues if the list is empty
-    if len(m.TEXT_SLOTS) > 1:
-        avg_hvac_w = sum(m.p_chiller_hvac_w[k] for k in m.TEXT_SLOTS if k > 1) / (len(m.TEXT_SLOTS) - 1)
-        avg_tes_w = sum(m.p_chiller_tes_w[k] for k in m.TEXT_SLOTS if k > 1) / (len(m.TEXT_SLOTS) - 1)
-        m.CoolingConstraints.add(m.p_chiller_hvac_w[1] == avg_hvac_w)
-        m.CoolingConstraints.add(m.p_chiller_tes_w[1] == avg_tes_w)
-    
-    for t in m.TEXT_SLOTS:
-        if t > 1:
-            # Thermal power (q) is in Watts, Electrical power (p_chiller) is in Watts
-            m.CoolingConstraints.add(m.q_cool_w[t] == (m.p_chiller_hvac_w[t] * params.COP_HVAC) + m.q_dis_tes_w[t])
-            m.CoolingConstraints.add(m.q_ch_tes_w[t] == m.p_chiller_tes_w[t] * params.COP_HVAC)
-            m.CoolingConstraints.add(m.t_in[t] == m.t_hot_aisle[t] - m.q_cool_w[t] / mcp)
-            m.CoolingConstraints.add(m.q_cool_w[t] <= (m.t_hot_aisle[t] - params.T_cAisle_lower_limit_Celsius) * mcp)
-            
-            # Convert IT power from kW to Watts for thermal calculation
-            it_heat_watts = m.p_it_total_kw[t] * 1000.0
-            
-            m.CoolingConstraints.add(m.t_it[t] == m.t_it[t-1] + params.dt_seconds * ((it_heat_watts - params.G_conv * (m.t_it[t-1] - m.t_rack[t])) / params.C_IT))
-            m.CoolingConstraints.add(m.t_rack[t] == m.t_rack[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_cold_aisle[t]-m.t_rack[t-1]) + params.G_conv*(m.t_it[t-1]-m.t_rack[t-1])) / params.C_Rack))
-            m.CoolingConstraints.add(m.t_cold_aisle[t] == m.t_cold_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_in[t]-m.t_cold_aisle[t-1]) - params.G_cold*(m.t_cold_aisle[t-1]-params.T_out_Celsius)) / params.C_cAisle))
-            m.CoolingConstraints.add(m.t_hot_aisle[t] == m.t_hot_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_rack[t]-m.t_hot_aisle[t-1])) / params.C_hAisle))
-            
-            # dE_tes is in kWh, so q_..._w (in W) must be divided by 1000
-            dE_tes_kwh = (m.q_ch_tes_w[t]*params.TES_charge_efficiency - m.q_dis_tes_w[t]/params.TES_discharge_efficiency) * params.dt_hours / 1000.0
-            m.CoolingConstraints.add(m.e_tes_kwh[t] == m.e_tes_kwh[t-1] + dE_tes_kwh)
-            
-            m.CoolingConstraints.add(m.q_dis_tes_w[t] - m.q_dis_tes_w[t-1] <= params.TES_p_dis_ramp)
-            m.CoolingConstraints.add(m.q_ch_tes_w[t] - m.q_ch_tes_w[t-1] <= params.TES_p_ch_ramp)
-            m.CoolingConstraints.add(m.p_chiller_tes_w[t] + m.p_chiller_hvac_w[t] <= params.P_chiller_max)
-            m.CoolingConstraints.add(m.q_cool_w[t] >= it_heat_watts)
-
-    if CYCLE_TES_ENERGY:
-        m.CoolingConstraints.add(m.e_tes_kwh[m.TEXT_SLOTS.last()] == m.e_tes_kwh[1])
 
 def load_and_prepare_data(params: ModelParameters):
     """
@@ -320,79 +236,7 @@ def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, 
     fig1.savefig(IMAGE_DIR / 'nominal_cost_and_price.png')
     print("✅ Nominal cost chart saved.")
 
-    # --- Figure 2: TES Performance ---
-    fig2, (ax2_tes, ax3_tes) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
-    ax2_tes.plot(time_slots_ext, df['E_TES_kWh'], label='TES Energy Level', color='mediumblue')
-    ax2_tes.set_ylabel('Energy (kWh)')
-    ax2_tes.set_title('Thermal Energy Storage (TES) Performance')
-    ax2_tes.legend()
-    ax2_tes.grid(True)
-    ax3_tes.plot(time_slots_ext, df['Q_Charge_TES_Watts'], label='Charge Heat Flow', color='green')
-    ax3_tes.plot(time_slots_ext, df['Q_Discharge_TES_Watts'], label='Discharge Heat Flow', color='orange')
-    ax3_tes.set_xlabel('Time Slot')
-    ax3_tes.set_ylabel('Heat Flow (Watts)')
-    ax3_tes.legend()
-    ax3_tes.grid(True)
-    fig2.tight_layout()
-    fig2.savefig(IMAGE_DIR / 'tes_performance.png')
-    print("✅ TES performance chart saved.")
-
-    # --- Figure 3: Data Centre Temperatures ---
-    fig3, ax4 = plt.subplots(figsize=(12, 6))
-    ax4.plot(time_slots_ext, df['T_IT_Celsius'], label='IT Equipment Temp')
-    ax4.plot(time_slots_ext, df['T_Rack_Celsius'], label='Rack Temp')
-    ax4.plot(time_slots_ext, df['T_HotAisle_Celsius'], label='Hot Aisle Temp')
-    ax4.plot(time_slots_ext, df['T_ColdAisle_Celsius'], label='Cold Aisle Temp')
-    ax4.set_xlabel('Time Slot')
-    ax4.set_ylabel('Temperature (°C)')
-    ax4.set_title('Data Centre Temperatures')
-    ax4.legend()
-    ax4.grid(True)
-    fig3.tight_layout()
-    fig3.savefig(IMAGE_DIR / 'dc_temperatures.png')
-    print("✅ Data centre temperatures chart saved.")
-
-    # --- Figure 4: Cooling System Power Components ---
-    fig4, ax5 = plt.subplots(figsize=(12, 6))
-    ax5.plot(time_slots_ext, df['P_Grid_Cooling_kW'], label='Total Cooling Power (kW)', color='blue')
-    ax5.plot(time_slots_ext, df['P_Chiller_HVAC_kW'], label='Chiller HVAC Power (kW)', color='red')
-    ax5.plot(time_slots_ext, df['P_Chiller_TES_kW'], label='Chiller TES Power (kW)', color='green')
-    ax5.set_xlabel('Time Slot')
-    ax5.set_ylabel('Power (kW)')
-    ax5.set_title('Cooling System Power Components')
-    ax5.legend()
-    ax5.grid(True)
-    fig4.tight_layout()
-    fig4.savefig(IMAGE_DIR / 'cooling_power_components.png')
-    print("✅ Cooling system power components chart saved.")
-
-    # --- Figure 5: Thermal Cooling Power (q) ---
-    fig5, ax6 = plt.subplots(figsize=(12, 6))
-    df['Q_Chiller_Direct_Watts'] = df['Q_Cool_Total_Watts'] - df['Q_Discharge_TES_Watts']
-    ax6.stackplot(time_slots_ext, df['Q_Chiller_Direct_Watts'], df['Q_Discharge_TES_Watts'],
-                  labels=['Cooling from Chiller (Direct)', 'Cooling from TES'],
-                  colors=['green', 'blue'])
-    ax6.plot(time_slots_ext, df['P_IT_Total_kW'] * 1000, label='Total Cooling Demand (Heat from IT)', color='red', linestyle='--', linewidth=2)
-    ax6.set_xlabel('Time Slot')
-    ax6.set_ylabel('Thermal Power (Watts)')
-    ax6.set_title('Cooling Power (q) by Source')
-    ax6.legend(loc='upper left')
-    ax6.grid(True)
-    fig5.tight_layout()
-    fig5.savefig(IMAGE_DIR / 'thermal_cooling_power.png')
-    print("✅ Thermal cooling power chart saved.")
-
-    # --- Figure 6: Cumulative Cost ---
-    fig6, ax7 = plt.subplots(figsize=(12, 7))
-    ax7.plot(time_slots_ext, df['Nominal_Cost'].cumsum(), label='Cumulative Nominal Cost', color='crimson', linewidth=2)
-    ax7.set_xlabel('Time Slot')
-    ax7.set_ylabel('Cumulative Cost (£)')
-    ax7.set_title('Cumulative Nominal Energy Cost')
-    ax7.legend()
-    ax7.grid(True)
-    fig6.tight_layout()
-    fig6.savefig(IMAGE_DIR / 'cumulative_nominal_cost.png')
-    print("✅ Cumulative cost chart saved.")
+    gen_charts(df, time_slots_ext, IMAGE_DIR)
 
     # --- Figure 7: Stacked Bar Chart of IT Workload ---
     fig7, ax8 = plt.subplots(figsize=(18, 9))
@@ -440,7 +284,7 @@ def run_single_calculation(params: ModelParameters, input_data: dict, msg=False)
         print(f"Solver did not find an optimal solution. Status: {results.solver.termination_condition}")
         return None, None, None
 
-def run_nominal_case_generation():
+def run_nominal_case_generation(include_charts):
     """
     Sets up and runs the nominal case calculation, saving results and charts.
     """
@@ -453,11 +297,11 @@ def run_nominal_case_generation():
 
     if total_cost is not None:
         print_summary(results_df)
-        create_and_save_charts(results_df, flex_load_origin_df, input_data, params)
-
+        if include_charts:
+            create_and_save_charts(results_df, flex_load_origin_df, input_data, params)
         output_path = DATA_DIR_OUTPUTS / "nominal_case_results.csv"
         results_df.to_csv(output_path, index=False, float_format='%.4f')
         print(f"\nNominal case results successfully exported to '{output_path}'")
 
 if __name__ == '__main__':
-    run_nominal_case_generation()
+    run_nominal_case_generation(include_charts=True)

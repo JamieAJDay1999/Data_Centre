@@ -8,11 +8,9 @@ import seaborn as sns
 # MODIFIED: Switched from pulp to pyomo
 import pyomo.environ as pyo
 
-DATA_DIR = pathlib.Path("static/data")
-IMAGE_DIR = pathlib.Path("static/images")
+IMAGE_DIR = pathlib.Path("static/images/flexibility_outputs")
 
 # Create directories if they don't exist
-DATA_DIR.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 
 def extract_detailed_results(m, params, data, start_timestep, flex_time, baseline_df):

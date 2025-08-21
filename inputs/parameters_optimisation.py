@@ -4,14 +4,16 @@ import numpy as np
 # These calculate derived thermal properties based on primary inputs.
 
 def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
-    hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 95, 100, 98, 95, 110, 120, 130, 140, 135, 120, 100, 90, 80, 70]
+    #hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 95, 100, 98, 95, 110, 120, 130, 140, 135, 120, 100, 90, 80, 70] # original
+    hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 115, 120, 70, 65, 70, 120, 130, 140, 50, 50, 50, 70, 80, 75, 70] # modified
+    #hourly_prices = [74.1, 77, 73.65, 72, 67.2, 68.9, 67.8, 67, 67.11, 67.11, 68.29, 68.17, 72.14, 75.1, 85, 86, 84.7, 92.08, 82, 85.3, 83.13, 81.74, 77.74, 80, 80, 79.94, 78.83, 76.08, 72.5, 72, 69.16, 69.2, 75, 72.7, 79, 70.6, 80.8, 87.22, 90.69, 95.24, 97.6, 99.74, 95.7, 95.9, 88.73, 82.88, 82.54, 72.91]
+    #hourly_prices = [(hourly_prices[2*i] + hourly_prices[2*i+1]) / 2 for i in range(24)]
+    #hourly_prices = [96.52, 91.65, 86.25, 84.2, 88, 96.86, 106.94, 107.04, 103.02, 82.14, 69.95, 68.06, 47.4, 35, 41.3, 69.51, 77.31, 103.84, 115.69, 131.04, 126.97, 112.82, 104.93, 99.87]
     num_hours = (num_steps * dt_seconds) // 3600
     full_price_series = np.tile(hourly_prices, int(np.ceil(num_hours / 24)))
+    print(full_price_series)
     price_per_step = np.repeat(full_price_series, 3600 // dt_seconds)
     return np.insert(price_per_step[:num_steps], 0, 0)
-
-
-
 
 # --- Parameter Management Class ----------------------------------------------
 class ModelParameters:
@@ -56,12 +58,6 @@ class ModelParameters:
         self.__dict__.update(cooling_params) # Merges the cooling params into this class
 
         self.TES_capacity_kWh = self.TES_kwh_cap
-
-
-
-
-
-
 
 def _calc_cit(it_params):
     """Calculate the total heat capacity of IT equipment."""
@@ -185,6 +181,6 @@ def setup_simulation_parameters(mode="cool_down"):
     # This is used as the upBound for the T_c variable in optimisation.py
     # For "cool_down" mode in the original script, it was set to None.
     params['T_cAisle_lower_limit_Celsius'] = 18
-    params['T_cAisle_upper_limit_Celsius'] = 22.25
+    params['T_cAisle_upper_limit_Celsius'] = 22
 
     return params
