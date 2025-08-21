@@ -3,17 +3,16 @@ import json
 import pathlib
 import pandas as pd
 import numpy as np
-import pulp
+# MODIFIED: Switched from pulp to pyomo
+import pyomo.environ as pyo
 import matplotlib.pyplot as plt
 from parameters_optimisation import setup_simulation_parameters
 
 # --- Path Configuration ------------------------------------------------------
-# Define base directories for data, images, and debugging
 DATA_DIR = pathlib.Path("static/data")
 IMAGE_DIR = pathlib.Path("static/images2")
 DEBUG_DIR = pathlib.Path("lp_debug")
 
-# Create directories if they don't exist
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 DEBUG_DIR.mkdir(exist_ok=True)
@@ -22,7 +21,7 @@ DEBUG_DIR.mkdir(exist_ok=True)
 # --- Model Configuration -----------------------------------------------------
 CYCLE_TES_ENERGY = True
 
-# --- Parameter Management Class ----------------------------------------------
+# --- Parameter Management Class (Logic Preserved) ----------------------------
 class ModelParameters:
     """A class to hold and manage all model parameters and derived constants."""
     def __init__(self, simulation_minutes=1440, dt_seconds=900, extended_horizon_minutes=180):
@@ -34,7 +33,7 @@ class ModelParameters:
         self.sim_minutes_ext = self.simulation_minutes + self.extended_horizon_minutes
         self.num_steps_extended = int(self.sim_minutes_ext * 60 / self.dt_seconds)
 
-        # Time slots (1-based indexing for PuLP readability)
+        # Time slots (1-based indexing for readability)
         self.T_SLOTS = range(1, 1 + int(self.simulation_minutes * 60 / self.dt_seconds))
         self.TEXT_SLOTS = range(1, 1 + self.num_steps_extended)
         self.K_TRANCHES = range(1, 5)
@@ -60,143 +59,176 @@ class ModelParameters:
         self.e_min_kwh = 0
         self.e_max_kwh = 0
 
-        # --- Cooling System (from external file) ---
+        # --- Cooling System (from external file, TES disabled) ---
         cooling_params = setup_simulation_parameters("cool_down")
         self.__dict__.update(cooling_params) # Merges the cooling params into this class
-        self.TES_kwh_cap = 0  # Nominal capacity (kWh)
-        self.TES_w_discharge_max = 0  # Max discharge power (W)
+        self.TES_kwh_cap = 0
+        self.TES_w_discharge_max = 0
         self.TES_discharge_efficiency = 0.9
-        self.TES_w_charge_max = 0  # Max charge power (W)
+        self.TES_w_charge_max = 0
         self.TES_charge_efficiency = 0.9
-        self.E_TES_min_kWh = 0.0  # Minimum charge state (kWh)
-        self.TES_initial_charge_kWh = 0.5 * self.TES_kwh_cap  # Initial charge (kWh)
-        self.TES_p_dis_ramp = 0  # Max power ramp for TES discharge (W per dt)
-        self.TES_p_ch_ramp = 0  # Max power ramp for TES charge (W per dt)
-
+        self.E_TES_min_kWh = 0.0
+        self.TES_initial_charge_kWh = 0.5 * self.TES_kwh_cap
+        self.TES_p_dis_ramp = 0
+        self.TES_p_ch_ramp = 0
         self.TES_capacity_kWh = self.TES_kwh_cap
 
 
 def build_model(params: ModelParameters, data: dict):
     """
-    Builds the PuLP optimization model, defining all variables, constraints, and the objective.
+    Builds the Pyomo model for the nominal case.
     """
-    m = pulp.LpProblem("DC_Cost_Calculation", pulp.LpMinimize)
-    TEXT_SLOTS = params.TEXT_SLOTS
+    # MODIFIED: Use Pyomo's ConcreteModel
+    m = pyo.ConcreteModel(name="DC_Cost_Calculation_Nominal")
+
+    # MODIFIED: Define index sets for Pyomo
+    m.TEXT_SLOTS = pyo.Set(initialize=params.TEXT_SLOTS)
+    m.T_SLOTS = pyo.Set(initialize=params.T_SLOTS)
+    m.K_TRANCHES = pyo.Set(initialize=params.K_TRANCHES)
 
     # IT & Power Grid Variables
-    total_cpu = pulp.LpVariable.dicts("TotalCpuUsage", TEXT_SLOTS, lowBound=0, upBound=params.max_cpu_usage)
-    p_grid_it = pulp.LpVariable.dicts("P_Grid_IT", TEXT_SLOTS, lowBound=0)
-    p_grid_od = pulp.LpVariable.dicts("P_Grid_Other", TEXT_SLOTS, lowBound=0)
-    p_it_total = pulp.LpVariable.dicts("P_IT_Total", TEXT_SLOTS, lowBound=0)
+    m.total_cpu = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.max_cpu_usage), initialize=0)
+    # Power variables in kW
+    m.p_grid_it_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
+    m.p_grid_od_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
+    m.p_it_total_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
 
     # UPS Variables
-    p_ups_ch = pulp.LpVariable.dicts("P_UPS_Charge", TEXT_SLOTS, lowBound=0)
-    p_ups_disch = pulp.LpVariable.dicts("P_UPS_Discharge", TEXT_SLOTS, lowBound=0)
-    e_ups = pulp.LpVariable.dicts("E_UPS", TEXT_SLOTS, lowBound=params.e_min_kwh, upBound=params.e_max_kwh)
-    z_ch = pulp.LpVariable.dicts("Z_Charge", TEXT_SLOTS, cat='Binary')
-    z_disch = pulp.LpVariable.dicts("Z_Discharge", TEXT_SLOTS, cat='Binary')
+    m.p_ups_ch_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
+    m.p_ups_disch_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
+    m.e_ups_kwh = pyo.Var(m.TEXT_SLOTS, bounds=(params.e_min_kwh, params.e_max_kwh), initialize=params.e_start_kwh)
+    m.z_ch = pyo.Var(m.TEXT_SLOTS, within=pyo.Binary, initialize=0)
+    m.z_disch = pyo.Var(m.TEXT_SLOTS, within=pyo.Binary, initialize=0)
 
-    # Job Scheduling Variables
-    ut_ks_idx = [(t, k, s) for t in params.T_SLOTS for k in params.K_TRANCHES for s in TEXT_SLOTS if s >= t and s <= t + params.tranche_max_delay[k]]
-    ut_ks = pulp.LpVariable.dicts("U_JobTranche", ut_ks_idx, lowBound=0)
+    # Job Scheduling Variables (set to be inflexible for nominal case)
+    ut_ks_idx = [(t, k, s) for t in m.T_SLOTS for k in m.K_TRANCHES for s in m.TEXT_SLOTS if s == t]
+    m.ut_ks_idx = pyo.Set(initialize=ut_ks_idx)
+    m.ut_ks = pyo.Var(m.ut_ks_idx, within=pyo.NonNegativeReals, initialize=0)
 
     # Cooling System Variables
-    t_it = pulp.LpVariable.dicts("T_IT", TEXT_SLOTS, lowBound=14, upBound=60)
-    t_rack = pulp.LpVariable.dicts("T_Rack", TEXT_SLOTS, lowBound=14, upBound=40)
-    t_cold_aisle = pulp.LpVariable.dicts("T_ColdAisle", TEXT_SLOTS, lowBound=18, upBound=params.T_cAisle_upper_limit_Celsius)
-    t_hot_aisle = pulp.LpVariable.dicts("T_HotAisle", TEXT_SLOTS, lowBound=14, upBound=40)
-    e_tes = pulp.LpVariable.dicts("E_TES", TEXT_SLOTS, lowBound=params.E_TES_min_kWh, upBound=params.TES_capacity_kWh)
-    p_chiller_hvac = pulp.LpVariable.dicts("P_Chiller_HVAC_Watts", TEXT_SLOTS, lowBound=0)
-    p_chiller_tes = pulp.LpVariable.dicts("P_Chiller_TES_Watts", TEXT_SLOTS, lowBound=0)
-    q_cool = pulp.LpVariable.dicts("Q_Cool_Watts", TEXT_SLOTS, lowBound=0)
-    q_ch_tes = pulp.LpVariable.dicts("Q_Charge_TES_Watts", TEXT_SLOTS, lowBound=0, upBound=params.TES_w_charge_max)
-    q_dis_tes = pulp.LpVariable.dicts("Q_Discharge_TES_Watts", TEXT_SLOTS, lowBound=0, upBound=params.TES_w_discharge_max)
-    t_in = pulp.LpVariable.dicts("T_Aisle_In", TEXT_SLOTS, lowBound=14, upBound=30)
+    m.t_it = pyo.Var(m.TEXT_SLOTS, bounds=(14, 60), initialize=25)
+    m.t_rack = pyo.Var(m.TEXT_SLOTS, bounds=(14, 40), initialize=25)
+    m.t_cold_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(18, params.T_cAisle_upper_limit_Celsius), initialize=20)
+    m.t_hot_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(14, 40), initialize=30)
+    m.e_tes_kwh = pyo.Var(m.TEXT_SLOTS, bounds=(params.E_TES_min_kWh, params.TES_capacity_kWh), initialize=params.TES_initial_charge_kWh)
+    # Electrical power for cooling in Watts
+    m.p_chiller_hvac_w = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
+    m.p_chiller_tes_w = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
+    # Thermal power in Watts
+    m.q_cool_w = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
+    m.q_ch_tes_w = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.TES_w_charge_max), initialize=0)
+    m.q_dis_tes_w = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.TES_w_discharge_max), initialize=0)
+    m.t_in = pyo.Var(m.TEXT_SLOTS, bounds=(14, 30), initialize=20)
 
 
     # --- Add Constraints ---
-    add_it_and_job_constraints(m, params, data, total_cpu, p_it_total, ut_ks)
-    add_ups_constraints(m, params, p_ups_ch, p_ups_disch, e_ups, z_ch, z_disch)
-    add_power_balance_constraints(m, params, p_it_total, p_grid_it, p_grid_od, p_ups_disch)
-    add_cooling_constraints(m, params, p_it_total, t_it, t_rack, t_cold_aisle, t_hot_aisle, e_tes, p_chiller_hvac, p_chiller_tes, q_cool, q_ch_tes, q_dis_tes, t_in)
+    add_it_and_job_constraints(m, params, data)
+    add_ups_constraints(m, params)
+    add_power_balance_constraints(m, params)
+    add_cooling_constraints(m, params)
 
     # --- Define Objective Function ---
-    m += pulp.lpSum(
-        params.dt_hours * (
-            p_grid_it[s] +
-            (p_chiller_hvac[s] / 1000.0) +
-            (p_chiller_tes[s] / 1000.0) +
-            p_grid_od[s] +
-            p_ups_ch[s]
-        ) * (data['electricity_price'][s] / 1000.0)
-        for s in TEXT_SLOTS
-    ), "Total_Energy_Cost"
+    def objective_rule(mod):
+        # Objective combines all grid-drawn power in kW
+        cost = sum(
+            params.dt_hours * (
+                mod.p_grid_it_kw[s] +
+                (mod.p_chiller_hvac_w[s] / 1000.0) + # W to kW
+                (mod.p_chiller_tes_w[s] / 1000.0) +  # W to kW
+                mod.p_grid_od_kw[s] +
+                mod.p_ups_ch_kw[s]
+            ) * (data['electricity_price'][s] / 1000.0) # Price is per MWh
+            for s in mod.TEXT_SLOTS
+        )
+        return cost
+    m.objective = pyo.Objective(rule=objective_rule, sense=pyo.minimize)
 
     return m
 
-def add_it_and_job_constraints(m, params, data, total_cpu, p_it_total, ut_ks):
-    p_it_act = pulp.LpVariable.dicts("P_IT_Actual", params.TEXT_SLOTS, lowBound=0)
-    p_it_act_ext = pulp.LpVariable.dicts("P_IT_Actual_Extended", params.TEXT_SLOTS, lowBound=None)
-    for t in params.T_SLOTS:
-        for k in params.K_TRANCHES:
-            m += pulp.lpSum(ut_ks[(t, k, s)] * params.dt_hours for s in params.TEXT_SLOTS if (t,k,s) in ut_ks) == data['Rt'][t] * data['shiftabilityProfile'].get((t, k), 0), f"JobCompletion_{t}_{k}"
+def add_it_and_job_constraints(m, params, data):
+  
+    m.JobCompletion = pyo.ConstraintList()
+    for t in m.T_SLOTS:
+        for k in m.K_TRANCHES:
+            # For nominal case, jobs are not shifted, so s must equal t.
+            if (t, k, t) in m.ut_ks_idx:
+                expr = m.ut_ks[(t, k, t)] * params.dt_hours
+                m.JobCompletion.add(expr == data['Rt'][t] * data['shiftabilityProfile'].get((t, k), 0))
 
-    for s in params.TEXT_SLOTS:
-        flexible_usage = pulp.lpSum(ut_ks[idx] for idx in ut_ks if idx[2] == s)
-        m += total_cpu[s] == data['inflexibleLoadProfile_TEXT'][s] + flexible_usage, f"TotalCPUUsage_{s}"
-        if s in params.T_SLOTS:
-            m += p_it_act[s] == params.idle_power_kw + (params.max_power_kw - params.idle_power_kw) * total_cpu[s], f"IT_Power_Primary_{s}"
-            m += p_it_act_ext[s] == 0, f"IT_Power_Ext_Zero_{s}"
-        else:
-            m += p_it_act[s] == 0, f"IT_Power_Primary_Zero_{s}"
-            m += p_it_act_ext[s] >= (params.idle_power_kw + (params.max_power_kw - params.idle_power_kw) * total_cpu[s]), f"IT_Power_Ext_Min_{s}"
-        m += p_it_total[s] == p_it_act[s] + p_it_act_ext[s], f"Total_IT_Power_{s}"
+    m.CPUandPower = pyo.ConstraintList()
+    for s in m.TEXT_SLOTS:
+        flexible_usage = sum(m.ut_ks[idx] for idx in m.ut_ks_idx if idx[2] == s)
+        m.CPUandPower.add(m.total_cpu[s] == data['inflexibleLoadProfile_TEXT'][s] + flexible_usage)
+        
+        # p_it_total_kw is in kW
+        power_expr = params.idle_power_kw + (params.max_power_kw - params.idle_power_kw) * m.total_cpu[s] ** 1.32
+        m.CPUandPower.add(m.p_it_total_kw[s] == power_expr)
 
-def add_ups_constraints(m, params, p_ups_ch, p_ups_disch, e_ups, z_ch, z_disch):
-    for s in params.TEXT_SLOTS:
-        prev_energy = params.e_start_kwh if s == 1 else e_ups[s-1]
-        charge = params.eta_ch * p_ups_ch[s] * params.dt_hours
-        discharge = (p_ups_disch[s] / params.eta_disch) * params.dt_hours
-        m += e_ups[s] == prev_energy + charge - discharge, f"UPS_EnergyBalance_{s}"
-        m += p_ups_ch[s] <= z_ch[s] * params.p_max_ch_kw, f"UPS_MaxCharge_{s}"
-        m += p_ups_ch[s] >= z_ch[s] * params.p_min_ch_kw, f"UPS_MinCharge_{s}"
-        m += p_ups_disch[s] <= z_disch[s] * params.p_max_disch_kw, f"UPS_MaxDischarge_{s}"
-        m += p_ups_disch[s] >= z_disch[s] * params.p_min_disch_kw, f"UPS_MinDischarge_{s}"
-        m += z_ch[s] + z_disch[s] <= 1, f"UPS_ChargeOrDischarge_{s}"
-    m += e_ups[max(params.TEXT_SLOTS)] == params.e_start_kwh, "Final_UPS_Energy_Level"
+def add_ups_constraints(m, params):
+    m.UPS_Constraints = pyo.ConstraintList()
+    for s in m.TEXT_SLOTS:
+        # e_ups_kwh is in kWh, p_ups... variables are in kW
+        prev_energy = params.e_start_kwh if s == m.TEXT_SLOTS.first() else m.e_ups_kwh[s-1]
+        charge = params.eta_ch * m.p_ups_ch_kw[s] * params.dt_hours
+        discharge = (m.p_ups_disch_kw[s] / params.eta_disch) * params.dt_hours
+        m.UPS_Constraints.add(m.e_ups_kwh[s] == prev_energy + charge - discharge)
+        m.UPS_Constraints.add(m.p_ups_ch_kw[s] <= m.z_ch[s] * params.p_max_ch_kw)
+        m.UPS_Constraints.add(m.p_ups_ch_kw[s] >= m.z_ch[s] * params.p_min_ch_kw)
+        m.UPS_Constraints.add(m.p_ups_disch_kw[s] <= m.z_disch[s] * params.p_max_disch_kw)
+        m.UPS_Constraints.add(m.p_ups_disch_kw[s] >= m.z_disch[s] * params.p_min_disch_kw)
+        m.UPS_Constraints.add(m.z_ch[s] + m.z_disch[s] <= 1)
+    m.UPS_Constraints.add(m.e_ups_kwh[m.TEXT_SLOTS.last()] == params.e_start_kwh)
 
-def add_power_balance_constraints(m, params, p_it_total, p_grid_it, p_grid_od, p_ups_disch):
-    for s in params.TEXT_SLOTS:
-        m += p_it_total[s] == p_grid_it[s] + p_ups_disch[s], f"IT_PowerBalance_{s}"
-        m += p_grid_od[s] == p_it_total[s] * params.nominal_overhead_factor, f"Overhead_PowerBalance_{s}"
+def add_power_balance_constraints(m, params):
+    m.PowerBalance = pyo.ConstraintList()
+    for s in m.TEXT_SLOTS:
+        # All power variables in this balance are in kW
+        m.PowerBalance.add(m.p_it_total_kw[s] == m.p_grid_it_kw[s] + m.p_ups_disch_kw[s])
+        m.PowerBalance.add(m.p_grid_od_kw[s] == m.p_it_total_kw[s] * params.nominal_overhead_factor)
 
-def add_cooling_constraints(m, params, p_it_total, t_it, t_rack, t_cold, t_hot, e_tes, p_hvac, p_tes, q_cool, q_ch_tes, q_dis_tes, t_in):
-    m += t_it[1] >= params.T_IT_initial_Celsius
-    m += t_rack[1] >= params.T_Rack_initial_Celsius
-    m += t_cold[1] >= params.T_cAisle_initial
-    m += t_hot[1] >= params.T_hAisle_initial
-    m += e_tes[1] >= params.TES_initial_charge_kWh
+def add_cooling_constraints(m, params):
+    m.CoolingConstraints = pyo.ConstraintList()
+    m.CoolingConstraints.add(m.t_it[1] >= params.T_IT_initial_Celsius)
+    m.CoolingConstraints.add(m.t_rack[1] >= params.T_Rack_initial_Celsius)
+    m.CoolingConstraints.add(m.t_cold_aisle[1] >= params.T_cAisle_initial)
+    m.CoolingConstraints.add(m.t_hot_aisle[1] >= params.T_hAisle_initial)
+    m.CoolingConstraints.add(m.e_tes_kwh[1] >= params.TES_initial_charge_kWh)
     mcp = params.m_dot_air * params.c_p_air
-    m += p_hvac[1] == np.mean([p_hvac[k] for k in list(p_hvac.keys())[1:]]), f"HVAC_PowerBalance_{1}"
-    m += p_tes[1] == np.mean([p_tes[k] for k in list(p_tes.keys())[1:]]), f"TES_PowerBalance_{1}"
-    for t in params.TEXT_SLOTS[1:]:
-        m += q_cool[t] == (p_hvac[t] * params.COP_HVAC) + q_dis_tes[t], f"CoolingSourceBalance_{t}"
-        m += q_ch_tes[t] == p_tes[t] * params.COP_HVAC, f"ChillerTESPower_{t}"
-        m += t_in[t] == t_hot[t] - q_cool[t] / mcp, f"AisleTempIn_{t}"
-        m += q_cool[t] <= (t_hot[t] - params.T_cAisle_lower_limit_Celsius) * mcp, f"MaxCoolingDrop_{t}"
-        it_heat_watts = p_it_total[t] * 1000.0
-        m += t_it[t] == t_it[t-1] + params.dt_seconds * ((it_heat_watts - params.G_conv * (t_it[t-1] - t_rack[t])) / params.C_IT), f"TempUpdate_IT_{t}"
-        m += t_rack[t] == t_rack[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(t_cold[t]-t_rack[t-1]) + params.G_conv*(t_it[t-1]-t_rack[t-1])) / params.C_Rack), f"TempUpdate_Rack_{t}"
-        m += t_cold[t] == t_cold[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(t_in[t]-t_cold[t-1]) - params.G_cold*(t_cold[t-1]-params.T_out_Celsius)) / params.C_cAisle), f"TempUpdate_ColdAisle_{t}"
-        m += t_hot[t] == t_hot[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(t_rack[t]-t_hot[t-1])) / params.C_hAisle), f"TempUpdate_HotAisle_{t}"
-        dE_tes = (q_ch_tes[t]*params.TES_charge_efficiency - q_dis_tes[t]/params.TES_discharge_efficiency) * params.dt_hours / 1000.0
-        m += e_tes[t] == e_tes[t-1] + dE_tes, f"EnergyBalance_TES_{t}"
-        m += q_dis_tes[t] - q_dis_tes[t-1] <= params.TES_p_dis_ramp, f"Ramp_TES_Discharge_{t}"
-        m += q_ch_tes[t] - q_ch_tes[t-1] <= params.TES_p_ch_ramp, f"Ramp_TES_Charge_{t}"
-        m += p_tes[t] + p_hvac[t] <= params.P_chiller_max
-        m += q_cool[t] >= it_heat_watts
+    
+    # This constraint can cause issues if the list is empty
+    if len(m.TEXT_SLOTS) > 1:
+        avg_hvac_w = sum(m.p_chiller_hvac_w[k] for k in m.TEXT_SLOTS if k > 1) / (len(m.TEXT_SLOTS) - 1)
+        avg_tes_w = sum(m.p_chiller_tes_w[k] for k in m.TEXT_SLOTS if k > 1) / (len(m.TEXT_SLOTS) - 1)
+        m.CoolingConstraints.add(m.p_chiller_hvac_w[1] == avg_hvac_w)
+        m.CoolingConstraints.add(m.p_chiller_tes_w[1] == avg_tes_w)
+    
+    for t in m.TEXT_SLOTS:
+        if t > 1:
+            # Thermal power (q) is in Watts, Electrical power (p_chiller) is in Watts
+            m.CoolingConstraints.add(m.q_cool_w[t] == (m.p_chiller_hvac_w[t] * params.COP_HVAC) + m.q_dis_tes_w[t])
+            m.CoolingConstraints.add(m.q_ch_tes_w[t] == m.p_chiller_tes_w[t] * params.COP_HVAC)
+            m.CoolingConstraints.add(m.t_in[t] == m.t_hot_aisle[t] - m.q_cool_w[t] / mcp)
+            m.CoolingConstraints.add(m.q_cool_w[t] <= (m.t_hot_aisle[t] - params.T_cAisle_lower_limit_Celsius) * mcp)
+            
+            # Convert IT power from kW to Watts for thermal calculation
+            it_heat_watts = m.p_it_total_kw[t] * 1000.0
+            
+            m.CoolingConstraints.add(m.t_it[t] == m.t_it[t-1] + params.dt_seconds * ((it_heat_watts - params.G_conv * (m.t_it[t-1] - m.t_rack[t])) / params.C_IT))
+            m.CoolingConstraints.add(m.t_rack[t] == m.t_rack[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_cold_aisle[t]-m.t_rack[t-1]) + params.G_conv*(m.t_it[t-1]-m.t_rack[t-1])) / params.C_Rack))
+            m.CoolingConstraints.add(m.t_cold_aisle[t] == m.t_cold_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_in[t]-m.t_cold_aisle[t-1]) - params.G_cold*(m.t_cold_aisle[t-1]-params.T_out_Celsius)) / params.C_cAisle))
+            m.CoolingConstraints.add(m.t_hot_aisle[t] == m.t_hot_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_rack[t]-m.t_hot_aisle[t-1])) / params.C_hAisle))
+            
+            # dE_tes is in kWh, so q_..._w (in W) must be divided by 1000
+            dE_tes_kwh = (m.q_ch_tes_w[t]*params.TES_charge_efficiency - m.q_dis_tes_w[t]/params.TES_discharge_efficiency) * params.dt_hours / 1000.0
+            m.CoolingConstraints.add(m.e_tes_kwh[t] == m.e_tes_kwh[t-1] + dE_tes_kwh)
+            
+            m.CoolingConstraints.add(m.q_dis_tes_w[t] - m.q_dis_tes_w[t-1] <= params.TES_p_dis_ramp)
+            m.CoolingConstraints.add(m.q_ch_tes_w[t] - m.q_ch_tes_w[t-1] <= params.TES_p_ch_ramp)
+            m.CoolingConstraints.add(m.p_chiller_tes_w[t] + m.p_chiller_hvac_w[t] <= params.P_chiller_max)
+            m.CoolingConstraints.add(m.q_cool_w[t] >= it_heat_watts)
+
     if CYCLE_TES_ENERGY:
-        m += e_tes[max(params.TEXT_SLOTS)] == e_tes[1], "Cycle_E_TES"
+        m.CoolingConstraints.add(m.e_tes_kwh[m.TEXT_SLOTS.last()] == m.e_tes_kwh[1])
 
 def load_and_prepare_data(params: ModelParameters):
     """
@@ -255,76 +287,54 @@ def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
     price_per_step = np.repeat(full_price_series, 3600 // dt_seconds)
     return np.insert(price_per_step[:num_steps], 0, 0)
 
-def post_process_results(m: pulp.LpProblem, params: ModelParameters, data: dict):
+# MODIFIED: Post-processing function adapted for Pyomo model
+def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: dict):
     """
-    Extracts results from a solved model into a DataFrame for the nominal case.
+    Extracts results from a solved Pyomo model into a DataFrame for the nominal case.
     """
-    solved_vars = {v.name: v.value() for v in m.variables()}
-    def get_val(var_name):
-        return solved_vars.get(var_name, 0.0)
-    
-    # This section for detailed job analysis remains commented out as per the original script.
-    """
-    tranche_map = params.tranche_max_delay
-    ...
-    shiftability_df.to_csv(f'{DATA_DIR}/shiftability_profile_opt.csv')
-    """
-
-    # --- Calculate Nominal Cost Profile (per time step) ---
-    nominal_cost = [
-        params.dt_hours * (
-            get_val(f"P_Grid_IT_{s}") +
-            (get_val(f"P_Chiller_HVAC_Watts_{s}") / 1000.0) +
-            (get_val(f"P_Chiller_TES_Watts_{s}") / 1000.0) +
-            get_val(f"P_Grid_Other_{s}") +
-            get_val(f"P_UPS_Charge_{s}")
-        ) * (data['electricity_price'][s] / 1000.0)
-        for s in params.TEXT_SLOTS
-    ]
-
-    # --- Get CPU loads directly from model variables ---
-    total_cpu_usage = [get_val(f"TotalCpuUsage_{s}") for s in params.TEXT_SLOTS]
-    inflexible_cpu_usage = [data['inflexibleLoadProfile_TEXT'][s] for s in params.TEXT_SLOTS]
-    flexible_cpu_usage = [(total - inflexible) for total, inflexible in zip(total_cpu_usage, inflexible_cpu_usage)]
-
-    # --- Build results dictionary ---
-    total_power_consumption = [
-        get_val(f"P_Grid_IT_{s}") +
-        (get_val(f"P_Chiller_HVAC_Watts_{s}") / 1000.0) +
-        (get_val(f"P_Chiller_TES_Watts_{s}") / 1000.0) +
-        get_val(f"P_Grid_Other_{s}") +
-        get_val(f"P_UPS_Charge_{s}")
-        for s in params.TEXT_SLOTS
-    ]
+    # --- Build results dictionary explicitly ---
     results = {
         'Time_Slot_EXT': list(params.TEXT_SLOTS),
-        'Total_Nominal_Cost': pulp.value(m.objective),
-        'Nominal_Cost': nominal_cost,
-        'P_Total_kW': total_power_consumption,
-        'P_IT_Total_kW': [get_val(f"P_IT_Total_{s}") for s in params.TEXT_SLOTS],
-        'P_Grid_IT_kW': [get_val(f"P_Grid_IT_{s}") for s in params.TEXT_SLOTS],
-        'P_Chiller_HVAC_kW': [get_val(f"P_Chiller_HVAC_Watts_{s}") / 1000.0 for s in params.TEXT_SLOTS],
-        'P_Chiller_TES_kW': [get_val(f"P_Chiller_TES_Watts_{s}") / 1000.0 for s in params.TEXT_SLOTS],
-        'P_Grid_Cooling_kW': [(get_val(f"P_Chiller_HVAC_Watts_{s}") + get_val(f"P_Chiller_TES_Watts_{s}")) / 1000.0 for s in params.TEXT_SLOTS],
-        'P_Grid_Other_kW': [get_val(f"P_Grid_Other_{s}") for s in params.TEXT_SLOTS],
-        'P_UPS_Charge_kW': [get_val(f"P_UPS_Charge_{s}") for s in params.TEXT_SLOTS],
-        'P_UPS_Discharge_kW': [get_val(f"P_UPS_Discharge_{s}") for s in params.TEXT_SLOTS],
-        'E_UPS_kWh': [get_val(f"E_UPS_{s}") for s in params.TEXT_SLOTS],
-        'T_IT_Celsius': [get_val(f"T_IT_{s}") for s in params.TEXT_SLOTS],
-        'T_Rack_Celsius': [get_val(f"T_Rack_{s}") for s in params.TEXT_SLOTS],
-        'T_ColdAisle_Celsius': [get_val(f"T_ColdAisle_{s}") for s in params.TEXT_SLOTS],
-        'T_HotAisle_Celsius': [get_val(f"T_HotAisle_{s}") for s in params.TEXT_SLOTS],
-        'E_TES_kWh': [get_val(f"E_TES_{s}") for s in params.TEXT_SLOTS],
-        'Q_Cool_Total_Watts': [get_val(f"Q_Cool_Watts_{s}") for s in params.TEXT_SLOTS],
-        'Q_Charge_TES_Watts': [get_val(f"Q_Charge_TES_Watts_{s}") for s in params.TEXT_SLOTS],
-        'Q_Discharge_TES_Watts': [get_val(f"Q_Discharge_TES_Watts_{s}") for s in params.TEXT_SLOTS],
-        'Price_GBP_per_MWh': [data['electricity_price'][s] for s in params.TEXT_SLOTS],
-        'Inflexible_Load_CPU': inflexible_cpu_usage,
-        'Flexible_Load_CPU': flexible_cpu_usage,
-        'Total_CPU_Load': total_cpu_usage,
+        'Total_Nominal_Cost': pyo.value(m.objective),
+        'P_IT_Total_kW': [pyo.value(m.p_it_total_kw[s]) for s in params.TEXT_SLOTS],
+        'P_Grid_IT_kW': [pyo.value(m.p_grid_it_kw[s]) for s in params.TEXT_SLOTS],
+        'P_Chiller_HVAC_Watts': [pyo.value(m.p_chiller_hvac_w[s]) for s in params.TEXT_SLOTS],
+        'P_Chiller_TES_Watts': [pyo.value(m.p_chiller_tes_w[s]) for s in params.TEXT_SLOTS],
+        'P_Grid_Other_kW': [pyo.value(m.p_grid_od_kw[s]) for s in params.TEXT_SLOTS],
+        'P_UPS_Charge_kW': [pyo.value(m.p_ups_ch_kw[s]) for s in params.TEXT_SLOTS],
+        'P_UPS_Discharge_kW': [pyo.value(m.p_ups_disch_kw[s]) for s in params.TEXT_SLOTS],
+        'E_UPS_kWh': [pyo.value(m.e_ups_kwh[s]) for s in params.TEXT_SLOTS],
+        'T_IT_Celsius': [pyo.value(m.t_it[s]) for s in params.TEXT_SLOTS],
+        'T_Rack_Celsius': [pyo.value(m.t_rack[s]) for s in params.TEXT_SLOTS],
+        'T_ColdAisle_Celsius': [pyo.value(m.t_cold_aisle[s]) for s in params.TEXT_SLOTS],
+        'T_HotAisle_Celsius': [pyo.value(m.t_hot_aisle[s]) for s in params.TEXT_SLOTS],
+        'E_TES_kWh': [pyo.value(m.e_tes_kwh[s]) for s in params.TEXT_SLOTS],
+        'Q_Cool_Total_Watts': [pyo.value(m.q_cool_w[s]) for s in params.TEXT_SLOTS],
+        'Q_Charge_TES_Watts': [pyo.value(m.q_ch_tes_w[s]) for s in params.TEXT_SLOTS],
+        'Q_Discharge_TES_Watts': [pyo.value(m.q_dis_tes_w[s]) for s in params.TEXT_SLOTS],
+        'Total_CPU_Load': [pyo.value(m.total_cpu[s]) for s in params.TEXT_SLOTS],
     }
-    df = pd.DataFrame(results)
+    
+    # --- Derived calculations ---
+    results['P_Chiller_HVAC_kW'] = [p / 1000.0 for p in results['P_Chiller_HVAC_Watts']]
+    results['P_Chiller_TES_kW'] = [p / 1000.0 for p in results['P_Chiller_TES_Watts']]
+    results['P_Grid_Cooling_kW'] = [(h + t) for h, t in zip(results['P_Chiller_HVAC_kW'], results['P_Chiller_TES_kW'])]
+    results['P_Total_kW'] = [
+        results['P_Grid_IT_kW'][i-1] + results['P_Grid_Cooling_kW'][i-1] +
+        results['P_Grid_Other_kW'][i-1] + results['P_UPS_Charge_kW'][i-1]
+        for i in params.TEXT_SLOTS
+    ]
+    results['Nominal_Cost'] = [
+        params.dt_hours * results['P_Total_kW'][i-1] * (data['electricity_price'][i] / 1000.0)
+        for i in params.TEXT_SLOTS
+    ]
+    
+    # --- Add data from input ---
+    results['Price_GBP_per_MWh'] = [data['electricity_price'][s] for s in params.TEXT_SLOTS]
+    results['Inflexible_Load_CPU'] = [data['inflexibleLoadProfile_TEXT'][s] for s in params.TEXT_SLOTS]
+    results['Flexible_Load_CPU'] = [data['flexibleLoadProfile_TEXT'][s] for s in params.TEXT_SLOTS]
 
+    df = pd.DataFrame(results)
     return df, pd.DataFrame()  # Return placeholder for flex_load_origin_df
 
 def print_summary(results_df: pd.DataFrame):
@@ -427,7 +437,7 @@ def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, 
 
     # --- Figure 6: Cumulative Cost ---
     fig6, ax7 = plt.subplots(figsize=(12, 7))
-    ax7.plot(time_slots_ext, df['Nominal_Cost'], label='Cumulative Nominal Cost', color='crimson', linewidth=2)
+    ax7.plot(time_slots_ext, df['Nominal_Cost'].cumsum(), label='Cumulative Nominal Cost', color='crimson', linewidth=2)
     ax7.set_xlabel('Time Slot')
     ax7.set_ylabel('Cumulative Cost (£)')
     ax7.set_title('Cumulative Nominal Energy Cost')
@@ -438,66 +448,49 @@ def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, 
     print("✅ Cumulative cost chart saved.")
 
     # --- Figure 7: Stacked Bar Chart of IT Workload ---
-    if not flex_load_origin_df.empty:
-        # This section remains unchanged as it depends on flex_load_origin_df which is currently empty.
-        # If enabled, it would show the composition of the workload.
-        pass
-    else:
-        # Plotting the simpler CPU load chart if detailed data is not generated.
-        fig7, ax8 = plt.subplots(figsize=(18, 9))
-        df_cpu = pd.DataFrame({
-            'Inflexible': df['Inflexible_Load_CPU'],
-            'Flexible': df['Flexible_Load_CPU']
-        }, index=time_slots_ext)
-        
-        df_cpu.plot(kind='bar', stacked=True, ax=ax8, width=0.8, color=['black', 'gray'])
-        
-        ax8.set_title('Nominal IT Workload Composition', fontsize=16)
-        ax8.set_xlabel('Processing Time Slot')
-        ax8.set_ylabel('CPU Load Units')
-        ax8.legend(title='Load Type')
-        ax8.grid(axis='y', linestyle='--', alpha=0.7)
+    fig7, ax8 = plt.subplots(figsize=(18, 9))
+    df_cpu = pd.DataFrame({
+        'Inflexible': df['Inflexible_Load_CPU'],
+        'Flexible': df['Flexible_Load_CPU']
+    }, index=time_slots_ext)
+    
+    df_cpu.plot(kind='bar', stacked=True, ax=ax8, width=0.8, color=['black', 'gray'])
+    
+    ax8.set_title('Nominal IT Workload Composition', fontsize=16)
+    ax8.set_xlabel('Processing Time Slot')
+    ax8.set_ylabel('CPU Load Units')
+    ax8.legend(title='Load Type')
+    ax8.grid(axis='y', linestyle='--', alpha=0.7)
 
-        tick_frequency = max(1, len(time_slots_ext) // 24)
-        ax8.set_xticks(ax8.get_xticks()[::tick_frequency])
-        ax8.set_xticklabels(ax8.get_xticklabels(), rotation=45, ha="right")
-        
-        fig7.tight_layout(rect=[0, 0, 0.9, 1])
-        fig7.savefig(IMAGE_DIR / 'it_load_stacked_bar.png')
-        print("✅ IT workload stacked bar chart saved.")
+    tick_frequency = max(1, len(time_slots_ext) // 24)
+    ax8.set_xticks(ax8.get_xticks()[::tick_frequency])
+    ax8.set_xticklabels(ax8.get_xticklabels(), rotation=45, ha="right")
+    
+    fig7.tight_layout(rect=[0, 0, 0.9, 1])
+    fig7.savefig(IMAGE_DIR / 'it_load_stacked_bar.png')
+    print("✅ IT workload stacked bar chart saved.")
 
-
-    plt.close('all') # Close all figures to free memory
+    plt.close('all')
     print("\nAll charts have been generated and saved.")
 
-
+# MODIFIED: Updated solver invocation for Pyomo
 def run_single_calculation(params: ModelParameters, input_data: dict, msg=False):
     """
     Runs a single calculation with a given set of parameters.
-
-    Args:
-        params (ModelParameters): The configuration parameters for the model.
-        input_data (dict): The prepared input data (loads, prices, etc.).
-        msg (bool): Whether to show solver output.
-
-    Returns:
-        A tuple containing:
-        - The total calculated cost (float).
-        - The full results DataFrame.
-        - The flexible load origin DataFrame (placeholder).
     """
     print(f"Building and solving model for nominal case...")
     model = build_model(params, input_data)
 
-    model.solve(pulp.PULP_CBC_CMD(msg=msg, gapRel=0.01))
+    solver = pyo.SolverFactory('scip')
+    results = solver.solve(model, tee=msg)
 
-    if pulp.LpStatus[model.status] == 'Optimal':
-        print("Solver found a solution. Post-processing...")
+    if results.solver.termination_condition == pyo.TerminationCondition.optimal:
+        print("Solver found an optimal solution. Post-processing...")
         results_df, flex_load_origin_df = post_process_results(model, params, input_data)
         total_cost = results_df['Total_Nominal_Cost'].iloc[0]
         return total_cost, results_df, flex_load_origin_df
     else:
-        print(f"Solver did not find an optimal solution. Status: {pulp.LpStatus[model.status]}")
+        print(f"Solver did not find an optimal solution. Status: {results.solver.termination_condition}")
         return None, None, None
 
 def run_nominal_case_generation():

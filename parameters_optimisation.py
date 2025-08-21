@@ -125,6 +125,6 @@ def setup_simulation_parameters(mode="cool_down"):
     # This is used as the upBound for the T_c variable in optimisation.py
     # For "cool_down" mode in the original script, it was set to None.
     params['T_cAisle_lower_limit_Celsius'] = 18
-    params['T_cAisle_upper_limit_Celsius'] = 22
+    params['T_cAisle_upper_limit_Celsius'] = 22.25
 
     return params
