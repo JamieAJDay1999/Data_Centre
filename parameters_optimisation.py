@@ -3,6 +3,66 @@ import numpy as np
 # Helper functions (used internally by setup_simulation_parameters)
 # These calculate derived thermal properties based on primary inputs.
 
+def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
+    hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 95, 100, 98, 95, 110, 120, 130, 140, 135, 120, 100, 90, 80, 70]
+    num_hours = (num_steps * dt_seconds) // 3600
+    full_price_series = np.tile(hourly_prices, int(np.ceil(num_hours / 24)))
+    price_per_step = np.repeat(full_price_series, 3600 // dt_seconds)
+    return np.insert(price_per_step[:num_steps], 0, 0)
+
+
+
+
+# --- Parameter Management Class ----------------------------------------------
+class ModelParameters:
+    """A class to hold and manage all model parameters and derived constants."""
+    def __init__(self, simulation_minutes=1440, dt_seconds=900, extended_horizon_minutes=180):
+        # --- Time Horizon ---
+        self.simulation_minutes = simulation_minutes
+        self.dt_seconds = dt_seconds
+        self.extended_horizon_minutes = extended_horizon_minutes
+        self.dt_hours = self.dt_seconds / 3600.0
+        self.sim_minutes_ext = self.simulation_minutes + self.extended_horizon_minutes
+        self.num_steps_extended = int(self.sim_minutes_ext * 60 / self.dt_seconds)
+
+        # Time slots (1-based indexing for readability)
+        self.T_SLOTS = range(1, 1 + int(self.simulation_minutes * 60 / self.dt_seconds))
+        self.TEXT_SLOTS = range(1, 1 + self.num_steps_extended)
+        self.K_TRANCHES = range(1, 5)
+
+        # --- IT Equipment ---
+        self.idle_power_kw = 166.7
+        self.max_power_kw = 1000.0
+        self.max_cpu_usage = 1.0
+        self.tranche_max_delay = {1: 2, 2: 4, 3: 8, 4: 12}
+        self.nominal_overhead_factor = 0.1 # For other DC loads (lighting, etc.)
+
+        # --- UPS / Battery Storage ---
+        self.eta_ch = 0.82
+        self.eta_disch = 0.92
+        self.e_nom_kwh = 600.0
+        self.soc_min = 0.5
+        self.soc_max = 1.0
+        self.e_start_kwh = 600.0
+        self.p_max_ch_kw = 270.0
+        self.p_max_disch_kw = 2700.0
+        self.p_min_ch_kw = 40.0
+        self.p_min_disch_kw = 100.0
+        self.e_min_kwh = self.soc_min * self.e_nom_kwh
+        self.e_max_kwh = self.soc_max * self.e_nom_kwh
+
+        # --- Cooling System (from external file) ---
+        cooling_params = setup_simulation_parameters("cool_down")
+        self.__dict__.update(cooling_params) # Merges the cooling params into this class
+
+        self.TES_capacity_kWh = self.TES_kwh_cap
+
+
+
+
+
+
+
 def _calc_cit(it_params):
     """Calculate the total heat capacity of IT equipment."""
     return (it_params['n_racks'] * it_params['n_servers_per_rack'] * it_params['mass_server'] * it_params['c_server'] +

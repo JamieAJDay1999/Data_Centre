@@ -230,9 +230,9 @@ def main():
 
 
     # --- Save the DataFrames to CSV files ---
-    load_profiles_df.to_csv(f'{DATA_DIR}/load_profiles.csv')
-    spot_prices_df.to_csv(f'{DATA_DIR}/spot_prices.csv')
-    shiftability_df.to_csv(f'{DATA_DIR}/shiftability_profile.csv')
+    load_profiles_df.to_csv(f'{DATA_DIR}/load_profiles_nominal.csv')
+    spot_prices_df.to_csv(f'{DATA_DIR}/spot_prices_nominal.csv')
+    shiftability_df.to_csv(f'{DATA_DIR}/shiftability_profile_nominal.csv')
 
     print("Successfully created 'load_profiles.csv', 'spot_prices.csv', and 'shiftability_profile.csv'")
 

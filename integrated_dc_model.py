@@ -6,66 +6,25 @@ import numpy as np
 # MODIFIED: Switched from pulp to pyomo
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
-from parameters_optimisation import setup_simulation_parameters
+from parameters_optimisation import ModelParameters, generate_tariff
+
 
 # --- Path Configuration ------------------------------------------------------
 # Define base directories for data, images, and debugging
-DATA_DIR = pathlib.Path("static/data")
-IMAGE_DIR = pathlib.Path("static/images2")
+DATA_DIR_INPUTS_1 = pathlib.Path("static/data/inputs")
+DATA_DIR_INPUTS_2 = pathlib.Path("static/data/nominal_outputs")
+DATA_DIR_OUTPUTS = pathlib.Path("static/data/optimisation_outputs")
+IMAGE_DIR = pathlib.Path("static/images/optimisation_outputs")
 DEBUG_DIR = pathlib.Path("lp_debug")
 
-# Create directories if they don't exist
-DATA_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR_INPUTS_1.mkdir(parents=True, exist_ok=True)
+DATA_DIR_INPUTS_2.mkdir(parents=True, exist_ok=True)
+DATA_DIR_OUTPUTS.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 DEBUG_DIR.mkdir(exist_ok=True)
 
-
 # --- Model Configuration -----------------------------------------------------
 CYCLE_TES_ENERGY = True
-
-# --- Parameter Management Class ----------------------------------------------
-class ModelParameters:
-    """A class to hold and manage all model parameters and derived constants."""
-    def __init__(self, simulation_minutes=1440, dt_seconds=900, extended_horizon_minutes=180):
-        # --- Time Horizon ---
-        self.simulation_minutes = simulation_minutes
-        self.dt_seconds = dt_seconds
-        self.extended_horizon_minutes = extended_horizon_minutes
-        self.dt_hours = self.dt_seconds / 3600.0
-        self.sim_minutes_ext = self.simulation_minutes + self.extended_horizon_minutes
-        self.num_steps_extended = int(self.sim_minutes_ext * 60 / self.dt_seconds)
-
-        # Time slots (1-based indexing for readability)
-        self.T_SLOTS = range(1, 1 + int(self.simulation_minutes * 60 / self.dt_seconds))
-        self.TEXT_SLOTS = range(1, 1 + self.num_steps_extended)
-        self.K_TRANCHES = range(1, 5)
-
-        # --- IT Equipment ---
-        self.idle_power_kw = 166.7
-        self.max_power_kw = 1000.0
-        self.max_cpu_usage = 1.0
-        self.tranche_max_delay = {1: 2, 2: 4, 3: 8, 4: 12}
-        self.nominal_overhead_factor = 0.1 # For other DC loads (lighting, etc.)
-
-        # --- UPS / Battery Storage ---
-        self.eta_ch = 0.82
-        self.eta_disch = 0.92
-        self.e_nom_kwh = 600.0
-        self.soc_min = 0.5
-        self.soc_max = 1.0
-        self.e_start_kwh = 600.0
-        self.p_max_ch_kw = 270.0
-        self.p_max_disch_kw = 2700.0
-        self.p_min_ch_kw = 40.0
-        self.p_min_disch_kw = 100.0
-        self.e_min_kwh = self.soc_min * self.e_nom_kwh
-        self.e_max_kwh = self.soc_max * self.e_nom_kwh
-
-        # --- Cooling System (from external file) ---
-        cooling_params = setup_simulation_parameters("cool_down")
-        self.__dict__.update(cooling_params) # Merges the cooling params into this class
-
-        self.TES_capacity_kWh = self.TES_kwh_cap
 
 
 def build_model(params: ModelParameters, data: dict):
@@ -259,10 +218,10 @@ def load_and_prepare_data(params: ModelParameters):
     """
     # --- Load data from CSV files ---
     try:
-        load_profiles_df = pd.read_csv(DATA_DIR / "load_profiles.csv", index_col='time_slot')
-        shiftability_df = pd.read_csv(DATA_DIR / "shiftability_profile.csv", index_col='time_slot')
+        load_profiles_df = pd.read_csv(DATA_DIR_INPUTS_1 / "load_profiles.csv", index_col='time_slot')
+        shiftability_df = pd.read_csv(DATA_DIR_INPUTS_1 / "shiftability_profile.csv", index_col='time_slot')
     except FileNotFoundError as e:
-        print(f"Error: Could not find a required data file. Make sure 'load_profiles.csv' and 'shiftability_profile.csv' are in {DATA_DIR}")
+        print(f"Error: Could not find a required data file. Make sure 'load_profiles.csv' and 'shiftability_profile.csv' are in {DATA_DIR_INPUTS_1}")
         raise e
 
     # --- Convert loaded data into the required formats ---
@@ -312,15 +271,6 @@ def resample_shiftability_profile(shiftability_profile, repeats):
             counter += 1
     return extended_data
 
-def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
-    hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 95, 100, 98, 95, 110, 120, 130, 140, 135, 120, 100, 90, 80, 70]
-    #data = [96.52, 91.65, 86.25, 84.2, 88.0, 96.86, 106.94, 107.04, 103.02, 82.14, 69.95, 68.06, 47.4, 35.0, 41.3, 69.51, 77.31, 103.84, 115.69, 131.04, 126.97, 112.82, 104.93, 99.87]
-    num_hours = (num_steps * dt_seconds) // 3600
-    full_price_series = np.tile(hourly_prices, int(np.ceil(num_hours / 24)))
-    price_per_step = np.repeat(full_price_series, 3600 // dt_seconds)
-    return np.insert(price_per_step[:num_steps], 0, 0)
-
-# MODIFIED: A more robust version of the post-processing function
 def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: dict):
     """
     Extracts results from a solved Pyomo model into a DataFrame.
@@ -344,7 +294,38 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
     if not flex_load_origin_df.empty:
         flex_load_origin_df = flex_load_origin_df.sort_values(by=['processing_slot', 'tranche']).reset_index(drop=True)
     
-    # (The rest of your flex load processing remains the same...)
+    #flex_load_origin_df.to_csv(DATA_DIR_OUTPUTS / "flex_load_origin_df.csv")
+
+    flex_filtered = flex_load_origin_df[flex_load_origin_df['shiftability'] > 0]  # Flexible only
+    new_flexible_load_per_slot = flex_filtered.groupby('processing_slot')['cpu_load'].sum().reindex(range(1, 109), fill_value=0)  # Sum cpu_load only, for 96 slots
+    new_inflexible_load_per_slot = flex_load_origin_df[flex_load_origin_df['shiftability'] == 0].groupby('processing_slot')['cpu_load'].sum().reindex(range(1, 109), fill_value=0)
+    new_inflexible_load = data['inflexibleLoadProfile_TEXT'][1:109] + new_inflexible_load_per_slot.values  # Align to slots 1-96
+    load_profiles_df = pd.DataFrame({
+        'inflexible_load': new_inflexible_load,
+        'flexible_load': new_flexible_load_per_slot.values
+    }, index=range(1, 109))
+    load_profiles_df.index.name = 'time_slot'
+    load_profiles_df.to_csv(DATA_DIR_OUTPUTS / 'load_profiles_opt.csv')
+
+    # Now generate the new shiftability profile using remaining shiftability
+    def generate_shiftability_profile(flex_df, num_timesteps, num_tranches):
+        # Group by processing_slot and shiftability, sum cpu_load
+        grouped = flex_df.groupby(['processing_slot', 'shiftability'])['cpu_load'].sum().reset_index()
+        
+        shiftabilityProfile_data = {}
+        for t in range(1, num_timesteps + 1):
+            for k in range(1, num_tranches + 1):
+                key = (t, k)
+                # Sum cpu_load where processing_slot == t and remaining shiftability == k
+                value = grouped[(grouped['processing_slot'] == t) & (grouped['shiftability'] == k)]['cpu_load']
+                shiftabilityProfile_data[key] = value.sum() if not value.empty else 0.0
+        return shiftabilityProfile_data
+
+    data['shiftabilityProfile'] = generate_shiftability_profile(flex_filtered, 108, 12)
+    shiftability_df = pd.Series(data['shiftabilityProfile']).unstack()
+    shiftability_df.index.name = 'time_slot'
+    shiftability_df.columns.name = 'category'
+    shiftability_df.to_csv(DATA_DIR_OUTPUTS / 'shiftability_profile_opt.csv')
 
     # --- Build results dictionary explicitly ---
     # This is safer than looping through all model components
@@ -370,7 +351,6 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
         'Total_CPU_Load': [pyo.value(m.total_cpu[s]) for s in params.TEXT_SLOTS],
     }
 
-    # (The rest of the function for derived calculations and adding nominal cost remains the same...)
     # --- Derived calculations ---
     results['P_Chiller_HVAC_kW'] = [p / 1000.0 for p in results['P_Chiller_HVAC_Watts']]
     results['P_Chiller_TES_kW'] = [p / 1000.0 for p in results['P_Chiller_TES_Watts']]
@@ -401,15 +381,16 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
 
     # --- Add nominal cost comparison ---
     try:
-        df_nominal = pd.read_csv(DATA_DIR / "nominal_case_results.csv")
+        df_nominal = pd.read_csv(DATA_DIR_INPUTS_2 / "nominal_case_results.csv")
         df['Nominal_Cost'] = df_nominal['Nominal_Cost'][:len(df)].values
         df['P_Total_kW_Nominal'] = df_nominal['P_Total_kW'][:len(df)].values
     except Exception:
-        print(f"Warning: Could not load or align '{DATA_DIR / 'nominal_case_results.csv'}'. Nominal cost set to 0.")
+        print(f"Warning: Could not load or align '{DATA_DIR_INPUTS_2 / 'nominal_case_results.csv'}'. Nominal cost set to 0.")
         df['Nominal_Cost'] = 0
         df['P_Total_kW_Nominal'] = 0
 
     return df, flex_load_origin_df
+
 def print_summary(params, results_df: pd.DataFrame):
     optimized_cost = results_df['Optimized_Cost'].iloc[-1] if not results_df.empty else 0
 
@@ -585,7 +566,6 @@ def run_single_optimization(params: ModelParameters, input_data: dict, msg=False
     model = build_model(params, input_data)
 
     solver = pyo.SolverFactory('scip')
-    solver.options['limits/gap'] = 0.01
 
     # Change 1: Add 'load_solutions=False' to the solve command.
     # This tells Pyomo to run the solver but wait to load the results.
@@ -625,7 +605,7 @@ def run_full_optimisation():
         print_summary(params, results_df)
         create_and_save_charts(results_df, flex_load_origin_df, input_data, params)
 
-        output_path = DATA_DIR / "optimised_baseline.csv"
+        output_path = DATA_DIR_OUTPUTS / "optimised_baseline.csv"
         results_df.to_csv(output_path, index=False, float_format='%.4f')
         print(f"\nResults successfully exported to '{output_path}'")
 

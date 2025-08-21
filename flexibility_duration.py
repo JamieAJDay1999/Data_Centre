@@ -9,20 +9,22 @@ import seaborn as sns
 import time
 
 # --- Import user-provided dependency modules ---
-from parameters_optimisation import setup_simulation_parameters
-from it_parameters import get_load_and_price_profiles
-from integrated_dc_model import ModelParameters
+from parameters_optimisation import ModelParameters, generate_tariff
 # This imported function will need to be updated separately to handle Pyomo model objects
 from flexibility_duration_results_and_plots import extract_detailed_results, plot_flex_contribution_grid, save_heatmap_from_results
 
 # --- Path Configuration ------------------------------------------------------
 # Define base directories for data and images
-DATA_DIR = pathlib.Path("static/data")
-IMAGE_DIR = pathlib.Path("static/images")
+DATA_DIR_INPUTS = pathlib.Path("static/data/optimisation_outputs")
+DATA_DIR_OUTPUTS = pathlib.Path("static/data/flexibility_outputs")
+IMAGE_DIR = pathlib.Path("static/images/flexibility_outputs")
+DEBUG_DIR = pathlib.Path("lp_debug")
 
-# Create directories if they don't exist
-DATA_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR_INPUTS.mkdir(parents=True, exist_ok=True)
+DATA_DIR_INPUTS.mkdir(parents=True, exist_ok=True)
+DATA_DIR_OUTPUTS.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+DEBUG_DIR.mkdir(exist_ok=True)
 
 
 # --- Constants and Configuration ---------------------------------------------
@@ -245,10 +247,10 @@ def add_power_change_constraints(m, params, flex_target_kw, start_timestep, flex
 def load_and_prepare_data(params: ModelParameters):
     # This function remains unchanged
     try:
-        load_profiles_df = pd.read_csv(DATA_DIR / "load_profiles_opt.csv", index_col='time_slot')
-        shiftability_df = pd.read_csv(DATA_DIR / "shiftability_profile_opt.csv", index_col='time_slot')
+        load_profiles_df = pd.read_csv(DATA_DIR_INPUTS / "load_profiles_opt.csv", index_col='time_slot')
+        shiftability_df = pd.read_csv(DATA_DIR_INPUTS / "shiftability_profile_opt.csv", index_col='time_slot')
     except FileNotFoundError as e:
-        print(f"Error: Could not find a required data file. Make sure 'load_profiles.csv' and 'shiftability_profile.csv' are in {DATA_DIR}")
+        print(f"Error: Could not find a required data file. Make sure 'load_profiles.csv' and 'shiftability_profile.csv' are in {DATA_DIR_INPUTS}")
         raise e
     inflexible = load_profiles_df['inflexible_load']
     base_flex = load_profiles_df['flexible_load']
@@ -287,14 +289,6 @@ def resample_shiftability_profile(shiftability_profile, repeats):
                 extended_data[(counter, j)] = shiftability_profile.get((i, j), 0)
             counter += 1
     return extended_data
-
-def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
-    # This function remains unchanged
-    hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 95, 100, 98, 95, 110, 120, 130, 140, 135, 120, 100, 90, 80, 70]
-    num_hours = (num_steps * dt_seconds) // 3600
-    full_price_series = np.tile(hourly_prices, int(np.ceil(num_hours / 24)))
-    price_per_step = np.repeat(full_price_series, 3600 // dt_seconds)
-    return np.insert(price_per_step[:num_steps], 0, 0)
 
 def find_max_duration(params, data, baseline_df, start_timestep, flex_kw, search_type):
     print(f"\n--- Searching for Max Duration: Timestep {start_timestep}, Flex {flex_kw} kW ---")
@@ -345,7 +339,7 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
     params.tranche_max_delay = {x:x for x in range(1,13)}
     params.K_TRANCHES = range(1, 13)
     
-    baseline_csv_path = DATA_DIR / "optimised_baseline.csv"
+    baseline_csv_path = DATA_DIR_INPUTS / "optimised_baseline.csv"
     
     try:
         baseline_df = pd.read_csv(baseline_csv_path)
@@ -359,10 +353,10 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
     data = load_and_prepare_data(params)
 
     if include_banked_results is None:
-        bank_file = DATA_DIR / "flex_duration_results.csv"
+        bank_file = DATA_DIR_OUTPUTS / "flex_duration_results.csv"
         old_results = pd.DataFrame(columns=['Timestep', 'Flex_Magnitude_kW', 'Max_Duration_Min'])
     else:
-        bank_file = DATA_DIR / include_banked_results
+        bank_file = DATA_DIR_OUTPUTS / include_banked_results
         old_results = pd.read_csv(bank_file) if bank_file.exists() else pd.DataFrame(columns=['Timestep', 'Flex_Magnitude_kW', 'Max_Duration_Min'])
     old_results = old_results.set_index(['Timestep', 'Flex_Magnitude_kW'])
 
@@ -396,7 +390,7 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
                 results_df = extract_detailed_results(model, params, data, ts, max_dur_steps, baseline_df)
                 
                 csv_filename = f"flex_duration_detailed_results_ts{ts}_flex{str(fm).replace('-', 'neg')}.csv"
-                results_df.to_csv(DATA_DIR / csv_filename)
+                results_df.to_csv(DATA_DIR_OUTPUTS / csv_filename)
                 print(f"  -> Saved detailed results to {csv_filename}")
                 if generate_plots:
                     plot_data_list.append({
@@ -412,13 +406,13 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
 
     save_heatmap_from_results(
         results_rows=results_list,
-        csv_path=DATA_DIR / "flex_duration_results.csv",
+        csv_path=DATA_DIR_OUTPUTS / "flex_duration_results.csv",
         png_path=IMAGE_DIR / "flex_duration_heatmap.png"
     )
 
 if __name__ == '__main__':
     timesteps = [5]#[1]+ list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
-    flex_magnitudes = [-100]#[75, 50, 25, -100, -150, -200, -250, -300, -350, -400, -450, -500]
+    flex_magnitudes = [-50]#[75, 50, 25, -100, -150, -200, -250, -300, -350, -400, -450, -500]
     include_banked_results = None #"flex_duration_results_new_all.csv"
     main(flex_magnitudes, timesteps, include_banked_results, search_type='linear_3')#, generate_plots=True)
     #[10, 20, 25, 30, 35, 40, 50, 55, 60, 70, 75, 80, 85, 90, 95]#

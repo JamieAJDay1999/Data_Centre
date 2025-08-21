@@ -6,14 +6,16 @@ import numpy as np
 # MODIFIED: Switched from pulp to pyomo
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
-from parameters_optimisation import setup_simulation_parameters
+from parameters_optimisation import ModelParameters, generate_tariff
 
 # --- Path Configuration ------------------------------------------------------
-DATA_DIR = pathlib.Path("static/data")
-IMAGE_DIR = pathlib.Path("static/images2")
+DATA_DIR_INPUTS = pathlib.Path("static/data/inputs")
+DATA_DIR_OUTPUTS = pathlib.Path("static/data/nominal_outputs")
+IMAGE_DIR = pathlib.Path("static/images/nominal_outputs")
 DEBUG_DIR = pathlib.Path("lp_debug")
 
-DATA_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR_INPUTS.mkdir(parents=True, exist_ok=True)
+DATA_DIR_OUTPUTS.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 DEBUG_DIR.mkdir(exist_ok=True)
 
@@ -21,57 +23,6 @@ DEBUG_DIR.mkdir(exist_ok=True)
 # --- Model Configuration -----------------------------------------------------
 CYCLE_TES_ENERGY = True
 
-# --- Parameter Management Class (Logic Preserved) ----------------------------
-class ModelParameters:
-    """A class to hold and manage all model parameters and derived constants."""
-    def __init__(self, simulation_minutes=1440, dt_seconds=900, extended_horizon_minutes=180):
-        # --- Time Horizon ---
-        self.simulation_minutes = simulation_minutes
-        self.dt_seconds = dt_seconds
-        self.extended_horizon_minutes = extended_horizon_minutes
-        self.dt_hours = self.dt_seconds / 3600.0
-        self.sim_minutes_ext = self.simulation_minutes + self.extended_horizon_minutes
-        self.num_steps_extended = int(self.sim_minutes_ext * 60 / self.dt_seconds)
-
-        # Time slots (1-based indexing for readability)
-        self.T_SLOTS = range(1, 1 + int(self.simulation_minutes * 60 / self.dt_seconds))
-        self.TEXT_SLOTS = range(1, 1 + self.num_steps_extended)
-        self.K_TRANCHES = range(1, 5)
-
-        # --- IT Equipment ---
-        self.idle_power_kw = 166.7
-        self.max_power_kw = 1000.0
-        self.max_cpu_usage = 1.0
-        self.tranche_max_delay = {1: 2, 2: 4, 3: 8, 4: 12}
-        self.nominal_overhead_factor = 0.1 # For other DC loads (lighting, etc.)
-
-        # --- UPS / Battery Storage (Effectively disabled for nominal run) ---
-        self.eta_ch = 0.82
-        self.eta_disch = 0.92
-        self.e_nom_kwh = 0
-        self.soc_min = 0.5
-        self.soc_max = 0
-        self.e_start_kwh = 0
-        self.p_max_ch_kw = 0
-        self.p_max_disch_kw = 0
-        self.p_min_ch_kw = 0
-        self.p_min_disch_kw = 0
-        self.e_min_kwh = 0
-        self.e_max_kwh = 0
-
-        # --- Cooling System (from external file, TES disabled) ---
-        cooling_params = setup_simulation_parameters("cool_down")
-        self.__dict__.update(cooling_params) # Merges the cooling params into this class
-        self.TES_kwh_cap = 0
-        self.TES_w_discharge_max = 0
-        self.TES_discharge_efficiency = 0.9
-        self.TES_w_charge_max = 0
-        self.TES_charge_efficiency = 0.9
-        self.E_TES_min_kWh = 0.0
-        self.TES_initial_charge_kWh = 0.5 * self.TES_kwh_cap
-        self.TES_p_dis_ramp = 0
-        self.TES_p_ch_ramp = 0
-        self.TES_capacity_kWh = self.TES_kwh_cap
 
 
 def build_model(params: ModelParameters, data: dict):
@@ -156,6 +107,7 @@ def add_it_and_job_constraints(m, params, data):
                 m.JobCompletion.add(expr == data['Rt'][t] * data['shiftabilityProfile'].get((t, k), 0))
 
     m.CPUandPower = pyo.ConstraintList()
+    print(len(data['inflexibleLoadProfile_TEXT']))
     for s in m.TEXT_SLOTS:
         flexible_usage = sum(m.ut_ks[idx] for idx in m.ut_ks_idx if idx[2] == s)
         m.CPUandPower.add(m.total_cpu[s] == data['inflexibleLoadProfile_TEXT'][s] + flexible_usage)
@@ -235,10 +187,10 @@ def load_and_prepare_data(params: ModelParameters):
     Loads input data from CSV files and prepares it for the model.
     """
     try:
-        load_profiles_df = pd.read_csv(DATA_DIR / "load_profile_nominal.csv", index_col='time_slot')
-        shiftability_df = pd.read_csv(DATA_DIR / "shiftability_profile_nominal.csv", index_col='time_slot')
+        load_profiles_df = pd.read_csv(DATA_DIR_INPUTS / "load_profiles.csv", index_col='time_slot')
+        shiftability_df = pd.read_csv(DATA_DIR_INPUTS / "shiftability_profile.csv", index_col='time_slot')
     except FileNotFoundError as e:
-        print(f"Error: Could not find a required data file. Make sure 'load_profile_nominal.csv' and 'shiftability_profile_nominal.csv' are in {DATA_DIR}")
+        print(f"Error: Could not find a required data file. Make sure 'load_profile_nominal.csv' and 'shiftability_profile_nominal.csv' are in {DATA_DIR_INPUTS}")
         raise e
 
     inflexible = load_profiles_df['inflexible_load']
@@ -280,12 +232,7 @@ def resample_shiftability_profile(shiftability_profile, repeats):
             counter += 1
     return extended_data
 
-def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
-    hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 95, 100, 98, 95, 110, 120, 130, 140, 135, 120, 100, 90, 80, 70]
-    num_hours = (num_steps * dt_seconds) // 3600
-    full_price_series = np.tile(hourly_prices, int(np.ceil(num_hours / 24)))
-    price_per_step = np.repeat(full_price_series, 3600 // dt_seconds)
-    return np.insert(price_per_step[:num_steps], 0, 0)
+
 
 # MODIFIED: Post-processing function adapted for Pyomo model
 def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: dict):
@@ -508,7 +455,7 @@ def run_nominal_case_generation():
         print_summary(results_df)
         create_and_save_charts(results_df, flex_load_origin_df, input_data, params)
 
-        output_path = DATA_DIR / "nominal_case_results.csv"
+        output_path = DATA_DIR_OUTPUTS / "nominal_case_results.csv"
         results_df.to_csv(output_path, index=False, float_format='%.4f')
         print(f"\nNominal case results successfully exported to '{output_path}'")
 
