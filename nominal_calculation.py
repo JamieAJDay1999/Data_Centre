@@ -53,7 +53,9 @@ def build_model(params: ModelParameters, data: dict):
     m.z_disch = pyo.Var(m.TEXT_SLOTS, within=pyo.Binary, initialize=0)
 
     # Job Scheduling Variables (set to be inflexible for nominal case)
+    # %%%%%%%% CRUCIAL CONSTRAINT CHANGE FOR NOMINAL CASE: s == t rather than s <= t %%%%%%%%%%%%%
     ut_ks_idx = [(t, k, s) for t in m.T_SLOTS for k in m.K_TRANCHES for s in m.TEXT_SLOTS if s == t]
+
     m.ut_ks_idx = pyo.Set(initialize=ut_ks_idx)
     m.ut_ks = pyo.Var(m.ut_ks_idx, within=pyo.NonNegativeReals, initialize=0)
 
@@ -75,10 +77,8 @@ def build_model(params: ModelParameters, data: dict):
 
     # --- Add Constraints ---
     add_it_and_job_constraints(m, params, data)
-    add_ups_constraints(m, params)
-    add_power_balance_constraints(m, params)
+    add_power_balance_constraints_nominal(m, params)
     add_cooling_constraints(m, params, CYCLE_TES_ENERGY)
-
     # --- Define Objective Function ---
     def objective_rule(mod):
         # Objective combines all grid-drawn power in kW
@@ -96,6 +96,13 @@ def build_model(params: ModelParameters, data: dict):
     m.objective = pyo.Objective(rule=objective_rule, sense=pyo.minimize)
 
     return m
+
+def add_power_balance_constraints_nominal(m, params):
+    m.PowerBalance = pyo.ConstraintList()
+    for s in m.TEXT_SLOTS:
+        # All power variables in this balance are in kW
+        m.PowerBalance.add(m.p_it_total_kw[s] == m.p_grid_it_kw[s])
+        m.PowerBalance.add(m.p_grid_od_kw[s] == m.p_it_total_kw[s] * params.nominal_overhead_factor)
 
 
 def load_and_prepare_data(params: ModelParameters):
@@ -283,6 +290,16 @@ def run_single_calculation(params: ModelParameters, input_data: dict, msg=False)
     else:
         print(f"Solver did not find an optimal solution. Status: {results.solver.termination_condition}")
         return None, None, None
+    
+def configure_nominal_params(params):
+
+    params.T_cAisle_lower_limit_Celsius = 22
+    params.TES_kwh_cap = 1 
+    params.TES_initial_charge_kWh = 0
+    params.TES_w_discharge_max = 0
+    params.TES_w_charge_max = 0
+    return params
+
 
 def run_nominal_case_generation(include_charts):
     """
@@ -290,6 +307,7 @@ def run_nominal_case_generation(include_charts):
     """
     print("1. Setting up model parameters for nominal run...")
     params = ModelParameters()
+    params = configure_nominal_params(params)
     print("2. Loading and preparing input data...")
     input_data = load_and_prepare_data(params)
 

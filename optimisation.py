@@ -278,12 +278,14 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
     return df, flex_load_origin_df
 
 def print_summary(params, results_df: pd.DataFrame):
-    optimized_cost = results_df['Optimized_Cost'].iloc[-1] if not results_df.empty else 0
-
+    
     for t in range(96, 108):
-        optimized_cost -= results_df['Nominal_Cost'].iloc[t]
-    nominal_cost = results_df['Nominal_Cost'].iloc[:96].sum()
+        cost_diff_in_extension = results_df['Optimized_Cost_per_Step'].iloc[t] - results_df['Nominal_Cost'].iloc[t]
 
+    print(f"Cost difference in extension period (slots 97-108): {cost_diff_in_extension:,.2f} GBP")
+    nominal_cost = results_df['Nominal_Cost'].iloc[:96].sum()
+    optimized_cost = results_df['Optimized_Cost_per_Step'].iloc[:96].sum()
+    optimized_cost += cost_diff_in_extension
     cost_saving_abs = nominal_cost - optimized_cost if nominal_cost > 0 else 0
     cost_saving_rel = (cost_saving_abs / nominal_cost) * 100 if nominal_cost > 0 else 0
 
@@ -303,8 +305,8 @@ def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, 
 
     # --- Figure 1: Power Consumption and Energy Price ---
     fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
-    ax1.plot(time_slots_ext, df['P_Total_kW'], label='Nominal IT Power', linestyle='--', color='gray')
-    ax1.plot(time_slots_ext, df['P_Total_kW_Nominal'], label='Optimized IT Power', color='crimson')
+    ax1.plot(time_slots_ext, df['P_Total_kW_Nominal'], label='Nominal IT Power', linestyle='--', color='gray')
+    ax1.plot(time_slots_ext, df['P_Total_kW'], label='Optimized IT Power', color='crimson')
     #ax1.plot(time_slots_ext, df['Optimized_Cost_per_Step'], label='Optimised Cost', linestyle='--', color='gray')
     #ax1.plot(time_slots_ext, df['Nominal_Cost'], label='Nominal Cost', color='crimson')
     ax1.set_ylabel('Cost Incurred (GBP/15 min)')
