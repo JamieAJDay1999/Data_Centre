@@ -61,8 +61,8 @@ def extract_detailed_results(m, params, data, start_timestep, flex_time, baselin
         results_df[diff_col] = diff_vals
         final_columns.extend([base_col, opt_col, diff_col])
 
-    results_df['P_UPS_NET_kw_Diff'] = results_df['P_UPS_Charge_kW_diff'] - results_df['P_UPS_Discharge_kW_diff']
-    final_columns.append('P_UPS_NET_kw_Diff')
+    results_df['UPS_NET_kw_Diff'] = results_df['P_UPS_Charge_kW_diff'] - results_df['P_UPS_Discharge_kW_diff']
+    final_columns.append('UPS_NET_kw_Diff')
     hvac_opt_kw = [pyo.value(m.p_chiller_hvac_w[s]) / 1000.0 for s in time_slots]
     tes_opt_kw = [pyo.value(m.p_chiller_tes_w[s]) / 1000.0 for s in time_slots]
     opt_vals_cool_kw = [h + t for h, t in zip(hvac_opt_kw, tes_opt_kw)]
@@ -148,10 +148,10 @@ def plot_flex_contribution_grid(all_plot_data, timesteps, flex_magnitudes):
     col_map = {
         'P_IT_Total_kW_diff': 'IT', 'P_Chiller_HVAC_kW_diff': 'Chiller HVAC',
         'P_Chiller_TES_kW_diff': 'Chiller TES', 'P_Grid_Other_kW_diff': 'Other overhead',
-        'P_UPS_NET_kw_Diff': 'UPS charge',
+        'P_UPS_Charge_kW_diff': 'UPS charge',
     }
     palette = {
-        'IT': '#0072B2', 'Chiller HVAC': '#E69F00', 'Chiller TES': '#009E73',
+        'IT (grid)': '#0072B2', 'Chiller HVAC': '#E69F00', 'Chiller TES': '#009E73',
         'Other overhead': '#CC79A7', 'UPS charge': '#56B4E9',
     }
     series_order = list(col_map.values())
@@ -223,7 +223,7 @@ def plot_flex_contribution_grid(all_plot_data, timesteps, flex_magnitudes):
 
     fig.text(0.5, 0.10, 'Flexibility Duration (Hours)', ha='center', va='center', fontsize=16, weight='bold')
     fig.text(0.01, 0.5, 'Magnitude (kW)', ha='center', va='center', rotation='vertical', fontsize=16, weight='bold')
-    #fig.suptitle('Grid Power Change by Source', fontsize=20, weight='bold')
+    fig.suptitle('Grid Power Change by Source', fontsize=20, weight='bold')
     fig.subplots_adjust(left=0.12, right=0.85, top=0.9, bottom=0.15, wspace=0.08, hspace=0.12)
 
     filename = "grid_source_diffs_summary.png"

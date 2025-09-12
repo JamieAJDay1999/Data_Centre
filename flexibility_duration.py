@@ -27,10 +27,9 @@ IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 DEBUG_DIR.mkdir(exist_ok=True)
 
 
-# --- Constants and Configuration ---------------------------------------------
-DURATION_SIM_HORIZON_MINUTES = 720 # 12 hours should be enough to find max duration
+# --- Constants and Configuration ---------------------------------------------     
 DEBUG_ON_FAIL = True # If True, will re-run failed simulations with verbose output
-SOLVER_TIME_LIMIT_SECONDS = 20 # Return infeasible if solver exceeds 3 minutes
+SOLVER_TIME_LIMIT_SECONDS = 60 # Return infeasible if solver exceeds 60 seconds
 
 def build_duration_model(params: ModelParameters, data: dict, initial_state: dict, baseline_df: pd.DataFrame, start_timestep: int, flex_target_kw: float, flex_time):
     # MODIFIED: Use Pyomo's ConcreteModel
@@ -103,6 +102,7 @@ def add_it_and_job_constraints(m, params, data):
     # --- JOB COMPLETION for Shiftable Workload ---
     m.JobCompletion = pyo.ConstraintList()
     for t in m.T_SLOTS:
+        #total_flexible_work_at_t = data['Rt'][t] if t < len(data['Rt']) else 0
         total_flexible_work_at_t = data['Rt'][t]
         for k in m.K_TRANCHES:
             workload_in_tranche_k = total_flexible_work_at_t * data['shiftabilityProfile'].get((t, k), 0)
@@ -221,8 +221,8 @@ def add_cooling_constraints(m, params, initial_state, start_timestep):
         dE_tes_kwh = (m.q_ch_tes_w[t]*params.TES_charge_efficiency - m.q_dis_tes_w[t]/params.TES_discharge_efficiency) * params.dt_hours / 1000.0
         m.CoolingConstraints.add(m.e_tes_kwh[t] == m.e_tes_kwh[t-1] + dE_tes_kwh)
         
-        m.CoolingConstraints.add(m.q_dis_tes_w[t] - m.q_dis_tes_w[t-1] <= params.TES_p_dis_ramp)
-        m.CoolingConstraints.add(m.q_ch_tes_w[t] - m.q_ch_tes_w[t-1] <= params.TES_p_ch_ramp)
+        #m.CoolingConstraints.add(m.q_dis_tes_w[t] - m.q_dis_tes_w[t-1] <= params.TES_p_dis_ramp)
+        #m.CoolingConstraints.add(m.q_ch_tes_w[t] - m.q_ch_tes_w[t-1] <= params.TES_p_ch_ramp)
         m.CoolingConstraints.add(m.p_chiller_tes_w[t] + m.p_chiller_hvac_w[t] <= params.P_chiller_max)
         m.CoolingConstraints.add(m.q_cool_w[t] >= it_heat_watts)
 
@@ -303,6 +303,9 @@ def find_max_duration(params, data, baseline_df, start_timestep, flex_kw, search
             mid_duration = (low + high) // 2
         elif search_type == 'linear':
             mid_duration = low + 6
+            if mid_duration + start_timestep > 96:
+                mid_duration = (low + high) // 2
+                search_type = 'binary'
         if mid_duration == 0: break
         print(f"\rTesting duration: {mid_duration} steps... ", end="")
         
@@ -406,13 +409,13 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
 
     save_heatmap_from_results(
         results_rows=results_list,
-        csv_path=DATA_DIR_OUTPUTS / "flex_duration_results.csv",
-        png_path=IMAGE_DIR / "flex_duration_heatmap.png"
+        csv_path=DATA_DIR_OUTPUTS / "flex_duration_results_small.csv",
+        png_path=IMAGE_DIR / "flex_duration_heatmap_small.png"
     )
 
 if __name__ == '__main__':
-    timesteps = [1, 40]#[1]+ list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
-    flex_magnitudes =  [-300, -200, -100] #[75, 50, 25, -100, -150, -200, -250, -300, -350, -400, -450, -500]
-    include_banked_results = None #"flex_duration_results_new_all.csv"
-    main(flex_magnitudes, timesteps, include_banked_results, search_type='binary', generate_plots=True)
+    timesteps = [15, 65] #+ list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
+    flex_magnitudes =  [75, 50, 25] #[75, 50, 25, -100, -150, -200, -250, -300, -350, -400, -450, -500]
+    include_banked_results = "flex_duration_results_neg.csv"
+    main(flex_magnitudes, timesteps, include_banked_results, search_type='linear', generate_plots=True)
     #[10, 20, 25, 30, 35, 40, 50, 55, 60, 70, 75, 80, 85, 90, 95]#

@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # Helper functions (used internally by setup_simulation_parameters)
 # These calculate derived thermal properties based on primary inputs.
@@ -11,7 +13,7 @@ def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
     #hourly_prices = [96.52, 91.65, 86.25, 84.2, 88, 96.86, 106.94, 107.04, 103.02, 82.14, 69.95, 68.06, 47.4, 35, 41.3, 69.51, 77.31, 103.84, 115.69, 131.04, 126.97, 112.82, 104.93, 99.87]
     num_hours = (num_steps * dt_seconds) // 3600
     full_price_series = np.tile(hourly_prices, int(np.ceil(num_hours / 24)))
-    print(full_price_series)
+    #print(full_price_series)
     price_per_step = np.repeat(full_price_series, 3600 // dt_seconds)
     return np.insert(price_per_step[:num_steps], 0, 0)
 
@@ -167,8 +169,8 @@ def setup_simulation_parameters(mode="cool_down"):
     params['TES_charge_efficiency'] = 0.9
     params['E_TES_min_kWh'] = 0.0  # Minimum charge state (kWh)
     params['TES_initial_charge_kWh'] = 0.5 * params['TES_kwh_cap'] # Initial charge (kWh)
-    params['TES_p_dis_ramp'] = 1000000.0  # Max power ramp for TES discharge (W per dt)
-    params['TES_p_ch_ramp'] = 1000000.0   # Max power ramp for TES charge (W per dt)
+    #params['TES_p_dis_ramp'] = 1000000.0  # Max power ramp for TES discharge (W per dt)
+    #params['TES_p_ch_ramp'] = 1000000.0   # Max power ramp for TES charge (W per dt)
 
     # === V. Initial Conditions & Operational Limits for "cool_down" mode ===
     # (as used by optimisation.py)
@@ -181,6 +183,7 @@ def setup_simulation_parameters(mode="cool_down"):
     # This is used as the upBound for the T_c variable in optimisation.py
     # For "cool_down" mode in the original script, it was set to None.
     params['T_cAisle_lower_limit_Celsius'] = 18
-    params['T_cAisle_upper_limit_Celsius'] = 22.01
+    params['T_cAisle_upper_limit_Celsius'] = 22
 
     return params
+

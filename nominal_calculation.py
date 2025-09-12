@@ -7,7 +7,8 @@ import numpy as np
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
 from inputs.parameters_optimisation import ModelParameters, generate_tariff
-from constraints import add_it_and_job_constraints, add_ups_constraints, add_power_balance_constraints, add_cooling_constraints
+# MODIFIED: Removed import of add_it_and_job_constraints, as it will be defined locally
+from constraints import add_ups_constraints, add_power_balance_constraints, add_cooling_constraints
 from plotting_and_saving.nom_opt_charts import gen_charts
 # --- Path Configuration ------------------------------------------------------
 DATA_DIR_INPUTS = pathlib.Path("static/data/inputs")
@@ -26,7 +27,7 @@ CYCLE_TES_ENERGY = True
 
 
 
-def build_model(params: ModelParameters, data: dict):
+def build_model(params: ModelParameters, data: dict, linear: bool = False):
     """
     Builds the Pyomo model for the nominal case.
     """
@@ -76,7 +77,21 @@ def build_model(params: ModelParameters, data: dict):
 
 
     # --- Add Constraints ---
-    add_it_and_job_constraints(m, params, data)
+    if not linear:
+        # Define Piecewise Linear helper variables and constraints
+        m.num_pw_points = 11
+        m.PW_POINTS = pyo.RangeSet(0, m.num_pw_points - 1)
+        m.pw_x = {i: i / (m.num_pw_points - 1) for i in m.PW_POINTS}
+        m.pw_y = {i: m.pw_x[i] ** 1.32 for i in m.PW_POINTS}
+        
+        m.w = pyo.Var(m.TEXT_SLOTS, m.PW_POINTS, within=pyo.NonNegativeReals)
+        m.cpu_power_factor = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
+        m.cpu_sos2 = pyo.SOSConstraint(m.TEXT_SLOTS, var=m.w, sos=2)
+
+        add_it_and_job_constraints_pwl_nominal(m, params, data)
+    else:
+        add_it_and_job_constraints_linear_nominal(m, params, data)
+
     add_power_balance_constraints_nominal(m, params)
     add_cooling_constraints(m, params, CYCLE_TES_ENERGY)
     # --- Define Objective Function ---
@@ -96,6 +111,60 @@ def build_model(params: ModelParameters, data: dict):
     m.objective = pyo.Objective(rule=objective_rule, sense=pyo.minimize)
 
     return m
+
+def add_it_and_job_constraints_linear_nominal(m, params, data):
+    """Adds job and IT constraints using a direct linear relationship."""
+    m.LinearITConstraints = pyo.ConstraintList()
+    
+    # --- Job Completion & Total CPU ---
+    for t in m.T_SLOTS:
+        # Job completion for each tranche
+        for k in m.K_TRANCHES:
+            # For nominal case, s=t is handled by ut_ks_idx definition
+            if (t, k, t) in m.ut_ks_idx:
+                expr = m.ut_ks[t, k, t] * params.dt_hours
+                rhs = data['Rt'][t] * data['shiftabilityProfile'].get((t, k), 0)
+                m.LinearITConstraints.add(expr == rhs)
+
+    for s in m.TEXT_SLOTS:
+        # Total CPU usage
+        flex_use_terms = [m.ut_ks[idx] for idx in m.ut_ks_idx if idx[2] == s]
+        flexible_usage = sum(flex_use_terms) if flex_use_terms else 0.0
+        base_cpu = data['inflexibleLoadProfile_TEXT'][s] + flexible_usage
+        m.LinearITConstraints.add(m.total_cpu[s] == base_cpu)
+
+        # Linear relationship between CPU and IT power
+        power_expr = params.idle_power_kw + (params.max_power_kw - params.idle_power_kw) * m.total_cpu[s]
+        m.LinearITConstraints.add(m.p_it_total_kw[s] == power_expr)
+
+def add_it_and_job_constraints_pwl_nominal(m, params, data):
+    """Adds job and IT constraints using a Piecewise Linear (PWL) relationship."""
+    m.PWLITConstraints = pyo.ConstraintList()
+
+    # --- Job Completion & Total CPU ---
+    for t in m.T_SLOTS:
+        # Job completion for each tranche
+        for k in m.K_TRANCHES:
+            if (t, k, t) in m.ut_ks_idx:
+                expr = m.ut_ks[t, k, t] * params.dt_hours
+                rhs = data['Rt'][t] * data['shiftabilityProfile'].get((t, k), 0)
+                m.PWLITConstraints.add(expr == rhs)
+
+    for s in m.TEXT_SLOTS:
+        # Total CPU usage
+        flex_use_terms = [m.ut_ks[idx] for idx in m.ut_ks_idx if idx[2] == s]
+        flexible_usage = sum(flex_use_terms) if flex_use_terms else 0.0
+        base_cpu = data['inflexibleLoadProfile_TEXT'][s] + flexible_usage
+        m.PWLITConstraints.add(m.total_cpu[s] == base_cpu)
+
+        # --- PWL Constraints ---
+        m.PWLITConstraints.add(m.total_cpu[s] == sum(m.pw_x[i] * m.w[s, i] for i in m.PW_POINTS))
+        m.PWLITConstraints.add(m.cpu_power_factor[s] == sum(m.pw_y[i] * m.w[s, i] for i in m.PW_POINTS))
+        m.PWLITConstraints.add(sum(m.w[s, i] for i in m.PW_POINTS) == 1)
+        
+        # Link IT power to the PWL power factor
+        power_expr = params.idle_power_kw + (params.max_power_kw - params.idle_power_kw) * m.cpu_power_factor[s]
+        m.PWLITConstraints.add(m.p_it_total_kw[s] == power_expr)
 
 def add_power_balance_constraints_nominal(m, params):
     m.PowerBalance = pyo.ConstraintList()
@@ -272,12 +341,13 @@ def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, 
     print("\nAll charts have been generated and saved.")
 
 # MODIFIED: Updated solver invocation for Pyomo
-def run_single_calculation(params: ModelParameters, input_data: dict, msg=False):
+def run_single_calculation(params: ModelParameters, input_data: dict, msg=False, linear=False):
     """
     Runs a single calculation with a given set of parameters.
     """
-    print(f"Building and solving model for nominal case...")
-    model = build_model(params, input_data)
+    model_type = "Linear" if linear else "Piecewise-Linear"
+    print(f"Building and solving model for nominal case ({model_type})...")
+    model = build_model(params, input_data, linear=linear)
 
     solver = pyo.SolverFactory('scip')
     results = solver.solve(model, tee=msg)
@@ -301,7 +371,7 @@ def configure_nominal_params(params):
     return params
 
 
-def run_nominal_case_generation(include_charts):
+def run_nominal_case_generation(include_charts, linear: bool = False):
     """
     Sets up and runs the nominal case calculation, saving results and charts.
     """
@@ -311,7 +381,7 @@ def run_nominal_case_generation(include_charts):
     print("2. Loading and preparing input data...")
     input_data = load_and_prepare_data(params)
 
-    total_cost, results_df, flex_load_origin_df = run_single_calculation(params, input_data, msg=True)
+    total_cost, results_df, flex_load_origin_df = run_single_calculation(params, input_data, msg=True, linear=linear)
 
     if total_cost is not None:
         print_summary(results_df)
@@ -322,4 +392,9 @@ def run_nominal_case_generation(include_charts):
         print(f"\nNominal case results successfully exported to '{output_path}'")
 
 if __name__ == '__main__':
-    run_nominal_case_generation(include_charts=True)
+    # Run the default piecewise-linear model
+    run_nominal_case_generation(include_charts=True, linear=False)
+    
+    # Example of how to run the linear model:
+    # print("\n\n--- RUNNING WITH LINEAR CPU-POWER MODEL ---")
+    # run_nominal_case_generation(include_charts=True, linear=True)

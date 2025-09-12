@@ -6,6 +6,8 @@ import numpy as np
 # MODIFIED: Switched from pulp to pyomo
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+from matplotlib.ticker import MaxNLocator # Import the ticker tool
 from inputs.parameters_optimisation import ModelParameters, generate_tariff
 from constraints import add_it_and_job_constraints, add_ups_constraints, add_power_balance_constraints, add_cooling_constraints
 from plotting_and_saving.nom_opt_charts import gen_charts
@@ -26,6 +28,17 @@ DEBUG_DIR.mkdir(exist_ok=True)
 
 # --- Model Configuration -----------------------------------------------------
 CYCLE_TES_ENERGY = True
+
+
+FIGURE_SIZE = (14, 7) 
+# Define the axes rectangle [left, bottom, width, height] in figure-fraction units.
+# This leaves space on the right for the second chart's legend.
+AXES_RECT = [0.1, 0.15, 0.75, 0.75] 
+
+# --- Font Size Definitions (can be global) ---
+LABEL_FONTSIZE = 16
+LEGEND_FONTSIZE = 12
+TICK_FONTSIZE = 14
 
 
 def build_model(params: ModelParameters, data: dict):
@@ -98,6 +111,8 @@ def build_model(params: ModelParameters, data: dict):
     m.objective = pyo.Objective(rule=objective_rule, sense=pyo.minimize)
 
     return m
+
+
 def load_and_prepare_data(params: ModelParameters):
     """
     Loads input data from CSV files and prepares it for the optimization model.
@@ -156,6 +171,8 @@ def resample_shiftability_profile(shiftability_profile, repeats):
                 extended_data[(counter, j)] = shiftability_profile.get((i, j), 0)
             counter += 1
     return extended_data
+
+import pandas as pd
 
 def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: dict):
     """
@@ -297,82 +314,200 @@ def print_summary(params, results_df: pd.DataFrame):
     print(f"Relative Cost Saving: {cost_saving_rel:.2f} %")
     print("="*50 + "\n")
 
-def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, data: dict, params: ModelParameters):
-    """Generates and saves all charts based on the results DataFrame."""
-    print("Generating and saving charts...")
-    plt.style.use('seaborn-v0_8-whitegrid')
-    time_slots_ext = df['Time_Slot_EXT']
-
-    # --- Figure 1: Power Consumption and Energy Price ---
-    fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
-    ax1.plot(time_slots_ext, df['P_Total_kW_Nominal'], label='Nominal IT Power', linestyle='--', color='gray')
-    ax1.plot(time_slots_ext, df['P_Total_kW'], label='Optimized IT Power', color='crimson')
-    #ax1.plot(time_slots_ext, df['Optimized_Cost_per_Step'], label='Optimised Cost', linestyle='--', color='gray')
-    #ax1.plot(time_slots_ext, df['Nominal_Cost'], label='Nominal Cost', color='crimson')
-    ax1.set_ylabel('Cost Incurred (GBP/15 min)')
-    #ax1.set_xlabel('Time Slot')
-    ax1.set_title('Optimized vs. Nominal DC Operational Cost')
-    ax1.legend(loc='upper left')
-    ax1.grid(True)
-    ax2.plot(time_slots_ext, df['Price_GBP_per_MWh'], label='Energy Price', color='royalblue', alpha=0.8)
-    ax2.set_xlabel('Time Slot')
-    ax2.set_ylabel('Energy Price (GBP/MWh)', color='royalblue')
-    ax2.tick_params(axis='y', labelcolor='royalblue')
-    ax2.legend(loc='upper left')
-    ax2.grid(True)
-    fig1.tight_layout()
-    fig1.savefig(IMAGE_DIR / 'power_consumption_comparison.png')
-    print("✅ Power consumption chart saved.")
-
-    gen_charts(df, time_slots_ext, IMAGE_DIR)
+def create_power_chart(df: pd.DataFrame, IMAGE_DIR: pathlib.Path):
+    """Generates and saves the power consumption chart with fixed dimensions."""
+    print("Generating power consumption chart...")
     
-    # --- Figure 7: Stacked Bar Chart of IT Workload ---
-    if not flex_load_origin_df.empty:
-        flex_load_origin_df['lag'] = flex_load_origin_df['processing_slot'] - flex_load_origin_df['original_slot']
-        flex_pivot_by_lag = flex_load_origin_df.pivot_table(
-            index='processing_slot',
-            columns='lag',
-            values='cpu_load',
-            aggfunc='sum'
-        ).fillna(0)
+    # --- Create the figure with a fixed size ---
+    fig = plt.figure(figsize=FIGURE_SIZE)
+    # --- Add axes with a fixed position and size ---
+    ax1 = fig.add_axes(AXES_RECT)
 
-        plot_df = pd.DataFrame({
-            'Inflexible': df['Inflexible_Load_CPU_Nom'].values
-        }, index=df['Time_Slot_EXT'])
-        plot_df = plot_df.join(flex_pivot_by_lag).fillna(0)
-        
-        rename_dict = {lag: f'Flexible (Lag {int(lag)})' for lag in flex_pivot_by_lag.columns}
-        plot_df.rename(columns=rename_dict, inplace=True)
-        
-        fig7, ax8 = plt.subplots(figsize=(18, 9))
-        flexible_cols = [col for col in plot_df.columns if 'Flexible' in col]
-        colors = ['black'] + list(plt.cm.viridis(np.linspace(0, 1, len(flexible_cols))))
+    x_indices = np.arange(len(df))
+    num_datapoints = len(df)
 
-        plot_df.plot(kind='bar', stacked=True, ax=ax8, width=0.8, color=colors)
-        
-        # Overlay nominal total load for comparison
-        nominal_total_load = data['inflexibleLoadProfile_TEXT'][1:] + data['flexibleLoadProfile_TEXT'][1:]
-        ax8.plot(range(len(nominal_total_load)), nominal_total_load, label='Nominal Total Workload', linestyle='--', color='gray')
+    ax1.yaxis.set_major_locator(MaxNLocator(nbins=5, prune='upper'))
+    ax1.plot(x_indices, df['P_Total_kW_Nominal'], label='Base DC Power', linestyle='--', color='gray')
+    ax1.plot(x_indices, df['P_Total_kW'], label='Optimized DC Power', color='crimson')
+    ax1.set_ylabel('Power (kW)', fontsize=LABEL_FONTSIZE)
+    ax1.tick_params(axis='y', labelsize=TICK_FONTSIZE)
 
-        ax8.set_title('Optimized IT Workload Composition by Origin', fontsize=16)
-        ax8.set_xlabel('Processing Time Slot')
-        ax8.set_ylabel('CPU Load Units')
-        ax8.legend(title='Load Type', bbox_to_anchor=(1.02, 1), loc='upper left')
-        ax8.grid(axis='y', linestyle='--', alpha=0.7)
+    ax2 = ax1.twinx()
+    ax2.plot(x_indices, df['Price_GBP_per_MWh'], label='Energy Price', color='royalblue', alpha=0.8)
+    ax2.set_ylabel('Energy Price (£/MWh)', color='royalblue', fontsize=LABEL_FONTSIZE)
+    ax2.tick_params(axis='y', labelcolor='royalblue', labelsize=TICK_FONTSIZE)
+    ax2.yaxis.set_major_locator(MaxNLocator(nbins=5, prune='upper'))
 
-        tick_frequency = max(1, len(time_slots_ext) // 24)
-        ax8.set_xticks(ax8.get_xticks()[::tick_frequency])
-        ax8.set_xticklabels(ax8.get_xticklabels(), rotation=45, ha="right")
-        
-        fig7.tight_layout(rect=[0, 0, 0.85, 1])
-        fig7.savefig(IMAGE_DIR / 'it_load_stacked_bar.png')
-        print("✅ IT workload stacked bar chart saved.")
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left', fontsize=LEGEND_FONTSIZE)
+    ax1.grid(axis='y', linestyle='--', alpha=0.7)
 
+    ax1.set_xlabel('Time (Hours)', fontsize=LABEL_FONTSIZE)
+    ax1.xaxis.set_major_locator(mticker.MultipleLocator(4))
+    ax1.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, pos: f'{x/4:g}'))
+    ax1.tick_params(axis='x', labelsize=TICK_FONTSIZE, rotation=0)
+    ax1.set_xlim(-0.5, num_datapoints - 0.5)
+
+    # REMOVED: fig.tight_layout() is no longer needed
+    fig.savefig(IMAGE_DIR / 'power_consumption_chart.png')
+    print("✅ Power consumption chart saved.")
     plt.show()
+
+
+def create_workload_chart(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, data: dict, IMAGE_DIR: pathlib.Path):
+    """Generates and saves the IT workload chart with fixed dimensions."""
+    print("Generating IT workload chart...")
+    if flex_load_origin_df.empty:
+        print("Skipping workload chart: flex_load_origin_df is empty.")
+        return
+
+    # --- Create the figure with the same fixed size ---
+    fig = plt.figure(figsize=FIGURE_SIZE)
+    # --- Add axes with the same fixed position and size ---
+    ax3 = fig.add_axes(AXES_RECT)
+    
+    num_datapoints = len(df)
+
+    ax3.yaxis.set_major_locator(MaxNLocator(nbins=5, prune='upper'))
+    # ... (rest of the data processing for the bar chart is identical)
+    flex_load_origin_df['lag'] = flex_load_origin_df['processing_slot'] - flex_load_origin_df['original_slot']
+    flex_pivot_by_lag = flex_load_origin_df.pivot_table(
+        index='processing_slot', columns='lag', values='cpu_load', aggfunc='sum'
+    ).fillna(0)
+    plot_df = pd.DataFrame({'Inflexible': df['Inflexible_Load_CPU_Nom'].values}, index=df['Time_Slot_EXT'])
+    plot_df = plot_df.join(flex_pivot_by_lag).fillna(0)
+    rename_dict = {lag: f'Flexible (Lag {int(lag)})' for lag in flex_pivot_by_lag.columns}
+    plot_df.rename(columns=rename_dict, inplace=True)
+    flexible_cols = [col for col in plot_df.columns if 'Flexible' in col]
+    num_flexible_lags = len(flexible_cols)
+    power = 0.5
+    non_linear_space = np.linspace(0, 1, num_flexible_lags) ** power
+    cmap = plt.cm.get_cmap('plasma')
+    color_indices = 0.2 + (non_linear_space * 0.8)
+    flexible_colors = cmap(color_indices)
+    colors = ['black'] + list(flexible_colors)
+    plot_df.plot(kind='bar', stacked=True, ax=ax3, width=0.8, color=colors)
+    nominal_total_load = data['inflexibleLoadProfile_TEXT'][1:] + data['flexibleLoadProfile_TEXT'][1:]
+    ax3.plot(range(len(nominal_total_load)), nominal_total_load, label='Base Workload', linestyle='--', color='gray')
+    # ... (rest of the plotting and formatting is identical)
+    
+    ax3.set_xlabel('Time (Hours)', fontsize=LABEL_FONTSIZE)
+    ax3.set_ylabel('CPU Load Units', fontsize=LABEL_FONTSIZE)
+    # The legend is outside the axes, but our AXES_RECT leaves space for it.
+    ax3.legend(title='Load Type', bbox_to_anchor=(1, 1.0), loc='upper left', fontsize=LEGEND_FONTSIZE, title_fontsize=LEGEND_FONTSIZE)
+    ax3.grid(axis='y', linestyle='--', alpha=0.7)
+    ax3.tick_params(axis='y', labelsize=TICK_FONTSIZE)
+    ax3.xaxis.set_major_locator(mticker.MultipleLocator(4))
+    ax3.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, pos: f'{x/4:g}'))
+    ax3.tick_params(axis='x', labelsize=TICK_FONTSIZE, rotation=0)
+    ax3.set_xlim(-0.5, num_datapoints - 0.5)
+
+    # REMOVED: fig.tight_layout() is no longer needed
+    fig.savefig(IMAGE_DIR / 'it_workload_chart.png')
+    print("✅ IT workload chart saved.")
+    plt.show()
+
+
+def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, data: dict, params: 'ModelParameters', IMAGE_DIR: pathlib.Path):
+    """Generates and saves two separate charts for power and workload with identical sizes."""
+    plt.style.use('seaborn-v0_8-whitegrid')
+    
+    create_power_chart(df, IMAGE_DIR)
+    create_workload_chart(df, flex_load_origin_df, data, IMAGE_DIR)
+    
     print("\nAll charts have been generated and saved.")
 
-# MODIFIED: Solver invocation changed to Pyomo with Ipopt
-# MODIFIED: Manually load results to handle non-optimal termination
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import pathlib
+
+def create_power_stack_chart(df: pd.DataFrame, image_dir: pathlib.Path):
+    """
+    Generates and saves a stacked bar chart of power resources, showing consumption
+    as positive bars and discharge as negative bars. The legend is ordered to show
+    UPS items before TES items.
+    """
+    print("Generating final power resource chart as stacked bars...")
+    plt.style.use('seaborn-v0_8-whitegrid')
+
+    # --- Font Size Definitions ---
+    TITLE_FONTSIZE = 22
+    LABEL_FONTSIZE = 16
+    LEGEND_FONTSIZE = 14
+    TICK_FONTSIZE = 14
+
+    fig, ax = plt.subplots(figsize=(14, 8))
+
+    # --- Data Preparation ---
+    timeslots_per_hour = 4
+    x_hours = df.index / timeslots_per_hour
+    bar_width = 1.0 / timeslots_per_hour
+
+    # --- 1. Plot Stacked POSITIVE BARS (GRID POWER CONSUMPTION) ---
+    # MODIFIED: Reordered dictionary and color list for desired legend order.
+    power_components = {
+        'IT Power': 'P_Grid_IT_kW',
+        'HVAC Power': 'P_Chiller_HVAC_kW',
+        'UPS Charging Power': 'P_UPS_Charge_kW',      # Moved Up
+        'TES Charging Power': 'P_Chiller_TES_kW',      # Moved Down
+        'Other DC Power': 'P_Grid_Other_kW'
+    }
+    # MODIFIED: Reordered colors to match the new component order.
+    colors_consume = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#8c564b']
+
+    y_consume = [df[col] for col in power_components.values()]
+    labels_consume = list(power_components.keys())
+
+    # Loop to create the stacked positive bars
+    bottom_positive = pd.Series([0.0] * len(df), index=df.index)
+    for i, component in enumerate(y_consume):
+        ax.bar(x_hours, component, width=bar_width, label=labels_consume[i], color=colors_consume[i], bottom=bottom_positive, alpha=0.8)
+        bottom_positive += component
+
+    # --- 2. Plot Stacked NEGATIVE BARS (DISCHARGED POWER) ---
+    ups_discharge_kw = df['P_UPS_Discharge_kW']
+    tes_discharge_kw = df['Q_Discharge_TES_Watts'] / (1000.0 * 6)
+    
+    y_discharge = [-ups_discharge_kw, -tes_discharge_kw]
+    labels_discharge = ['UPS Discharge', 'TES Discharge']
+    # MODIFIED: Updated color indices to match the reordered colors_consume list.
+    # UPS color is now at index 2, TES color is at index 3.
+    colors_discharge = [colors_consume[2], colors_consume[3]]
+
+    # Loop to create the stacked negative bars
+    bottom_negative = pd.Series([0.0] * len(df), index=df.index)
+    for i, component in enumerate(y_discharge):
+        ax.bar(x_hours, component, width=bar_width, label=labels_discharge[i], color=colors_discharge[i], bottom=bottom_negative, alpha=0.8)
+        bottom_negative += component
+
+    # --- 3. Plot Nominal Power for Comparison ---
+    ax.plot(x_hours, df['P_Total_kW_Nominal'], label='Base DC Power', linestyle=':', color='black', linewidth=2.5)
+
+    # --- 4. Formatting and Final Touches ---
+    ax.set_ylabel('Power (kW)', fontsize=LABEL_FONTSIZE)
+    ax.set_xlabel('Time (Hours)', fontsize=LABEL_FONTSIZE)
+    ax.tick_params(axis='both', which='major', labelsize=TICK_FONTSIZE)
+
+    ax.legend(loc='upper left', fontsize=LEGEND_FONTSIZE)
+    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+
+    ax.set_xlim(x_hours.min() - bar_width, x_hours.max() + bar_width)
+    min_y_limit = bottom_negative.min()
+    ax.set_ylim(bottom=min_y_limit * 1.1)
+    
+    ax.xaxis.set_major_locator(mticker.MultipleLocator(1))
+    ax.axhline(0, color='black', linewidth=0.8, linestyle='-')
+
+    # --- Save and Show ---
+    fig.tight_layout()
+    output_path = image_dir / 'power_resource_bar_chart_reordered.png'
+    fig.savefig(output_path)
+    print(f"✅ Power bar chart saved to '{output_path}'")
+    plt.show()
+
 def run_single_optimization(params: ModelParameters, input_data: dict, msg=False):
     """
     Runs a single optimization instance with a given set of parameters using Pyomo.
@@ -419,7 +554,8 @@ def run_full_optimisation(include_charts):
     if total_cost is not None:
         print_summary(params, results_df)
         if include_charts:
-            create_and_save_charts(results_df, flex_load_origin_df, input_data, params)
+            create_and_save_charts(results_df, flex_load_origin_df, input_data, params, IMAGE_DIR)
+            create_power_stack_chart(results_df, IMAGE_DIR)
 
         output_path = DATA_DIR_OUTPUTS / "optimised_baseline.csv"
         results_df.to_csv(output_path, index=False, float_format='%.4f')
