@@ -69,7 +69,7 @@ def add_power_balance_constraints(m, params):
     for s in m.TEXT_SLOTS:
         # All power variables in this balance are in kW
         m.PowerBalance.add(m.p_it_total_kw[s] == m.p_grid_it_kw[s] + m.p_ups_disch_kw[s])
-        m.PowerBalance.add(m.p_grid_od_kw[s] == m.p_it_total_kw[s] * params.nominal_overhead_factor)
+        #m.PowerBalance.add(m.p_grid_od_kw[s] == m.p_it_total_kw[s] * params.nominal_overhead_factor)
 
 def add_cooling_constraints(m, params, CYCLE_TES_ENERGY):
     m.CoolingConstraints = pyo.ConstraintList()

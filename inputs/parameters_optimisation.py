@@ -7,13 +7,8 @@ import matplotlib.pyplot as plt
 
 def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
     hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 95, 100, 98, 95, 110, 120, 130, 140, 135, 120, 100, 90, 80, 70] # original
-    #hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 115, 120, 70, 65, 70, 120, 130, 140, 50, 50, 50, 70, 80, 75, 70] # modified
-    #hourly_prices = [74.1, 77, 73.65, 72, 67.2, 68.9, 67.8, 67, 67.11, 67.11, 68.29, 68.17, 72.14, 75.1, 85, 86, 84.7, 92.08, 82, 85.3, 83.13, 81.74, 77.74, 80, 80, 79.94, 78.83, 76.08, 72.5, 72, 69.16, 69.2, 75, 72.7, 79, 70.6, 80.8, 87.22, 90.69, 95.24, 97.6, 99.74, 95.7, 95.9, 88.73, 82.88, 82.54, 72.91]
-    #hourly_prices = [(hourly_prices[2*i] + hourly_prices[2*i+1]) / 2 for i in range(24)]
-    #hourly_prices = [96.52, 91.65, 86.25, 84.2, 88, 96.86, 106.94, 107.04, 103.02, 82.14, 69.95, 68.06, 47.4, 35, 41.3, 69.51, 77.31, 103.84, 115.69, 131.04, 126.97, 112.82, 104.93, 99.87]
     num_hours = (num_steps * dt_seconds) // 3600
     full_price_series = np.tile(hourly_prices, int(np.ceil(num_hours / 24)))
-    #print(full_price_series)
     price_per_step = np.repeat(full_price_series, 3600 // dt_seconds)
     return np.insert(price_per_step[:num_steps], 0, 0)
 
@@ -39,7 +34,7 @@ class ModelParameters:
         self.max_power_kw = 1000.0
         self.max_cpu_usage = 1.0
         self.tranche_max_delay = {1: 2, 2: 4, 3: 8, 4: 12}
-        self.nominal_overhead_factor = 0.1 # For other DC loads (lighting, etc.)
+        self.nominal_overhead_addition = 53.095 # For other DC loads (lighting, etc.) # 7% of average power consumption in the DC
 
         # --- UPS / Battery Storage ---
         self.eta_ch = 0.82
@@ -96,7 +91,6 @@ def setup_simulation_parameters(mode="cool_down"):
     Currently, this function is configured primarily for "cool_down" mode as used by optimisation.py.
     """
     if mode != "cool_down":
-        # Or simply proceed, as optimisation.py hardcodes "cool_down"
         print(f"Warning: This parameters.py is primarily configured for 'cool_down' mode. Proceeding with 'cool_down' parameters for mode '{mode}'.")
 
     params = {}
@@ -108,7 +102,6 @@ def setup_simulation_parameters(mode="cool_down"):
     params['T_out_Celsius'] = 22
 
     # === II. Data Center and IT Equipment Specifications ===
-    # These values are used for internal calculations of thermal properties (C_IT, G_conv, C_Rack, G_cold)
     _dc_dims = {
         'dc_length': 28.0,  # Length of the data center (m)
         'dc_width': 10.0,   # Width of the data center (m)
@@ -147,19 +140,17 @@ def setup_simulation_parameters(mode="cool_down"):
     # For G_cold calculation
     _alpha_cAisle = 16.0  # Heat transfer coefficient for cold aisle walls (W/m^2K)
     _a_cAisle = _calc_dc_wall_area(_dc_dims) # Wall area (m^2)
-    # Thermal resistance of cold aisle wall (K/W)
     _r_cold_K_per_W = np.round((0.7 / 1000) / (_a_cAisle / 38.0), 4) if _a_cAisle > 0 else float('inf')
 
     _term1_Gcold_inv = 1.0 / (_alpha_cAisle * _a_cAisle) if (_alpha_cAisle * _a_cAisle) > 0 else float('inf')
     _denominator_g_cold = _term1_Gcold_inv + _r_cold_K_per_W
     params['G_cold'] = 1.0 / _denominator_g_cold if _denominator_g_cold > 0 else (_alpha_cAisle * _a_cAisle) # (W/K)
-    #params['G_cold'] = params['G_cold'] * 5 # testing sensitivity to G_cold
+
     # === IV. Cooling System Parameters ===
-    # HVAC
-    params['COP_HVAC'] = 6
+    params['COP_HVAC'] = 5
     params['kappa'] = 0.7663  # Air mixing factor / bypass factor for cooling coils
     params['P_chiller_max'] = 400000.0
-    params['P_HVAC_ramp'] = 10000.0  # Max power ramp for HVAC (W per time step dt)
+    params['P_HVAC_ramp'] = 100000.0  # Max power ramp for HVAC (W per time step dt)
 
     # Thermal Energy Storage (TES)
     params['TES_kwh_cap'] = 1000.0  # Nominal capacity (kWh)
@@ -169,21 +160,29 @@ def setup_simulation_parameters(mode="cool_down"):
     params['TES_charge_efficiency'] = 0.9
     params['E_TES_min_kWh'] = 0.0  # Minimum charge state (kWh)
     params['TES_initial_charge_kWh'] = 0.5 * params['TES_kwh_cap'] # Initial charge (kWh)
-    #params['TES_p_dis_ramp'] = 1000000.0  # Max power ramp for TES discharge (W per dt)
-    #params['TES_p_ch_ramp'] = 1000000.0   # Max power ramp for TES charge (W per dt)
 
     # === V. Initial Conditions & Operational Limits for "cool_down" mode ===
-    # (as used by optimisation.py)
     params['T_IT_initial_Celsius'] = 28.5
     params['T_Rack_initial_Celsius'] = 26
     params['T_cAisle_initial'] = 20
     params['T_hAisle_initial'] = 27
     params['T_target_Air_in_Celsius'] = 20
     
-    # This is used as the upBound for the T_c variable in optimisation.py
-    # For "cool_down" mode in the original script, it was set to None.
     params['T_cAisle_lower_limit_Celsius'] = 18
-    params['T_cAisle_upper_limit_Celsius'] = 22
+    params['T_cAisle_upper_limit_Celsius'] = 22.5
+
+    # Add IT specs and DC dims for printing in __main__
+    params['_it_specs'] = _it_specs
+    params['_dc_dims'] = _dc_dims
 
     return params
 
+if __name__ == "__main__":
+    params = setup_simulation_parameters("cool_down")
+    print(f'C_IT: {params["C_IT"]} J/K')
+    print(f'G_conv: {params["G_conv"]} W/K')
+    print(f'C_Rack: {params["C_Rack"]} J/K')
+    print(f'C_cAisle: {params["C_cAisle"]} J/K')
+    print(f'C_hAisle: {params["C_hAisle"]} J/K')
+    print(f'G_cold: {params["G_cold"]} W/K')
+    

@@ -61,10 +61,10 @@ def build_model(params: ModelParameters, data: dict, linear: bool = False):
     m.ut_ks = pyo.Var(m.ut_ks_idx, within=pyo.NonNegativeReals, initialize=0)
 
     # Cooling System Variables
-    m.t_it = pyo.Var(m.TEXT_SLOTS, bounds=(14, 60), initialize=25)
-    m.t_rack = pyo.Var(m.TEXT_SLOTS, bounds=(14, 40), initialize=25)
+    m.t_it = pyo.Var(m.TEXT_SLOTS, bounds=(18, 60), initialize=25)
+    m.t_rack = pyo.Var(m.TEXT_SLOTS, bounds=(18, 40), initialize=25)
     m.t_cold_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(18, params.T_cAisle_upper_limit_Celsius), initialize=20)
-    m.t_hot_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(14, 40), initialize=30)
+    m.t_hot_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(18, 40), initialize=30)
     m.e_tes_kwh = pyo.Var(m.TEXT_SLOTS, bounds=(params.E_TES_min_kWh, params.TES_capacity_kWh), initialize=params.TES_initial_charge_kWh)
     # Electrical power for cooling in Watts
     m.p_chiller_hvac_w = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
@@ -73,7 +73,7 @@ def build_model(params: ModelParameters, data: dict, linear: bool = False):
     m.q_cool_w = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
     m.q_ch_tes_w = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.TES_w_charge_max), initialize=0)
     m.q_dis_tes_w = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.TES_w_discharge_max), initialize=0)
-    m.t_in = pyo.Var(m.TEXT_SLOTS, bounds=(14, 30), initialize=20)
+    m.t_in = pyo.Var(m.TEXT_SLOTS, bounds=(18, 30), initialize=20)
 
 
     # --- Add Constraints ---
@@ -102,7 +102,7 @@ def build_model(params: ModelParameters, data: dict, linear: bool = False):
                 mod.p_grid_it_kw[s] +
                 (mod.p_chiller_hvac_w[s] / 1000.0) + # W to kW
                 (mod.p_chiller_tes_w[s] / 1000.0) +  # W to kW
-                mod.p_grid_od_kw[s] +
+                params.nominal_overhead_addition +
                 mod.p_ups_ch_kw[s]
             ) * (data['electricity_price'][s] / 1000.0) # Price is per MWh
             for s in mod.TEXT_SLOTS
@@ -171,7 +171,7 @@ def add_power_balance_constraints_nominal(m, params):
     for s in m.TEXT_SLOTS:
         # All power variables in this balance are in kW
         m.PowerBalance.add(m.p_it_total_kw[s] == m.p_grid_it_kw[s])
-        m.PowerBalance.add(m.p_grid_od_kw[s] == m.p_it_total_kw[s] * params.nominal_overhead_factor)
+        #m.PowerBalance.add(m.p_grid_od_kw[s] == m.p_it_total_kw[s] * params.nominal_overhead_factor)
 
 
 def load_and_prepare_data(params: ModelParameters):
@@ -239,7 +239,7 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
         'P_Grid_IT_kW': [pyo.value(m.p_grid_it_kw[s]) for s in params.TEXT_SLOTS],
         'P_Chiller_HVAC_Watts': [pyo.value(m.p_chiller_hvac_w[s]) for s in params.TEXT_SLOTS],
         'P_Chiller_TES_Watts': [pyo.value(m.p_chiller_tes_w[s]) for s in params.TEXT_SLOTS],
-        'P_Grid_Other_kW': [pyo.value(m.p_grid_od_kw[s]) for s in params.TEXT_SLOTS],
+        'P_Grid_Other_kW': [params.nominal_overhead_addition] * len(params.TEXT_SLOTS),  # Fixed value for other DC loads
         'P_UPS_Charge_kW': [pyo.value(m.p_ups_ch_kw[s]) for s in params.TEXT_SLOTS],
         'P_UPS_Discharge_kW': [pyo.value(m.p_ups_disch_kw[s]) for s in params.TEXT_SLOTS],
         'E_UPS_kWh': [pyo.value(m.e_ups_kwh[s]) for s in params.TEXT_SLOTS],
@@ -276,18 +276,50 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
     df = pd.DataFrame(results)
     return df, pd.DataFrame()  # Return placeholder for flex_load_origin_df
 
-def print_summary(results_df: pd.DataFrame):
-    """Prints a summary of the nominal case results."""
+def print_summary(results_df: pd.DataFrame, params: ModelParameters):
+    """
+    Prints a summary of the nominal case results, including energy breakdown.
+    """
     if results_df.empty:
         print("No results to summarize.")
         return
 
     total_nominal_cost = results_df['Nominal_Cost'].sum()
 
+    # --- Energy Breakdown Calculation ---
+    # Energy (kWh) = Power (kW) * duration (h)
+    # dt_hours is the duration of a single time step
+    dt_hours = params.dt_hours
+    
+    it_energy_kwh = results_df['P_Grid_IT_kW'].sum() * dt_hours
+    cooling_energy_kwh = results_df['P_Grid_Cooling_kW'].sum() * dt_hours
+    # 'Other' includes the fixed overhead and any UPS charging
+    other_energy_kwh = (results_df['P_Grid_Other_kW'].sum() + results_df['P_UPS_Charge_kW'].sum()) * dt_hours
+    
+    total_energy_kwh = results_df['P_Total_kW'].sum() * dt_hours
+
+    # Calculate percentages
+    if total_energy_kwh > 0:
+        it_percent = (it_energy_kwh / total_energy_kwh) * 100
+        cooling_percent = (cooling_energy_kwh / total_energy_kwh) * 100
+        other_percent = (other_energy_kwh / total_energy_kwh) * 100
+    else:
+        it_percent, cooling_percent, other_percent = 0, 0, 0
+    # --- End of Calculation ---
+
     print("\n" + "="*50)
     print("--- Nominal Case Results Summary ---")
     print(f"Total Nominal Cost: {total_nominal_cost:,.2f} GBP")
+    
+    # --- Print Energy Breakdown ---
+    print("\n--- Energy Consumption Breakdown ---")
+    print(f"Total Energy Consumed: {total_energy_kwh:,.2f} kWh")
+    print(f"  - IT Equipment:     {it_energy_kwh:,.2f} kWh ({it_percent:.1f}%)")
+    print(f"  - Cooling System:   {cooling_energy_kwh:,.2f} kWh ({cooling_percent:.1f}%)")
+    print(f"  - Other Equipment:  {other_energy_kwh:,.2f} kWh ({other_percent:.1f}%)")
+    
     print("="*50 + "\n")
+
 
 def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, data: dict, params: ModelParameters):
     """Generates and saves all charts based on the results DataFrame."""
@@ -384,7 +416,7 @@ def run_nominal_case_generation(include_charts, linear: bool = False):
     total_cost, results_df, flex_load_origin_df = run_single_calculation(params, input_data, msg=True, linear=linear)
 
     if total_cost is not None:
-        print_summary(results_df)
+        print_summary(results_df, params)
         if include_charts:
             create_and_save_charts(results_df, flex_load_origin_df, input_data, params)
         output_path = DATA_DIR_OUTPUTS / "nominal_case_results.csv"

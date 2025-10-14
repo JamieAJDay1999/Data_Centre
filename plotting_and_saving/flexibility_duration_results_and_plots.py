@@ -31,7 +31,7 @@ def extract_detailed_results(m, params, data, start_timestep, flex_time, baselin
         pyo.value(m.p_grid_it_kw[s]) +
         (pyo.value(m.p_chiller_hvac_w[s]) / 1000.0) +
         (pyo.value(m.p_chiller_tes_w[s]) / 1000.0) +
-        pyo.value(m.p_grid_od_kw[s]) +
+        params.nominal_overhead_addition +
         pyo.value(m.p_ups_ch_kw[s])
         for s in time_slots
     ]
@@ -42,8 +42,7 @@ def extract_detailed_results(m, params, data, start_timestep, flex_time, baselin
     power_source_map = {
         'P_IT_Total_kW': m.p_it_total_kw, 'P_Grid_IT_kW': m.p_grid_it_kw,
         'P_Chiller_HVAC_kW': m.p_chiller_hvac_w, 'P_Chiller_TES_kW': m.p_chiller_tes_w,
-        'P_Grid_Other_kW': m.p_grid_od_kw, 'P_UPS_Charge_kW': m.p_ups_ch_kw,
-        'P_UPS_Discharge_kW': m.p_ups_disch_kw,
+       'P_UPS_Charge_kW': m.p_ups_ch_kw, 'P_UPS_Discharge_kW': m.p_ups_disch_kw
     }
 
     for source_name, var_obj in power_source_map.items():
@@ -62,7 +61,10 @@ def extract_detailed_results(m, params, data, start_timestep, flex_time, baselin
         final_columns.extend([base_col, opt_col, diff_col])
 
     results_df['P_UPS_NET_kw_Diff'] = results_df['P_UPS_Charge_kW_diff'] - results_df['P_UPS_Discharge_kW_diff']
-    final_columns.append('P_UPS_NET_kw_Diff')
+    results_df['E_UPS_kWh_Opt'] = [pyo.value(m.e_ups_kwh[s]) for s in time_slots]
+    results_df['E_UPS_kWh_Base'] = [baseline_df.loc[s, 'E_UPS_kWh'] if s in baseline_df.index and 'E_UPS_kWh' in baseline_df.columns else 0 for s in time_slots]
+    results_df['E_UPS_kWh_Diff'] = results_df['E_UPS_kWh_Opt'] - results_df['E_UPS_kWh_Base']
+    final_columns += ['E_UPS_kWh_Base', 'E_UPS_kWh_Opt', 'E_UPS_kWh_Diff', 'P_UPS_NET_kw_Diff']
     hvac_opt_kw = [pyo.value(m.p_chiller_hvac_w[s]) / 1000.0 for s in time_slots]
     tes_opt_kw = [pyo.value(m.p_chiller_tes_w[s]) / 1000.0 for s in time_slots]
     opt_vals_cool_kw = [h + t for h, t in zip(hvac_opt_kw, tes_opt_kw)]
@@ -147,12 +149,12 @@ def plot_flex_contribution_grid(all_plot_data, timesteps, flex_magnitudes):
 
     col_map = {
         'P_IT_Total_kW_diff': 'IT', 'P_Chiller_HVAC_kW_diff': 'Chiller HVAC',
-        'P_Chiller_TES_kW_diff': 'Chiller TES', 'P_Grid_Other_kW_diff': 'Other overhead',
+        'P_Chiller_TES_kW_diff': 'Chiller TES',
         'P_UPS_NET_kw_Diff': 'UPS charge',
     }
     palette = {
-        'IT': '#0072B2', 'Chiller HVAC': '#E69F00', 'Chiller TES': '#009E73',
-        'Other overhead': '#CC79A7', 'UPS charge': '#56B4E9',
+        'IT': '#0072B2', 'Chiller CRAC': '#E69F00', 'Chiller TES': '#009E73',
+        'UPS charge': '#56B4E9',
     }
     series_order = list(col_map.values())
 
@@ -213,7 +215,7 @@ def plot_flex_contribution_grid(all_plot_data, timesteps, flex_magnitudes):
         axes[r, 0].set_ylabel(f'{sorted_flex_mags[r]} kW', rotation=0, va="center", ha="right", labelpad=5, fontsize=13)
     for c_idx, ts in enumerate(timesteps):
         hour, minute = int(ts // 4), int((ts % 4) * 15)
-        axes[0, c_idx].set_title(f'Start Time: {hour:02d}:{minute:02d}', fontsize=12, pad=2)
+        axes[0, c_idx].set_title(f'Start Time: {hour:02d}:{minute:02d}', fontsize=12, pad=2, y=1.02)
 
     legend_swatches = [Patch(facecolor=c, edgecolor='w', label=n) for n, c in palette.items()]
     extra_items = [Line2D([0], [0], ls='--', c='k', alpha=0.5, lw=2, label='Flex target'),
@@ -249,9 +251,9 @@ def save_heatmap_from_results(results_rows, csv_path: pathlib.Path, png_path: pa
                      cbar_kws={"label": "Max Duration (hours)"}, square=False,
                      annot=True, fmt=".1f", annot_kws={"size": 8})
     ax.invert_yaxis()
-    ax.set_xlabel("Timeslot (Hours into Day)")
-    ax.set_ylabel("Flex Magnitude (kW)")
-    ax.set_title("Max Achievable Duration by Time and Flex Magnitude (Hours)")
+    ax.set_xlabel("Time (Hours)", fontsize=18)
+    ax.set_ylabel("Flex Magnitude (kW)", fontsize=18)
+    #ax.set_title("Max Achievable Duration by Time and Flex Magnitude (Hours)", fontsize=16)
     plt.tight_layout()
     plt.savefig(png_path, dpi=180, bbox_inches="tight")
     plt.close()

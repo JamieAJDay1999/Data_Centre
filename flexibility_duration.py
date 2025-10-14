@@ -30,6 +30,7 @@ DEBUG_DIR.mkdir(exist_ok=True)
 # --- Constants and Configuration ---------------------------------------------     
 DEBUG_ON_FAIL = True # If True, will re-run failed simulations with verbose output
 SOLVER_TIME_LIMIT_SECONDS = 60 # Return infeasible if solver exceeds 60 seconds
+CYCLE_TES_ENERGY = True
 
 def build_duration_model(params: ModelParameters, data: dict, initial_state: dict, baseline_df: pd.DataFrame, start_timestep: int, flex_target_kw: float, flex_time):
     # MODIFIED: Use Pyomo's ConcreteModel
@@ -49,7 +50,7 @@ def build_duration_model(params: ModelParameters, data: dict, initial_state: dic
     m.total_cpu = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.max_cpu_usage))
     # Power variables in kW
     m.p_grid_it_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
-    m.p_grid_od_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
+    #m.p_grid_od_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
     m.p_it_total_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
     m.p_ups_ch_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
     m.p_ups_disch_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
@@ -59,10 +60,10 @@ def build_duration_model(params: ModelParameters, data: dict, initial_state: dic
     ut_ks_idx = [(t, k, s) for t in m.T_SLOTS for k in m.K_TRANCHES for s in m.TEXT_SLOTS if s >= t and s <= t + params.tranche_max_delay[k]]
     m.ut_ks_idx = pyo.Set(initialize=ut_ks_idx)
     m.ut_ks = pyo.Var(m.ut_ks_idx, within=pyo.NonNegativeReals)
-    m.t_it = pyo.Var(m.TEXT_SLOTS, bounds=(14, 60))
-    m.t_rack = pyo.Var(m.TEXT_SLOTS, bounds=(14, 40))
+    m.t_it = pyo.Var(m.TEXT_SLOTS, bounds=(18, 60))
+    m.t_rack = pyo.Var(m.TEXT_SLOTS, bounds=(18, 40))
     m.t_cold_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(18, params.T_cAisle_upper_limit_Celsius))
-    m.t_hot_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(14, 40))
+    m.t_hot_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(18, 40))
     m.e_tes_kwh = pyo.Var(m.TEXT_SLOTS, bounds=(params.E_TES_min_kWh, params.TES_capacity_kWh))
     # Electrical power for cooling in Watts
     m.p_chiller_hvac_w = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
@@ -71,7 +72,7 @@ def build_duration_model(params: ModelParameters, data: dict, initial_state: dic
     m.q_cool_w = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
     m.q_ch_tes_w = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.TES_w_charge_max))
     m.q_dis_tes_w = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.TES_w_discharge_max))
-    m.t_in = pyo.Var(m.TEXT_SLOTS, bounds=(14, 30))
+    m.t_in = pyo.Var(m.TEXT_SLOTS, bounds=(18, 30))
     m.z_tes_ch = pyo.Var(m.TEXT_SLOTS, within=pyo.Binary)
     m.z_tes_disch = pyo.Var(m.TEXT_SLOTS, within=pyo.Binary)
     
@@ -178,7 +179,7 @@ def add_power_balance_constraints(m, params):
     for s in m.TEXT_SLOTS:
         # All power variables in this balance are in kW
         m.PowerBalance.add(m.p_it_total_kw[s] == m.p_grid_it_kw[s] + m.p_ups_disch_kw[s])
-        m.PowerBalance.add(m.p_grid_od_kw[s] == m.p_it_total_kw[s] * params.nominal_overhead_factor)
+        #m.PowerBalance.add(m.p_grid_od_kw[s] == m.p_it_total_kw[s] * params.nominal_overhead_factor)
 
 
 def add_cooling_constraints(m, params, initial_state, start_timestep):
@@ -225,6 +226,9 @@ def add_cooling_constraints(m, params, initial_state, start_timestep):
         #m.CoolingConstraints.add(m.q_ch_tes_w[t] - m.q_ch_tes_w[t-1] <= params.TES_p_ch_ramp)
         m.CoolingConstraints.add(m.p_chiller_tes_w[t] + m.p_chiller_hvac_w[t] <= params.P_chiller_max)
         m.CoolingConstraints.add(m.q_cool_w[t] >= it_heat_watts)
+    
+    m.CoolingConstraints.add(m.e_tes_kwh[m.TEXT_SLOTS.last()] == m.e_tes_kwh[start_timestep])
+
 
 
 def add_power_change_constraints(m, params, flex_target_kw, start_timestep, flex_time, baseline_df):
@@ -236,7 +240,7 @@ def add_power_change_constraints(m, params, flex_target_kw, start_timestep, flex
         current_total_power_kw = (m.p_grid_it_kw[t] + 
                                   (m.p_chiller_hvac_w[t] / 1000.0) + # W to kW
                                   (m.p_chiller_tes_w[t] / 1000.0) +   # W to kW
-                                  m.p_grid_od_kw[t] + 
+                                  params.nominal_overhead_addition + 
                                   m.p_ups_ch_kw[t])
         target_power_kw = baseline_power_at_t + flex_target_kw
         # Compare kW with kW
@@ -409,13 +413,13 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
 
     save_heatmap_from_results(
         results_rows=results_list,
-        csv_path=DATA_DIR_OUTPUTS / "flex_duration_results_small.csv",
-        png_path=IMAGE_DIR / "flex_duration_heatmap_small.png"
+        csv_path=DATA_DIR_OUTPUTS / "flex_duration_results_5.csv",
+        png_path=IMAGE_DIR / "flex_duration_heatmap_5.png"
     )
 
 if __name__ == '__main__':
-    timesteps = [15, 65] #+ list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
-    flex_magnitudes =  [75, 50, 25] #[75, 50, 25, -100, -150, -200, -250, -300, -350, -400, -450, -500]
-    include_banked_results = "flex_duration_results_neg.csv"
+    timesteps = [5] #[1] + list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
+    flex_magnitudes =  [-100, -150, -200, -250, -300, -350, -400, -450, -500]
+    include_banked_results = None #"flex_duration_results_small.csv"
     main(flex_magnitudes, timesteps, include_banked_results, search_type='linear', generate_plots=True)
     #[10, 20, 25, 30, 35, 40, 50, 55, 60, 70, 75, 80, 85, 90, 95]#

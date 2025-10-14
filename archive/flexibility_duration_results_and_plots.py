@@ -31,7 +31,7 @@ def extract_detailed_results(m, params, data, start_timestep, flex_time, baselin
         pyo.value(m.p_grid_it_kw[s]) +
         (pyo.value(m.p_chiller_hvac_w[s]) / 1000.0) +
         (pyo.value(m.p_chiller_tes_w[s]) / 1000.0) +
-        pyo.value(m.p_grid_od_kw[s]) +
+        params.nominal_overhead_addition +
         pyo.value(m.p_ups_ch_kw[s])
         for s in time_slots
     ]
@@ -42,7 +42,7 @@ def extract_detailed_results(m, params, data, start_timestep, flex_time, baselin
     power_source_map = {
         'P_IT_Total_kW': m.p_it_total_kw, 'P_Grid_IT_kW': m.p_grid_it_kw,
         'P_Chiller_HVAC_kW': m.p_chiller_hvac_w, 'P_Chiller_TES_kW': m.p_chiller_tes_w,
-        'P_Grid_Other_kW': m.p_grid_od_kw, 'P_UPS_Charge_kW': m.p_ups_ch_kw,
+        'P_Grid_Other_kW': [params.nominal_overhead_addition] * len(time_slots), 'P_UPS_Charge_kW': m.p_ups_ch_kw,
         'P_UPS_Discharge_kW': m.p_ups_disch_kw,
     }
 

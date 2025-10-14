@@ -57,7 +57,7 @@ def build_model(params: ModelParameters, data: dict):
     m.total_cpu = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.max_cpu_usage), initialize=0)
     # Power variables in kW
     m.p_grid_it_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
-    m.p_grid_od_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
+    #m.p_grid_od_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
     m.p_it_total_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
 
     # UPS Variables
@@ -73,10 +73,10 @@ def build_model(params: ModelParameters, data: dict):
     m.ut_ks = pyo.Var(m.ut_ks_idx, within=pyo.NonNegativeReals, initialize=0)
 
     # Cooling System Variables
-    m.t_it = pyo.Var(m.TEXT_SLOTS, bounds=(14, 60), initialize=25)
-    m.t_rack = pyo.Var(m.TEXT_SLOTS, bounds=(14, 40), initialize=25)
+    m.t_it = pyo.Var(m.TEXT_SLOTS, bounds=(18, 60), initialize=25)
+    m.t_rack = pyo.Var(m.TEXT_SLOTS, bounds=(18, 40), initialize=25)
     m.t_cold_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(18, params.T_cAisle_upper_limit_Celsius), initialize=20)
-    m.t_hot_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(14, 40), initialize=30)
+    m.t_hot_aisle = pyo.Var(m.TEXT_SLOTS, bounds=(18, 40), initialize=30)
     m.e_tes_kwh = pyo.Var(m.TEXT_SLOTS, bounds=(params.E_TES_min_kWh, params.TES_capacity_kWh), initialize=params.TES_initial_charge_kWh)
     # Electrical power for cooling in Watts
     m.p_chiller_hvac_w = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
@@ -85,7 +85,7 @@ def build_model(params: ModelParameters, data: dict):
     m.q_cool_w = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
     m.q_ch_tes_w = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.TES_w_charge_max), initialize=0)
     m.q_dis_tes_w = pyo.Var(m.TEXT_SLOTS, bounds=(0, params.TES_w_discharge_max), initialize=0)
-    m.t_in = pyo.Var(m.TEXT_SLOTS, bounds=(14, 30), initialize=20)
+    m.t_in = pyo.Var(m.TEXT_SLOTS, bounds=(18, 30), initialize=20)
 
 
     # --- Add Constraints ---
@@ -102,7 +102,7 @@ def build_model(params: ModelParameters, data: dict):
                 mod.p_grid_it_kw[s] +
                 (mod.p_chiller_hvac_w[s] / 1000.0) + # W to kW
                 (mod.p_chiller_tes_w[s] / 1000.0) +  # W to kW
-                mod.p_grid_od_kw[s] +
+                params.nominal_overhead_addition +
                 mod.p_ups_ch_kw[s]
             ) * (data['electricity_price'][s] / 1000.0) # Price is per MWh
             for s in mod.TEXT_SLOTS
@@ -239,7 +239,7 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
         'P_Grid_IT_kW': [pyo.value(m.p_grid_it_kw[s]) for s in params.TEXT_SLOTS],
         'P_Chiller_HVAC_Watts': [pyo.value(m.p_chiller_hvac_w[s]) for s in params.TEXT_SLOTS],
         'P_Chiller_TES_Watts': [pyo.value(m.p_chiller_tes_w[s]) for s in params.TEXT_SLOTS],
-        'P_Grid_Other_kW': [pyo.value(m.p_grid_od_kw[s]) for s in params.TEXT_SLOTS],
+        'P_Grid_Other_kW': [params.nominal_overhead_addition] * len(params.TEXT_SLOTS),  # Fixed value for other DC loads
         'P_UPS_Charge_kW': [pyo.value(m.p_ups_ch_kw[s]) for s in params.TEXT_SLOTS],
         'P_UPS_Discharge_kW': [pyo.value(m.p_ups_disch_kw[s]) for s in params.TEXT_SLOTS],
         'E_UPS_kWh': [pyo.value(m.e_ups_kwh[s]) for s in params.TEXT_SLOTS],
@@ -377,7 +377,7 @@ def create_workload_chart(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, d
     ).fillna(0)
     plot_df = pd.DataFrame({'Inflexible': df['Inflexible_Load_CPU_Nom'].values}, index=df['Time_Slot_EXT'])
     plot_df = plot_df.join(flex_pivot_by_lag).fillna(0)
-    rename_dict = {lag: f'Flexible (Lag {int(lag)})' for lag in flex_pivot_by_lag.columns}
+    rename_dict = {lag: f'Flexible: {0.25 * int(lag)} Hours' for lag in flex_pivot_by_lag.columns}
     plot_df.rename(columns=rename_dict, inplace=True)
     flexible_cols = [col for col in plot_df.columns if 'Flexible' in col]
     num_flexible_lags = len(flexible_cols)
@@ -450,7 +450,7 @@ def create_power_stack_chart(df: pd.DataFrame, image_dir: pathlib.Path):
     # MODIFIED: Reordered dictionary and color list for desired legend order.
     power_components = {
         'IT Power': 'P_Grid_IT_kW',
-        'HVAC Power': 'P_Chiller_HVAC_kW',
+        'CRAC Power': 'P_Chiller_HVAC_kW',
         'UPS Charging Power': 'P_UPS_Charge_kW',      # Moved Up
         'TES Charging Power': 'P_Chiller_TES_kW',      # Moved Down
         'Other DC Power': 'P_Grid_Other_kW'
