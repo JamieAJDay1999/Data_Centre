@@ -1,0 +1,20 @@
+# Core data processing and numerical computing
+pandas>=1.5.0
+numpy>=1.23.0
+
+# Optimization framework
+pyomo>=6.5.0
+# Note: Pyomo requires a solver backend. The code uses SCIP solver.
+# Install SCIP separately or use an alternative solver like:
+# - GLPK (free, open-source): install system package or use conda
+# - CBC (free, open-source): install system package or use conda
+# - SCIP (academic license): download from https://www.scipopt.org/
+# - CPLEX/Gurobi (commercial licenses available)
+
+# Visualization
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# Testing (optional, used in archive)
+pytest>=7.0.0
+
