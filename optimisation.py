@@ -295,7 +295,7 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
     return df, flex_load_origin_df
 
 def print_summary(params, results_df: pd.DataFrame):
-    
+
     for t in range(96, 108):
         cost_diff_in_extension = results_df['Optimized_Cost_per_Step'].iloc[t] - results_df['Nominal_Cost'].iloc[t]
 

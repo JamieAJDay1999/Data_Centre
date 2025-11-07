@@ -148,7 +148,7 @@ def plot_flex_contribution_grid(all_plot_data, timesteps, flex_magnitudes):
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(7 * n_cols, 5 * n_rows), sharey=True, squeeze=False)
 
     col_map = {
-        'P_IT_Total_kW_diff': 'IT', 'P_Chiller_HVAC_kW_diff': 'Chiller HVAC',
+        'P_IT_Total_kW_diff': 'IT', 'P_Chiller_HVAC_kW_diff': 'Chiller CRAC',
         'P_Chiller_TES_kW_diff': 'Chiller TES',
         'P_UPS_NET_kw_Diff': 'UPS charge',
     }
@@ -239,7 +239,7 @@ def save_heatmap_from_results(results_rows, csv_path: pathlib.Path, png_path: pa
     Save all (timestep, flex_mag) results to CSV and create a heatmap image.
     """
     results_df = pd.DataFrame(results_rows)
-    results_df['Timestep_Hours'] = (results_df['Timestep'] * 15) / 60
+    results_df['Timestep_Hours'] = (results_df['Timestep'] * 15) / 60 - 0.25
     results_df['Max_Duration_Hours'] = results_df['Max_Duration_Min'] / 60
     results_df.to_csv(csv_path, index=False)
     heat = results_df.pivot(index="Flex_Magnitude_kW", columns="Timestep_Hours", values="Max_Duration_Hours")
@@ -249,7 +249,7 @@ def save_heatmap_from_results(results_rows, csv_path: pathlib.Path, png_path: pa
     plt.figure(figsize=(20, 10))
     ax = sns.heatmap(heat, cmap="viridis", linewidths=0.3, linecolor="white",
                      cbar_kws={"label": "Max Duration (hours)"}, square=False,
-                     annot=True, fmt=".1f", annot_kws={"size": 8})
+                     annot=True, fmt=".2f", annot_kws={"size": 8})
     ax.invert_yaxis()
     ax.set_xlabel("Time (Hours)", fontsize=18)
     ax.set_ylabel("Flex Magnitude (kW)", fontsize=18)

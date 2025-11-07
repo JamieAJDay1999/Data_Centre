@@ -92,19 +92,19 @@ def add_cooling_constraints(m, params, CYCLE_TES_ENERGY):
             # Thermal power (q) is in Watts, Electrical power (p_chiller) is in Watts
             m.CoolingConstraints.add(m.q_cool_w[t] == (m.p_chiller_hvac_w[t] * params.COP_HVAC) + m.q_dis_tes_w[t])
             m.CoolingConstraints.add(m.q_ch_tes_w[t] == m.p_chiller_tes_w[t] * params.COP_HVAC)
-            m.CoolingConstraints.add(m.t_in[t] == m.t_hot_aisle[t] - m.q_cool_w[t] / mcp)
+            m.CoolingConstraints.add(m.t_in[t] == m.t_hot_aisle[t-1] - m.q_cool_w[t-1] / mcp)
             m.CoolingConstraints.add(m.q_cool_w[t] <= (m.t_hot_aisle[t] - params.T_cAisle_lower_limit_Celsius) * mcp)
             
             # Convert IT power from kW to Watts for thermal calculation
             it_heat_watts = m.p_it_total_kw[t] * 1000.0
             
-            m.CoolingConstraints.add(m.t_it[t] == m.t_it[t-1] + params.dt_seconds * ((it_heat_watts - params.G_conv * (m.t_it[t-1] - m.t_rack[t])) / params.C_IT))
-            m.CoolingConstraints.add(m.t_rack[t] == m.t_rack[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_cold_aisle[t]-m.t_rack[t-1]) + params.G_conv*(m.t_it[t-1]-m.t_rack[t-1])) / params.C_Rack))
-            m.CoolingConstraints.add(m.t_cold_aisle[t] == m.t_cold_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_in[t]-m.t_cold_aisle[t-1]) - params.G_cold*(m.t_cold_aisle[t-1]-params.T_out_Celsius)) / params.C_cAisle))
-            m.CoolingConstraints.add(m.t_hot_aisle[t] == m.t_hot_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_rack[t]-m.t_hot_aisle[t-1])) / params.C_hAisle))
+            m.CoolingConstraints.add(m.t_it[t] == m.t_it[t-1] + params.dt_seconds * ((it_heat_watts - params.G_conv * (m.t_it[t-1] - m.t_rack[t-1])) / params.C_IT))
+            m.CoolingConstraints.add(m.t_rack[t] == m.t_rack[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_cold_aisle[t-1]-m.t_rack[t-1]) + params.G_conv*(m.t_it[t-1]-m.t_rack[t-1])) / params.C_Rack))
+            m.CoolingConstraints.add(m.t_cold_aisle[t] == m.t_cold_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_in[t-1]-m.t_cold_aisle[t-1]) - params.G_cold*(m.t_cold_aisle[t-1]-params.T_out_Celsius)) / params.C_cAisle))
+            m.CoolingConstraints.add(m.t_hot_aisle[t] == m.t_hot_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_rack[t-1]-m.t_hot_aisle[t-1])) / params.C_hAisle))
             
             # dE_tes is in kWh, so q_..._w (in W) must be divided by 1000
-            dE_tes_kwh = (m.q_ch_tes_w[t]*params.TES_charge_efficiency - m.q_dis_tes_w[t]/params.TES_discharge_efficiency) * params.dt_hours / 1000.0
+            dE_tes_kwh = (m.q_ch_tes_w[t-1]*params.TES_charge_efficiency - m.q_dis_tes_w[t-1]/params.TES_discharge_efficiency) * params.dt_hours / 1000.0
             m.CoolingConstraints.add(m.e_tes_kwh[t] == m.e_tes_kwh[t-1] + dE_tes_kwh)
             
             #m.CoolingConstraints.add(m.q_dis_tes_w[t] - m.q_dis_tes_w[t-1] <= params.TES_p_dis_ramp)

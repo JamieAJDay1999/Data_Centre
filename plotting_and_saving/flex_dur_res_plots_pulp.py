@@ -202,7 +202,8 @@ def plot_flex_contribution_grid(all_plot_data, timesteps, flex_magnitudes):
     plt.close()
 
 def save_heatmap_from_results(results_rows, csv_path: pathlib.Path, png_path: pathlib.Path):
-    results_df = pd.DataFrame(results_rows)
+    #results_df = pd.DataFrame(results_rows)
+    results_df = pd.read_csv("C:\\Users\\jamie\\GitHub\\PhD\\Data_Centre\\static\\data\\flexibility_outputs\\flex_duration_results_full.csv")
     results_df['Timestep_Hours'] = (results_df['Timestep'] * 15) / 60
     results_df['Max_Duration_Hours'] = results_df['Max_Duration_Min'] / 60
     results_df.to_csv(csv_path, index=False)
@@ -210,7 +211,17 @@ def save_heatmap_from_results(results_rows, csv_path: pathlib.Path, png_path: pa
     heat = heat.reindex(sorted(heat.columns), axis=1)
     heat = heat.reindex(sorted(heat.index), axis=0)
     plt.figure(figsize=(20, 10))
-    ax = sns.heatmap(heat, cmap="viridis", linewidths=0.3, linecolor="white", cbar_kws={"label": "Max Duration (hours)"}, square=False, annot=True, fmt=".1f", annot_kws={"size": 8})
+    ax = sns.heatmap(
+        heat,
+        cmap="viridis",
+        linewidths=0.3,
+        linecolor="white",
+        cbar_kws={"label": "Max Duration (hours)"},
+        square=False,
+        annot=True,
+        fmt=".2f",  # show numbers with 2 decimal places
+        annot_kws={"size": 8}
+    )
     ax.invert_yaxis()
     ax.set_xlabel("Timeslot (Hours into Day)")
     ax.set_ylabel("Flex Magnitude (kW)")

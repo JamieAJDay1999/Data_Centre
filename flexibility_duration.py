@@ -208,18 +208,18 @@ def add_cooling_constraints(m, params, initial_state, start_timestep):
     for t in list(m.TEXT_SLOTS)[1:]:
         m.CoolingConstraints.add(m.q_cool_w[t] == (m.p_chiller_hvac_w[t] * params.COP_HVAC) + m.q_dis_tes_w[t])
         m.CoolingConstraints.add(m.q_ch_tes_w[t] == m.p_chiller_tes_w[t] * params.COP_HVAC)
-        m.CoolingConstraints.add(m.t_in[t] == m.t_hot_aisle[t] - m.q_cool_w[t] / mcp)
+        m.CoolingConstraints.add(m.t_in[t] == m.t_hot_aisle[t-1] - m.q_cool_w[t-1] / mcp)
         m.CoolingConstraints.add(m.q_cool_w[t] <= (m.t_hot_aisle[t] - params.T_cAisle_lower_limit_Celsius) * mcp)
         
         it_heat_watts = m.p_it_total_kw[t] * 1000.0
         
-        m.CoolingConstraints.add(m.t_it[t] == m.t_it[t-1] + params.dt_seconds * ((it_heat_watts - params.G_conv * (m.t_it[t-1] - m.t_rack[t])) / params.C_IT))
-        m.CoolingConstraints.add(m.t_rack[t] == m.t_rack[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_cold_aisle[t]-m.t_rack[t-1]) + params.G_conv*(m.t_it[t-1]-m.t_rack[t-1])) / params.C_Rack))
-        m.CoolingConstraints.add(m.t_cold_aisle[t] == m.t_cold_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_in[t]-m.t_cold_aisle[t-1]) - params.G_cold*(m.t_cold_aisle[t-1]-params.T_out_Celsius)) / params.C_cAisle))
-        m.CoolingConstraints.add(m.t_hot_aisle[t] == m.t_hot_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_rack[t]-m.t_hot_aisle[t-1])) / params.C_hAisle))
+        m.CoolingConstraints.add(m.t_it[t] == m.t_it[t-1] + params.dt_seconds * ((it_heat_watts - params.G_conv * (m.t_it[t-1] - m.t_rack[t-1])) / params.C_IT))
+        m.CoolingConstraints.add(m.t_rack[t] == m.t_rack[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_cold_aisle[t-1]-m.t_rack[t-1]) + params.G_conv*(m.t_it[t-1]-m.t_rack[t-1])) / params.C_Rack))
+        m.CoolingConstraints.add(m.t_cold_aisle[t] == m.t_cold_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_in[t-1]-m.t_cold_aisle[t-1]) - params.G_cold*(m.t_cold_aisle[t-1]-params.T_out_Celsius)) / params.C_cAisle))
+        m.CoolingConstraints.add(m.t_hot_aisle[t] == m.t_hot_aisle[t-1] + params.dt_seconds * ((params.m_dot_air*params.kappa*params.c_p_air*(m.t_rack[t-1]-m.t_hot_aisle[t-1])) / params.C_hAisle))
         
         # dE_tes is in kWh, so q_..._w (in W) must be divided by 1000
-        dE_tes_kwh = (m.q_ch_tes_w[t]*params.TES_charge_efficiency - m.q_dis_tes_w[t]/params.TES_discharge_efficiency) * params.dt_hours / 1000.0
+        dE_tes_kwh = (m.q_ch_tes_w[t-1]*params.TES_charge_efficiency - m.q_dis_tes_w[t-1]/params.TES_discharge_efficiency) * params.dt_hours / 1000.0
         m.CoolingConstraints.add(m.e_tes_kwh[t] == m.e_tes_kwh[t-1] + dE_tes_kwh)
         
         #m.CoolingConstraints.add(m.q_dis_tes_w[t] - m.q_dis_tes_w[t-1] <= params.TES_p_dis_ramp)
@@ -413,13 +413,13 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
 
     save_heatmap_from_results(
         results_rows=results_list,
-        csv_path=DATA_DIR_OUTPUTS / "flex_duration_results_5.csv",
-        png_path=IMAGE_DIR / "flex_duration_heatmap_5.png"
+        csv_path=DATA_DIR_OUTPUTS / "flex_duration_results.csv",
+        png_path=IMAGE_DIR / "flex_duration_heatmap.png"
     )
 
 if __name__ == '__main__':
-    timesteps = [5] #[1] + list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
-    flex_magnitudes =  [-100, -150, -200, -250, -300, -350, -400, -450, -500]
-    include_banked_results = None #"flex_duration_results_small.csv"
+    timesteps = [75,80, 85, 90, 95]# [1] + list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
+    flex_magnitudes =  [ -100, -150, -200, -250, -300, -350, -400, -450, -500]
+    include_banked_results = "flex_duration_results.csv"
     main(flex_magnitudes, timesteps, include_banked_results, search_type='linear', generate_plots=True)
     #[10, 20, 25, 30, 35, 40, 50, 55, 60, 70, 75, 80, 85, 90, 95]#

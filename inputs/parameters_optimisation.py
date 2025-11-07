@@ -169,7 +169,7 @@ def setup_simulation_parameters(mode="cool_down"):
     params['T_target_Air_in_Celsius'] = 20
     
     params['T_cAisle_lower_limit_Celsius'] = 18
-    params['T_cAisle_upper_limit_Celsius'] = 22.5
+    params['T_cAisle_upper_limit_Celsius'] = 23
 
     # Add IT specs and DC dims for printing in __main__
     params['_it_specs'] = _it_specs
