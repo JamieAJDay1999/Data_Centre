@@ -270,7 +270,7 @@ Each of these core subsystems presents an opportunity for providing demand-side 
 
 \begin{figure}[!t]
     \centering
-    \includegraphics[width=\columnwidth]{figures/Figure_1.png}
+    \includegraphics[width=\columnwidth]{images/Figure_1.png}
     \caption{Data Centre Layout}
     \label{fig:dc_layout}
 \end{figure}
@@ -383,7 +383,7 @@ Flexibility case studies & \cite{Misaghian2023TIA,Xu2023SPIE,Zhou2024IJEPES,Fu20
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\columnwidth]{figures/Figure_2.png}
+\includegraphics[width=\columnwidth]{images/Figure_2.png}
 \caption{Stacked Proposed Workload Ratios Over 24 Hours}
 \label{fig:workload_ratios}
 \end{figure}
@@ -438,7 +438,7 @@ R = u(t) \times \Delta T
 
 \begin{figure}[!t]
  \centering
- \includegraphics[width=\columnwidth]{figures/Figure_3.png}
+ \includegraphics[width=\columnwidth]{images/Figure_3.png}
  \caption{Constant Computational Demand ($R$) with Varying CPU Utilisation and Duration}
  \label{fig:constantR}
 \end{figure}
@@ -723,10 +723,10 @@ The large amount of flexible load that is shifted by $3$ hours illustrates the o
 
 \begin{figure}[!t]
  \centering
- \subfloat[]{\includegraphics[width=\columnwidth]{figures/Figure_4a.png}%
+ \subfloat[]{\includegraphics[width=\columnwidth]{images/Figure_4a.png}%
  \label{fig:power_chart}}
  \vspace{2mm} 
- \subfloat[]{\includegraphics[width=\columnwidth]{figures/Figure_4b.png}%
+ \subfloat[]{\includegraphics[width=\columnwidth]{images/Figure_4b.png}%
  \label{fig:it_load_chart}}
  \caption{(a) Power consumption profile and energy prices over the monitored period. (b) The corresponding IT workload distribution, shown as a stacked bar chart.}
  \label{fig:stacked_images}
@@ -736,7 +736,7 @@ The large amount of flexible load that is shifted by $3$ hours illustrates the o
 Figure~\ref{fig:power_resource_stack_chart} provides a detailed decomposition of the data centre's power consumption and resource dispatch strategy under the cost-minimisation objective of Scenario 2. The chart visualises the co-optimised management of various electrical loads and energy storage assets over the 24 hour period. The positive stacked areas represent the components of power drawn from the grid, including IT, CRAC, and charging power for the energy storage systems. The negative stacked areas indicate the power being discharged from the UPS and TES to serve internal loads, thereby reducing the need for grid electricity. The dotted black line represents the base DC power demand before optimisation, serving as a baseline to illustrate the impact of the flexibility measures.
 \begin{figure}[!t]
  \centering
- \includegraphics[width=\columnwidth]{figures/Figure_5.png}
+ \includegraphics[width=\columnwidth]{images/Figure_5.png}
  \caption{Optimised DC Component Power Consumption}
  \label{fig:power_resource_stack_chart}
 \end{figure}
@@ -747,7 +747,7 @@ Between 03:00 and 06:00 when electricity prices are low, the optimisation algori
 Scenario 3 proposes a comprehensive test to determine the maximum flexibility duration for a set of flexibility magnitudes and start times. The resulting data is three-dimensional and can be effectively visualised as a heatmap. This heatmap is shown in Figure \ref{fig:flex_duration_hourly_heatmap}, with $\tau$ represented by the colour and ($t_0$, $\Delta P$) shown on the (x, y) axes. \rev{Each heatmap cell represents one evaluated start-time and flexibility-magnitude pair, and the cell value is the maximum feasible duration in hours.}
 \begin{figure*}[!t]
  \centering
- \includegraphics[width=\textwidth]{figures/Figure_6_revised.png}
+ \includegraphics[width=\textwidth]{images/Figure_6.png}
  \caption{\rev{Flexibility provision magnitude and duration. Values inside cells are $\tau$ in hours. Negative $\Delta P$ values correspond to upward flexibility (load reduction), positive $\Delta P$ values correspond to downward flexibility (load increase), and the horizontal divider separates these two regions. The x-axis lists evaluated start times $t_0$; the underlying model uses a 15-minute time step, with selected labels shown for readability.}}
  \label{fig:flex_duration_hourly_heatmap}
 \end{figure*}
@@ -759,7 +759,7 @@ This pattern stems from the optimised case shown in Figure~\ref{fig:stacked_imag
 
 \begin{figure}[!t]
  \centering
- \includegraphics[width=\columnwidth]{figures/Figure_7.png}
+ \includegraphics[width=\columnwidth]{images/Figure_7.png}
  \caption{DC Component Contributions to Upward Flexibility}
  \label{fig:stacked_barcharts_neg}
 \end{figure}
@@ -767,7 +767,7 @@ This pattern stems from the optimised case shown in Figure~\ref{fig:stacked_imag
 Figure \ref{fig:stacked_barcharts_neg} shows six stacked bar charts arranged into a 3-by-2 grid. The rows and columns correspond to varying flexibility magnitudes and start times respectively. The colours show how much flexibility each DC asset is providing. Figure \ref{fig:stacked_barcharts_neg} shows negative $\Delta P$ (upward flexibility) and Figure \ref{fig:stacked_barcharts_pos} shows positive $\Delta P$ (downward flexibility). Figure \ref{fig:stacked_barcharts_neg} shows that $\tau$ depends strongly on $\Delta P$ and $t_0$. It is intuitive that the larger the flexibility magnitude the shorter the duration it can be provided for. $t_0$ has a large impact on duration due to the specific baseline from which the flexibility is being provided. The left-hand side of Figure \ref{fig:stacked_barcharts_neg} shows that the flexibility is provided by all DC components for varying durations and magnitudes. One notable result is that the IT workload and UPS tend to provide flexibility at different time slots. This corresponds to IT workload shifting providing flexibility, followed by the execution of those deferred IT jobs using the UPS to provide power such that the flexibility target can still be met. Additionally, cooling power reduction can also take place when there is IT workload shifting as less heat is generated by the servers. The TES tank, shown by the green bars, provides a large buffer for the required thermal power. This buffer enables flexibility to be provided across a range of DC operating conditions. In the Scenario 2 results which provide the baseline for this flexibility provision, the TES tank is being charged between 4:15 and 6:15 am. The green bars on the left-hand side of the figure in this time window show the TES tank providing flexibility by reducing the rate at which it is charging. 
 \begin{figure}[!t]
  \centering
- \includegraphics[width=\columnwidth]{figures/Figure_8.png}
+ \includegraphics[width=\columnwidth]{images/Figure_8.png}
  \caption{DC Component Contributions to Downward flexibility}
  \label{fig:stacked_barcharts_pos}
 \end{figure}
@@ -781,7 +781,7 @@ Figure \ref{fig:stacked_barcharts_pos} shows the downward flexibility charts. As
 
 \begin{figure}[!t]
  \centering
- \includegraphics[width=\columnwidth]{figures/sensitivity_tornado.png}
+ \includegraphics[width=\columnwidth]{images/sensitivity_tornado.png}
  \caption{\rev{Cost-saving sensitivity tornado chart. Parameter multipliers from 0.5$\times$ to 1.5$\times$ are applied relative to the base case, which yields a 10.02\% saving.}}
  \label{fig:sensitivity_tornado}
 \end{figure}
