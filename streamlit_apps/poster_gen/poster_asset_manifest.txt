@@ -1,0 +1,30 @@
+Poster Asset Manifest
+Project: Data Centre Flexibility A1 Poster
+Date: 2026-02-16
+
+Output files
+- poster_A1_data_centre_flexibility.pptx
+- poster_A1_data_centre_flexibility.pdf
+
+Figure assets and captions
+1) Source: extracted_figures/p04_img01.png
+   Caption: F1. Integrated architecture linking grid, UPS, IT, chiller, and TES; flexibility emerges from coordinated electrical and thermal control.
+
+2) Source: extracted_figures/p12_img01.png
+   Caption: F2. Optimised demand tracks price: grid draw increases off-peak and drops during peak-price hours.
+
+3) Source: extracted_figures/p12_img03.png
+   Caption: F3. Stacked dispatch shows IT, CRAC, UPS, and TES coordination delivering cost-minimising operation.
+
+4) Source: extracted_figures/p13_img01.png
+   Caption: F4. Duration-certified flexibility envelope: maximum feasible duration (tau) varies strongly with start time and requested +/- DeltaP.
+
+5) Source: extracted_figures/p13_img02.png
+   Caption: F5 (left). Component-level decomposition for upward flexibility contributions.
+
+6) Source: extracted_figures/p14_img01.png
+   Caption: F5 (right). Component-level decomposition for downward flexibility contributions.
+
+Auxiliary asset
+7) Source: qr_paper.png
+   Purpose: QR panel in bottom-right strip linking to paper identifier text.
