@@ -139,15 +139,15 @@ def plot_tornado(ax, tier1: pd.DataFrame, panel_tag: str = ""):
         Line2D([0], [0], color=COL_BASE, linewidth=1.1,
                label=f"base ({base:.2f}%)"),
     ]
-    # Anchored in axes-fraction coordinates but with a negative y, this sits
-    # in the whitespace below the x-axis (and its label), not on the plot
-    # area — so it can never overlap a bar. main() reserves the extra bottom
-    # margin this needs via tight_layout(rect=...).
-    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(-0.02, -0.32),
-              bbox_transform=ax.transAxes, frameon=False, ncol=3,
-              handlelength=1.2, columnspacing=1.2, handletextpad=0.5)
-    title = "(a) Cost-saving sensitivity" if panel_tag else "Cost-saving sensitivity"
-    ax.set_title(title, loc="left", fontweight="bold")
+    if panel_tag:
+        ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(-0.02, -0.32),
+                  bbox_transform=ax.transAxes, frameon=False, ncol=3,
+                  handlelength=1.2, columnspacing=1.2, handletextpad=0.5)
+        ax.set_title(panel_tag, loc="left", fontweight="bold")
+    else:
+        ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(-0.45, -0.05),
+                  bbox_transform=ax.transAxes, frameon=False, ncol=1,
+                  handlelength=1.2, handletextpad=0.5)
 
 
 # --- Panel (b): duration probes ------------------------------------------------
@@ -216,7 +216,7 @@ def main():
     if tier1 is not None:
         fig, ax = plt.subplots(figsize=(3.5, 2.75))
         plot_tornado(ax, tier1)
-        fig.tight_layout(rect=(0, 0.13, 1, 1))
+        fig.tight_layout()
         _savefig(fig, "sensitivity_tornado")
         plt.close(fig)
 

@@ -231,31 +231,22 @@ def build_params(case: dict) -> ModelParameters:
 
 # --- Tier 1: cost-saving sensitivity -------------------------------------------
 def replicate_print_summary(results_df: pd.DataFrame) -> dict:
-    """Replicates optimisation.print_summary() arithmetic EXACTLY, including
-    that its range(96,108) loop overwrites cost_diff_in_extension each pass so
-    only the FINAL extension slot's difference survives. That arithmetic
-    produced the published 1659.54 / 1493.19 / 10.02% figures, so the same is
-    used here for comparability. saving_pct_ext_sum applies the (probably
-    intended) sum over all 12 extension slots — if the two variants differ
-    materially, investigate before publishing either."""
+    """Calculates cost summary, using the corrected sum over the 12 extension slots."""
     opt_step = results_df["Optimized_Cost_per_Step"]
     nom_step = results_df["Nominal_Cost"]
-    ext_diff_last = float(opt_step.iloc[107] - nom_step.iloc[107])
     ext_diff_sum = float((opt_step.iloc[96:108] - nom_step.iloc[96:108]).sum())
 
     base_cost = float(nom_step.iloc[:96].sum())
-    opt_cost = float(opt_step.iloc[:96].sum()) + ext_diff_last
-    opt_cost_ext_sum = float(opt_step.iloc[:96].sum()) + ext_diff_sum
-
+    opt_cost = float(opt_step.iloc[:96].sum()) + ext_diff_sum
     saving = base_cost - opt_cost
-    saving_ext_sum = base_cost - opt_cost_ext_sum
+    
     return {
         "base_cost_gbp": round(base_cost, 2),
         "opt_cost_gbp": round(opt_cost, 2),
         "saving_gbp": round(saving, 2),
         "saving_pct": round(100.0 * saving / base_cost, 3) if base_cost > 0 else 0.0,
-        "opt_cost_ext_sum_gbp": round(opt_cost_ext_sum, 2),
-        "saving_pct_ext_sum": round(100.0 * saving_ext_sum / base_cost, 3) if base_cost > 0 else 0.0,
+        "opt_cost_ext_sum_gbp": round(opt_cost, 2),
+        "saving_pct_ext_sum": round(100.0 * saving / base_cost, 3) if base_cost > 0 else 0.0,
     }
 
 

@@ -296,8 +296,7 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
 
 def print_summary(params, results_df: pd.DataFrame):
 
-    for t in range(96, 108):
-        cost_diff_in_extension = results_df['Optimized_Cost_per_Step'].iloc[t] - results_df['Nominal_Cost'].iloc[t]
+    cost_diff_in_extension = (results_df['Optimized_Cost_per_Step'].iloc[96:108] - results_df['Nominal_Cost'].iloc[96:108]).sum()
 
     print(f"Cost difference in extension period (slots 97-108): {cost_diff_in_extension:,.2f} GBP")
     nominal_cost = results_df['Nominal_Cost'].iloc[:96].sum()
