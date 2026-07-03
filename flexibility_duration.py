@@ -418,8 +418,8 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
     )
 
 if __name__ == '__main__':
-    timesteps = [75,80, 85, 90, 95]# [1] + list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
+    timesteps = [1] + list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
     flex_magnitudes =  [ -100, -150, -200, -250, -300, -350, -400, -450, -500]
-    include_banked_results = "flex_duration_results.csv"
+    include_banked_results = None#"flex_duration_results.csv"
     main(flex_magnitudes, timesteps, include_banked_results, search_type='linear', generate_plots=True)
     #[10, 20, 25, 30, 35, 40, 50, 55, 60, 70, 75, 80, 85, 90, 95]#

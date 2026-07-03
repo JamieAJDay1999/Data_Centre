@@ -214,14 +214,22 @@ def post_process_results(m: pyo.ConcreteModel, params: ModelParameters, data: di
     def generate_shiftability_profile(flex_df, num_timesteps, num_tranches):
         # Group by processing_slot and shiftability, sum cpu_load
         grouped = flex_df.groupby(['processing_slot', 'shiftability'])['cpu_load'].sum().reset_index()
-        
+        # Total flexible cpu_load per processing slot, used to normalise each
+        # tranche into a fraction of the slot's flexible load. The profile must
+        # sum to 1 per slot (matching the input shiftability_profile.csv format),
+        # because flexibility_duration.py multiplies it by Rt, which already
+        # contains the flexible load magnitude.
+        totals = flex_df.groupby('processing_slot')['cpu_load'].sum()
+
         shiftabilityProfile_data = {}
         for t in range(1, num_timesteps + 1):
+            total_flex_at_t = totals.get(t, 0.0)
             for k in range(1, num_tranches + 1):
                 key = (t, k)
                 # Sum cpu_load where processing_slot == t and remaining shiftability == k
                 value = grouped[(grouped['processing_slot'] == t) & (grouped['shiftability'] == k)]['cpu_load']
-                shiftabilityProfile_data[key] = value.sum() if not value.empty else 0.0
+                tranche_load = value.sum() if not value.empty else 0.0
+                shiftabilityProfile_data[key] = tranche_load / total_flex_at_t if total_flex_at_t > 0 else 0.0
         return shiftabilityProfile_data
 
     data['shiftabilityProfile'] = generate_shiftability_profile(flex_filtered, 108, 12)
