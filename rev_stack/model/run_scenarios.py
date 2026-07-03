@@ -17,12 +17,12 @@ import copy
 
 import numpy as np
 import pandas as pd
-import pyomo.environ as pyo
 
 from . import config
 from .facility import scaled_parameters, load_facility_data, build_facility_model
 from .market_data import load_market_day
-from .stack_model import StackOptions, add_market_layer, solve, get_solver
+from .stack_model import (StackOptions, add_market_layer, solve, get_solver,
+                          commitment_values)
 from .postprocess import revenue_summary
 
 Q = 0.95  # CVaR confidence level
@@ -56,7 +56,7 @@ def run_scenarios(date, n=12, solver_name=None, seed=1):
     _, ok = solve(m, solver_name=solver_name)
     if not ok:
         raise RuntimeError("first-stage model infeasible")
-    fixed = {(j, w): pyo.value(m.r[j, w]) for (j, w) in m.R_IDX}
+    fixed = commitment_values(m)
     det = revenue_summary(m)["net_cost"]
     print(f"Deterministic (perfect foresight) net cost: {det:.2f} GBP")
 

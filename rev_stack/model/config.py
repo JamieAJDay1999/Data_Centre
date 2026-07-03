@@ -45,6 +45,7 @@ CERT_MAX_OUTER_ITERS = 3      # certification loop iterations
 CERT_BISECTION_STEPS = 4      # binary-search depth on the deliverable scale
 CERT_START_OFFSETS = (0,)     # call-time samples within each EFA block (slots)
 CERT_TOL_KW = 1.0             # feasibility tolerance on the delivery constraint
+SOLVER_TIME_LIMIT_SECONDS = 600
 
 # Solver preference order. SCIP (Paper 1's solver) supports SOS2 natively;
 # HiGHS does not, but the CPU->power curve u^1.32 is convex and always under

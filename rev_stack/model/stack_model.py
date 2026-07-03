@@ -22,6 +22,7 @@ Conservative linearisations (documented in the paper):
     certification.
 """
 from dataclasses import dataclass, field
+import time
 
 import pyomo.environ as pyo
 
@@ -417,7 +418,8 @@ def prepare_for_solver(m, solver_name: str):
     return m
 
 
-def solve(m, solver_name=None, solver=None, tee=False, time_limit=600):
+def solve(m, solver_name=None, solver=None, tee=False, time_limit=None,
+          label=None, verbose=False):
     """Solve in place. Returns (solver_name, ok) where ok means a usable
     (optimal or time-limited feasible) solution has been loaded into m.
     Infeasibility is reported as ok=False, never raised, so the certification
@@ -425,12 +427,30 @@ def solve(m, solver_name=None, solver=None, tee=False, time_limit=600):
     if solver is None:
         solver_name, solver = get_solver(
             (solver_name,) if solver_name else None)
+    if time_limit is None:
+        time_limit = config.SOLVER_TIME_LIMIT_SECONDS
     prepare_for_solver(m, solver_name)
 
     kwargs = {"tee": tee, "load_solutions": False}
+    old_time_limit = None
     if solver_name == "scip":
         kwargs["options"] = {"limits/time": time_limit}
-    results = solver.solve(m, **kwargs)
+    elif "highs" in solver_name.lower() and hasattr(solver, "config"):
+        try:
+            old_time_limit = solver.config.time_limit
+            solver.config.time_limit = time_limit
+        except (AttributeError, ValueError):
+            old_time_limit = None
+    if verbose and label:
+        print(f"  [solve] start {label} ({solver_name}, limit={time_limit}s)",
+              flush=True)
+    t0 = time.time()
+    try:
+        results = solver.solve(m, **kwargs)
+    finally:
+        if old_time_limit is not None:
+            solver.config.time_limit = old_time_limit
+    elapsed = time.time() - t0
     tc = str(results.solver.termination_condition)
     ok = tc in ("optimal", "maxTimeLimit", "feasible", "locallyOptimal")
     if tc == "other" and results.problem.lower_bound != results.problem.upper_bound:
@@ -440,4 +460,7 @@ def solve(m, solver_name=None, solver=None, tee=False, time_limit=600):
             m.solutions.load_from(results)
         except Exception:
             ok = False
+    if verbose and label:
+        print(f"  [solve] done  {label}: {tc}, ok={ok}, {elapsed:.1f}s",
+              flush=True)
     return solver_name, ok

@@ -14,12 +14,14 @@ The revenue difference between the first (uncertified) and final (certified)
 portfolios is the phantom-flexibility metric reported in the paper.
 """
 import copy
+import time
 
 import pyomo.environ as pyo
 
 from . import config
 from .facility import build_facility_model
-from .stack_model import add_market_layer, solve, StackOptions
+from .stack_model import (add_market_layer, solve, StackOptions,
+                          commitment_values)
 from .postprocess import revenue_summary
 
 
@@ -57,7 +59,8 @@ def _staircase(m_solved, block: int, t0: int):
 
 
 def _delivery_feasible(params, data, mkt, opts, fixed_r, p_base, dev, scale,
-                       solver_name):
+                       solver_name, time_limit=None, tee=False, verbose=False,
+                       label=None):
     """Build and solve the delivery model: fixed commitments + staircase."""
     m = build_facility_model(params, data)
     d_opts = copy.copy(opts)
@@ -66,12 +69,13 @@ def _delivery_feasible(params, data, mkt, opts, fixed_r, p_base, dev, scale,
     m.Delivery = pyo.ConstraintList()
     for t, d in dev.items():
         m.Delivery.add(m.P_grid[t] <= p_base[t] - scale * d + config.CERT_TOL_KW)
-    _, ok = solve(m, solver_name=solver_name)
+    _, ok = solve(m, solver_name=solver_name, time_limit=time_limit, tee=tee,
+                  label=label, verbose=verbose)
     return ok
 
 
 def certify(params, data, mkt, opts: StackOptions, m_solved, solver_name,
-            verbose=True):
+            verbose=True, time_limit=None, tee=False):
     """Run the certification loop starting from a solved stacking model.
 
     Returns (m_certified, report) where report records per-iteration revenue,
@@ -84,10 +88,13 @@ def certify(params, data, mkt, opts: StackOptions, m_solved, solver_name,
     m = m_solved
 
     for it in range(config.CERT_MAX_OUTER_ITERS):
+        iter_t0 = time.time()
         report["iterations"] = it + 1
         p_base = {t: pyo.value(m.P_grid[t]) for t in m.TEXT_SLOTS}
-        fixed_r = {(j, w): pyo.value(m.r[j, w]) for (j, w) in m.R_IDX}
+        fixed_r = commitment_values(m)
         new_cuts = False
+        if verbose:
+            print(f"  [cert] iteration {it + 1} starting", flush=True)
         for block in range(1, config.N_EFA + 1):
             for off in config.CERT_START_OFFSETS:
                 t0 = (block - 1) * config.SLOTS_PER_EFA + 1 + off
@@ -95,15 +102,23 @@ def certify(params, data, mkt, opts: StackOptions, m_solved, solver_name,
                 if not dev:
                     continue
                 report["checks"] += 1
+                label = f"cert it{it + 1} block {block} t0={t0} scale=1.000"
                 if _delivery_feasible(params, data, mkt, opts, fixed_r,
-                                      p_base, dev, 1.0, solver_name):
+                                      p_base, dev, 1.0, solver_name,
+                                      time_limit=time_limit, tee=tee,
+                                      verbose=verbose, label=label):
                     continue
                 report["failures"] += 1
                 lo, hi = 0.0, 1.0
-                for _ in range(config.CERT_BISECTION_STEPS):
+                for step in range(config.CERT_BISECTION_STEPS):
                     mid = 0.5 * (lo + hi)
+                    label = (f"cert it{it + 1} block {block} t0={t0} "
+                             f"bisect {step + 1}/{config.CERT_BISECTION_STEPS} "
+                             f"scale={mid:.3f}")
                     if _delivery_feasible(params, data, mkt, opts, fixed_r,
-                                          p_base, dev, mid, solver_name):
+                                          p_base, dev, mid, solver_name,
+                                          time_limit=time_limit, tee=tee,
+                                          verbose=verbose, label=label):
                         lo = mid
                     else:
                         hi = mid
@@ -131,9 +146,14 @@ def certify(params, data, mkt, opts: StackOptions, m_solved, solver_name,
                        if m._products[j].direction == "down"
                        and _in_block(m._products[j], w, block, mkt))
             m.EnvelopeCuts.add(expr <= cap + config.CERT_TOL_KW)
-        _, ok = solve(m, solver_name=solver_name)
+        _, ok = solve(m, solver_name=solver_name, time_limit=time_limit,
+                      tee=tee, label=f"cert it{it + 1} stacking re-solve",
+                      verbose=verbose)
         if not ok:
             raise RuntimeError("Stacking model infeasible after envelope cuts")
+        if verbose:
+            print(f"  [cert] iteration {it + 1} finished in "
+                  f"{time.time() - iter_t0:.1f}s", flush=True)
 
     certified = revenue_summary(m)
     report["certified_net_cost"] = certified["net_cost"]

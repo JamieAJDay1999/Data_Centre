@@ -23,7 +23,8 @@ from . import config
 from .facility import scaled_parameters, load_facility_data, build_facility_model
 from .market_data import load_market_day
 from .market_parameters import PRODUCTS
-from .stack_model import StackOptions, add_market_layer, solve, get_solver
+from .stack_model import (StackOptions, add_market_layer, solve, get_solver,
+                          clean_commitment_value)
 from .certification import certify
 from .postprocess import revenue_summary
 
@@ -89,13 +90,14 @@ def run_benchmarks(date, solver_name=None):
         # fix earlier products at their greedy volumes; only the newest is free
         for (j, w) in m_g.R_IDX:
             if j != name:
-                m_g.r[j, w].fix(fixed.get((j, w), 0.0))
+                m_g.r[j, w].fix(clean_commitment_value(
+                    fixed.get((j, w), 0.0)))
         _, ok = solve(m_g, solver_name=solver_name)
         if not ok:
             continue
         for (j, w) in m_g.R_IDX:
             if j == name:
-                fixed[(j, w)] = pyo.value(m_g.r[j, w])
+                fixed[(j, w)] = clean_commitment_value(pyo.value(m_g.r[j, w]))
     opts = StackOptions(fixed_commitments=fixed)
     m2 = _solve_case(params, data, mkt, opts, solver_name)
     s2 = revenue_summary(m2)

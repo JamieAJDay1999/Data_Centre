@@ -24,7 +24,8 @@ from .postprocess import save_day_results
 
 
 def run_one_day(date, opts: StackOptions = None, do_certify=True,
-                solver_name=None, soc_floor=None, scale=None, verbose=True):
+                solver_name=None, soc_floor=None, scale=None, verbose=True,
+                time_limit=None, tee=False):
     """Build, solve and (optionally) certify one day. Returns (summary, m)."""
     opts = opts or StackOptions()
     params = scaled_parameters(scale=scale or config.SCALE, soc_floor=soc_floor)
@@ -36,7 +37,8 @@ def run_one_day(date, opts: StackOptions = None, do_certify=True,
     t0 = time.time()
     m = build_facility_model(params, data)
     add_market_layer(m, params, mkt, opts)
-    _, ok = solve(m, solver_name=solver_name)
+    _, ok = solve(m, solver_name=solver_name, time_limit=time_limit, tee=tee,
+                  label="initial stacking", verbose=verbose)
     if not ok:
         raise RuntimeError(f"Stacking model infeasible/unsolved for {date}")
     build_s = time.time() - t0
@@ -44,7 +46,7 @@ def run_one_day(date, opts: StackOptions = None, do_certify=True,
     report = None
     if do_certify:
         m, report = certify(params, data, mkt, opts, m, solver_name,
-                            verbose=verbose)
+                            verbose=verbose, time_limit=time_limit, tee=tee)
 
     extra = {"date": str(pd.Timestamp(date).date()), "solver": solver_name,
              "solve_seconds": round(time.time() - t0, 1)}
@@ -83,13 +85,18 @@ def main():
                     help="UPS resilience floor, e.g. 0.3 / 0.5 / 0.7")
     ap.add_argument("--scale", type=float, default=None,
                     help="facility scale in MW (default 10)")
+    ap.add_argument("--time-limit", type=float,
+                    default=config.SOLVER_TIME_LIMIT_SECONDS,
+                    help="per-solve solver time limit in seconds")
+    ap.add_argument("--tee", action="store_true",
+                    help="stream solver output for each Pyomo solve")
     args = ap.parse_args()
 
     config.ensure_dirs()
     opts = StackOptions(cm_kw=args.cm_kw)
     run_one_day(args.date, opts=opts, do_certify=not args.no_certify,
                 solver_name=args.solver, soc_floor=args.soc_floor,
-                scale=args.scale)
+                scale=args.scale, time_limit=args.time_limit, tee=args.tee)
 
 
 if __name__ == "__main__":
