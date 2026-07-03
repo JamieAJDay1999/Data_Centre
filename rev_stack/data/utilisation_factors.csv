@@ -1,0 +1,13 @@
+product,phi
+BRneg,0.05
+BRpos,0.05
+DCH,0.02
+DCL,0.02
+DMH,0.03
+DML,0.03
+DRH,0.15
+DRL,0.15
+DSO,0.1
+NQR,0.04
+PQR,0.04
+SR,0.06
