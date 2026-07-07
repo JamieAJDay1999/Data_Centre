@@ -37,14 +37,14 @@ TIER2_CSV = SWEEP_ROOT / "tier2_duration_sensitivity.csv"
 
 PARAM_LABELS = {
     "flex_share": "Flexible workload share",
-    "price_volatility": "Price volatility",
+    "price_day": "Price day",
     "tes_capacity": "TES energy capacity",
     "ups_capacity": "UPS energy capacity",
     "cold_aisle_temp": "Cold-aisle upper limit",
 }
 # Base-case x-position per parameter (multiplier 1.0, or 23 C for temperature).
 PARAM_BASE_X = {
-    "flex_share": 1.0, "price_volatility": 1.0, "tes_capacity": 1.0,
+    "flex_share": 1.0, "price_day": 0.0, "tes_capacity": 1.0,
     "ups_capacity": 1.0, "cold_aisle_temp": 23.0,
 }
 
@@ -130,12 +130,9 @@ def plot_tornado(ax, tier1: pd.DataFrame, panel_tag: str = ""):
     for side in ("top", "right", "left"):
         ax.spines[side].set_visible(False)
 
-    # Legend keys: consistent across parameters (verified monotonic in level).
-    lo_lv = entries[0]["lo_lv"]
-    hi_lv = entries[0]["hi_lv"]
     handles = [
-        Patch(facecolor=COL_LOW, label=f"level $\\times${lo_lv:g}"),
-        Patch(facecolor=COL_HIGH, label=f"level $\\times${hi_lv:g}"),
+        Patch(facecolor=COL_LOW, label="lower saving case"),
+        Patch(facecolor=COL_HIGH, label="higher saving case"),
         Line2D([0], [0], color=COL_BASE, linewidth=1.1,
                label=f"base ({base:.2f}%)"),
     ]
@@ -170,6 +167,20 @@ def plot_tau_panels(fig, axes, tier2: pd.DataFrame, params_order: list, panel_ta
                     markeredgewidth=0.5, linewidth=1.3, label=style["label"], zorder=3)
         if param == "cold_aisle_temp":
             ax.set_xlabel("Upper limit (°C)")
+        elif param == "price_day":
+            ax.set_xlabel("Price day")
+            price_rows = (
+                tier2[tier2["param"] == "price_day"][["level", "price_scenario"]]
+                .drop_duplicates()
+                .sort_values("level")
+            )
+            ticks = [PARAM_BASE_X[param]] + [float(v) for v in price_rows["level"]]
+            labels = ["Base"] + [
+                str(v).replace("_", "\n").replace("day", "").strip()
+                for v in price_rows["price_scenario"]
+            ]
+            ax.set_xticks(ticks)
+            ax.set_xticklabels(labels, rotation=35, ha="right")
         else:
             ax.set_xlabel("Multiplier")
             ax.axvline(1.0, color="#999999", linestyle=":", linewidth=0.8, zorder=1)
@@ -249,7 +260,8 @@ def main():
     if tier1 is not None:
         print("\n--- Tier 1 summary (cost saving %) ---")
         cols = [c for c in ["case_id", "level", "base_cost_gbp", "opt_cost_gbp",
-                            "saving_pct", "realized_flex_multiplier"] if c in tier1.columns]
+                            "saving_pct", "price_scenario",
+                            "realized_flex_multiplier"] if c in tier1.columns]
         print(tier1[cols].to_string(index=False))
     if tier2 is not None:
         print("\n--- Tier 2 summary (tau, hours) ---")

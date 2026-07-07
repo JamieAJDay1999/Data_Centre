@@ -1,16 +1,86 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 # Helper functions (used internally by setup_simulation_parameters)
 # These calculate derived thermal properties based on primary inputs.
 
-def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
-    hourly_prices = [60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 95, 100, 98, 95, 110, 120, 130, 140, 135, 120, 100, 90, 80, 70] # original
-    num_hours = (num_steps * dt_seconds) // 3600
+DEFAULT_HOURLY_PRICES_GBP_PER_MWH = [
+    60, 55, 52, 50, 48, 48, 55, 65, 80, 90, 95, 100,
+    98, 95, 110, 120, 130, 140, 135, 120, 100, 90, 80, 70,
+]
+DEFAULT_PRICE_SCENARIO_FILE = Path(__file__).with_name("price_scenarios_dummy.csv")
+
+
+def tariff_from_hourly_prices(hourly_prices, num_steps: int, dt_seconds: float) -> np.ndarray:
+    """Expand a 24-hour price profile to the model timestep, preserving index 0."""
+    hourly_prices = np.asarray(hourly_prices, dtype=float)
+    if hourly_prices.ndim != 1 or len(hourly_prices) != 24:
+        raise ValueError("A price scenario must contain exactly 24 hourly prices.")
+    if 3600 % dt_seconds != 0:
+        raise ValueError("dt_seconds must divide evenly into one hour for hourly price scenarios.")
+
+    num_hours = int(np.ceil((num_steps * dt_seconds) / 3600.0))
     full_price_series = np.tile(hourly_prices, int(np.ceil(num_hours / 24)))
-    price_per_step = np.repeat(full_price_series, 3600 // dt_seconds)
-    return np.insert(price_per_step[:num_steps], 0, 0)
+    price_per_step = np.repeat(full_price_series, int(3600 // dt_seconds))
+    return np.insert(price_per_step[:num_steps], 0, 0.0)
+
+
+def generate_tariff(num_steps: int, dt_seconds: float) -> np.ndarray:
+    return tariff_from_hourly_prices(DEFAULT_HOURLY_PRICES_GBP_PER_MWH, num_steps, dt_seconds)
+
+
+def load_price_scenarios(path=None) -> dict:
+    """Load representative-day price profiles from a long-form CSV.
+
+    The expected columns are:
+      scenario, hour, price_gbp_per_mwh
+
+    The bundled file is deliberately dummy data. Replace it with real daily
+    profiles using the same schema once the market data is available.
+    """
+    csv_path = Path(path) if path is not None else DEFAULT_PRICE_SCENARIO_FILE
+    scenarios_df = pd.read_csv(csv_path)
+    required = {"scenario", "hour", "price_gbp_per_mwh"}
+    missing = required - set(scenarios_df.columns)
+    if missing:
+        raise ValueError(f"{csv_path} is missing columns: {sorted(missing)}")
+
+    scenarios = {}
+    for scenario, grp in scenarios_df.groupby("scenario", sort=False):
+        grp = grp.sort_values("hour")
+        hours = grp["hour"].astype(int).tolist()
+        if hours != list(range(24)):
+            raise ValueError(
+                f"Scenario '{scenario}' in {csv_path} must have hours 0..23 exactly."
+            )
+        scenarios[str(scenario)] = grp["price_gbp_per_mwh"].astype(float).to_numpy()
+    return scenarios
+
+
+def generate_tariff_for_price_scenario(
+    scenario: str,
+    num_steps: int,
+    dt_seconds: float,
+    path=None,
+) -> np.ndarray:
+    scenarios = load_price_scenarios(path)
+    if scenario not in scenarios:
+        available = ", ".join(scenarios)
+        raise KeyError(f"Unknown price scenario '{scenario}'. Available scenarios: {available}")
+    return tariff_from_hourly_prices(scenarios[scenario], num_steps, dt_seconds)
+
+
+def price_scenario_summary(scenario: str, path=None) -> dict:
+    prices = load_price_scenarios(path)[scenario]
+    return {
+        "price_scenario": scenario,
+        "price_mean_gbp_per_mwh": round(float(prices.mean()), 3),
+        "price_min_gbp_per_mwh": round(float(prices.min()), 3),
+        "price_max_gbp_per_mwh": round(float(prices.max()), 3),
+        "price_std_gbp_per_mwh": round(float(prices.std(ddof=0)), 3),
+    }
 
 # --- Parameter Management Class ----------------------------------------------
 class ModelParameters:

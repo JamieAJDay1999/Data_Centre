@@ -17,8 +17,9 @@ Implements paper/sensitivity_analysis_plan.md (reviewer comment R2-3):
 
 Nothing in nominal_calculation.py / optimisation.py / flexibility_duration.py
 is modified. This wrapper redirects their module-level path constants into the
-per-case directories and monkey-patches generate_tariff for the
-price-volatility cases (mean-preserving spread scaling).
+per-case directories and monkey-patches generate_tariff for representative
+price-day cases. Other scalar parameters remain one-at-a-time multiplier
+sweeps.
 
 The nominal case needs no special handling for the TES/UPS cases:
 nominal_calculation.configure_nominal_params() zeroes the TES charge/discharge
@@ -59,7 +60,12 @@ import nominal_calculation as nom
 import optimisation as opt
 import flexibility_duration as fd
 from inputs.parameters_optimisation import ModelParameters
-from inputs.parameters_optimisation import generate_tariff as _base_tariff
+from inputs.parameters_optimisation import (
+    DEFAULT_PRICE_SCENARIO_FILE,
+    generate_tariff_for_price_scenario,
+    load_price_scenarios,
+    price_scenario_summary,
+)
 
 ORIG_INPUTS = ROOT / "static" / "data" / "inputs"
 SWEEP_ROOT = ROOT / "static" / "data" / "sensitivity_outputs"
@@ -68,19 +74,44 @@ SWEEP_ROOT = ROOT / "static" / "data" / "sensitivity_outputs"
 MULTIPLIER_LEVELS = [0.5, 0.75, 1.25, 1.5]   # base = 1.0
 UPS_LEVELS = [0.5, 1.5]                      # optional 5th parameter, 2 levels
 TEMP_LEVELS_C = [24.0, 25.0]                 # base = 23 C, Tier 2 only
+BASE_PRICE_SCENARIO = "baseline_synthetic"
+PRICE_SCENARIO_IDS = [
+    sid for sid in load_price_scenarios(DEFAULT_PRICE_SCENARIO_FILE)
+    if sid != BASE_PRICE_SCENARIO
+]
 
-BASE_CASE = {"case_id": "base", "param": "base", "level": 1.0}
+BASE_CASE = {
+    "case_id": "base",
+    "param": "base",
+    "level": 1.0,
+    "price_scenario": BASE_PRICE_SCENARIO,
+}
+
+
+def price_day_case_id(scenario_id: str) -> str:
+    safe = "".join(ch if ch.isalnum() else "_" for ch in str(scenario_id)).strip("_")
+    while "__" in safe:
+        safe = safe.replace("__", "_")
+    return f"price_day_{safe or 'scenario'}"
 
 
 def tier1_cases():
     cases = [BASE_CASE]
     for param, levels in (
         ("flex_share", MULTIPLIER_LEVELS),
-        ("price_volatility", MULTIPLIER_LEVELS),
         ("tes_capacity", MULTIPLIER_LEVELS),
         ("ups_capacity", UPS_LEVELS),
     ):
         cases += [{"case_id": f"{param}_x{lv:g}", "param": param, "level": lv} for lv in levels]
+    cases += [
+        {
+            "case_id": price_day_case_id(scenario_id),
+            "param": "price_day",
+            "level": i,
+            "price_scenario": scenario_id,
+        }
+        for i, scenario_id in enumerate(PRICE_SCENARIO_IDS, start=1)
+    ]
     return cases
 
 
@@ -110,12 +141,6 @@ EXPECTED_BASE = {
     "P2_tau_hours": 0.2,
 }
 GATE_TOL = {"cost_gbp": 2.0, "saving_pp": 0.25, "tau_hours": 0.30}
-
-# Mean of the 24 hourly tariff prices (~86.92 GBP/MWh), taken from the code so
-# it never drifts from generate_tariff(). Index 0 of the returned array is the
-# 1-based-indexing dummy zero and is excluded.
-_TARIFF_MEAN = float(_base_tariff(96, 900)[1:].mean())
-
 
 # --- Per-case environment setup ------------------------------------------------
 def case_dirs(case_id: str) -> dict:
@@ -147,22 +172,23 @@ def redirect_paths(d: dict):
     fd.IMAGE_DIR = d["images"]
 
 
-def install_price_scaling(k: float):
-    """Monkey-patch generate_tariff in all three modules with a mean-preserving
-    spread scaling: pi'(t) = mean + k*(pi(t) - mean). Isolates volatility from
-    price level. k=1 restores the original function exactly (no float drift).
-    The index-0 dummy zero is preserved and the scaling covers the full
-    extended horizon (slots 1..108)."""
-    if k == 1.0:
-        scaled = _base_tariff
-    else:
-        def scaled(num_steps, dt_seconds, _k=k):
-            arr = _base_tariff(num_steps, dt_seconds).astype(float)
-            arr[1:] = _TARIFF_MEAN + _k * (arr[1:] - _TARIFF_MEAN)
-            return arr
-    nom.generate_tariff = scaled
-    opt.generate_tariff = scaled
-    fd.generate_tariff = scaled
+def install_price_scenario(scenario: str):
+    """Monkey-patch generate_tariff in all three modules for a named price day.
+
+    The index-0 dummy zero is preserved and the selected 24-hour price profile
+    is tiled as needed across the extended horizon.
+    """
+    def scenario_tariff(num_steps, dt_seconds, _scenario=scenario):
+        return generate_tariff_for_price_scenario(
+            _scenario, num_steps, dt_seconds, DEFAULT_PRICE_SCENARIO_FILE
+        )
+    nom.generate_tariff = scenario_tariff
+    opt.generate_tariff = scenario_tariff
+    fd.generate_tariff = scenario_tariff
+
+
+def case_price_scenario(case: dict) -> str:
+    return case.get("price_scenario", BASE_PRICE_SCENARIO)
 
 
 def write_case_inputs(case: dict, d: dict) -> dict:
@@ -225,7 +251,7 @@ def build_params(case: dict) -> ModelParameters:
         params.e_max_kwh = params.soc_max * params.e_nom_kwh
     elif param == "cold_aisle_temp":
         params.T_cAisle_upper_limit_Celsius = lv       # absolute deg C, not a multiplier
-    # flex_share and price_volatility act through the inputs/tariff, not params.
+    # flex_share and price_day act through the inputs/tariff, not params.
     return params
 
 
@@ -272,8 +298,10 @@ def run_tier1_case(case: dict) -> dict:
     t_start = time.time()
     d = case_dirs(case["case_id"])
     redirect_paths(d)
-    install_price_scaling(case["level"] if case["param"] == "price_volatility" else 1.0)
+    scenario = case_price_scenario(case)
+    install_price_scenario(scenario)
     input_diag = write_case_inputs(case, d)
+    input_diag.update(price_scenario_summary(scenario, DEFAULT_PRICE_SCENARIO_FILE))
 
     # Scenario 1. configure_nominal_params() pins TES off and the nominal power
     # balance excludes UPS discharge, so the base case never uses storage.
@@ -332,7 +360,7 @@ def run_tier2_case(case: dict) -> list:
             f"({d['opt'] / 'optimised_baseline.csv'}). Run --tier 1 first."
         )
     redirect_paths(d)
-    install_price_scaling(case["level"] if case["param"] == "price_volatility" else 1.0)
+    install_price_scenario(case_price_scenario(case))
 
     params = build_params(case)
     # flexibility_duration.main() re-expresses the post-Scenario-2 shiftability
@@ -357,6 +385,7 @@ def run_tier2_case(case: dict) -> list:
             "case_id": case["case_id"],
             "param": case["param"],
             "level": case["level"],
+            "price_scenario": case_price_scenario(case),
             "probe": pr["probe"],
             "t0_slot": pr["t0_slot"],
             "t0_clock": slot_clock(pr["t0_slot"]),
@@ -459,6 +488,13 @@ def run_cases(cases, worker, jobs):
     return errors
 
 
+def format_case_level(case: dict) -> str:
+    if case["param"] == "price_day":
+        return str(case["price_scenario"])
+    level = case["level"]
+    return f"{level:g}" if isinstance(level, (int, float)) else str(level)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tier", type=int, choices=[1, 2], required=True)
@@ -478,7 +514,7 @@ def main():
     if args.dry_run:
         print(f"Tier {args.tier} cases ({len(cases)}):")
         for c in cases:
-            print(f"  {c['case_id']:<24} param={c['param']:<18} level={c['level']:g}")
+            print(f"  {c['case_id']:<34} param={c['param']:<18} level={format_case_level(c)}")
         return
 
     if not pyo.SolverFactory("scip").available(exception_flag=False):

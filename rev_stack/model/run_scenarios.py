@@ -1,11 +1,16 @@
 """Out-of-sample risk evaluation (Stage 3, light version).
 
-Takes the deterministic first-stage commitments for a day and re-evaluates
-them under price scenarios (mean-preserving spread scalings and level shifts
-of the day-ahead curve, and utilisation shocks), with the physical dispatch
-re-optimised per scenario. Reports the expected net cost and CVaR_q of the
-outcome distribution - the foresight premium and risk metrics of Section 4.7
-of the paper without the full two-stage model (noted there as Stage-3 work).
+Takes the deterministic first-stage decisions for a day - the capacity
+commitments AND the day-ahead purchase profile, per Section 4.7 of the
+paper - and re-evaluates them under price scenarios (mean-preserving spread
+scalings and level shifts of the day-ahead curve, and utilisation shocks).
+The purchase profile is fixed by pinning the metered grid trajectory to its
+first-stage value (the paper's balanced-facility assumption: the metered
+profile IS the day-ahead position); recourse per scenario is the internal
+dispatch (incl. per-asset backing allocations) and the BM/DFS positions.
+Reports the expected net cost and CVaR_q of the outcome distribution - the
+foresight premium and risk metrics of Section 4.7 without the full
+two-stage model (noted there as Stage-3 work).
 
 Usage (repo root, venv active):
     python -m rev_stack.model.run_scenarios --date 2025-01-15 --n 12
@@ -17,6 +22,7 @@ import copy
 
 import numpy as np
 import pandas as pd
+import pyomo.environ as pyo
 
 from . import config
 from .facility import scaled_parameters, load_facility_data, build_facility_model
@@ -26,6 +32,7 @@ from .stack_model import (StackOptions, add_market_layer, solve, get_solver,
 from .postprocess import revenue_summary
 
 Q = 0.95  # CVaR confidence level
+DA_PROFILE_TOL_KW = 0.1  # numerical slack when pinning the first-stage profile
 
 
 def _perturbed_market(mkt, rng):
@@ -50,17 +57,21 @@ def run_scenarios(date, n=12, solver_name=None, seed=1):
         solver_name, _ = get_solver()
     rng = np.random.default_rng(seed)
 
-    # First stage: deterministic commitments under the central forecast.
+    # First stage: deterministic commitments + DA purchase profile under the
+    # central forecast.
     m = build_facility_model(params, data)
     add_market_layer(m, params, mkt, StackOptions())
     _, ok = solve(m, solver_name=solver_name)
     if not ok:
         raise RuntimeError("first-stage model infeasible")
     fixed = commitment_values(m)
+    pgrid = {t: pyo.value(m.P_grid[t]) for t in m.TEXT_SLOTS}
     det = revenue_summary(m)["net_cost"]
     print(f"Deterministic (perfect foresight) net cost: {det:.2f} GBP")
 
-    # Second stage: re-dispatch under each scenario with commitments fixed.
+    # Second stage: re-dispatch under each scenario with the commitments AND
+    # the day-ahead purchase profile fixed (paper Section 4.7). P_grid is an
+    # Expression, so the profile is pinned with a constraint band.
     rows = []
     for i in range(n):
         mkt_w = _perturbed_market(mkt, rng)
@@ -68,6 +79,12 @@ def run_scenarios(date, n=12, solver_name=None, seed=1):
         m_w = build_facility_model(params, data_w)
         add_market_layer(m_w, params, mkt_w,
                          StackOptions(fixed_commitments=fixed))
+        m_w.FixDAProfile = pyo.ConstraintList()
+        for t in m_w.TEXT_SLOTS:
+            m_w.FixDAProfile.add(
+                m_w.P_grid[t] <= pgrid[t] + DA_PROFILE_TOL_KW)
+            m_w.FixDAProfile.add(
+                m_w.P_grid[t] >= pgrid[t] - DA_PROFILE_TOL_KW)
         _, ok = solve(m_w, solver_name=solver_name)
         if not ok:
             print(f"  scenario {i}: infeasible under fixed commitments "

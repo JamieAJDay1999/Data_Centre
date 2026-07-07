@@ -22,7 +22,8 @@ python -m rev_stack.model.run_day --date 2025-01-15
 #    faster, without the certification loop:
 python -m rev_stack.model.run_day --date 2025-01-15 --no-certify
 
-# 2. Benchmark ladder B0–B4 (value of co-optimisation & certification, RQ3)
+# 2. Benchmark ladder B0–B5 (value of co-optimisation, certification &
+#    market-sequential operation, RQ3)
 python -m rev_stack.model.benchmarks --date 2025-01-15
 
 # 3. Per-asset attribution: leave-one-out + standalone + synergy (RQ2)
@@ -60,7 +61,7 @@ Useful flags on `run_day` / `run_year`:
 | `postprocess.py` | — | summaries, commitment/dispatch frames |
 | `run_day.py` | §4 | single-day solve + certify |
 | `run_year.py` | §4.9/Stage 2 | multi-day simulation, CM sweep, annual roll-up |
-| `benchmarks.py` | §4.9 | B0 energy-only … B4 certified (phantom-flexibility metric) |
+| `benchmarks.py` | §4.9 | B0 energy-only … B4 certified (phantom flexibility) … B5 market-sequential (sequencing gap) |
 | `attribution.py` | §4.9/RQ2 | leave-one-out, standalone, synergy |
 | `run_scenarios.py` | §4.8 | out-of-sample price/utilisation scenarios, CVaR, foresight premium |
 | `plots.py` | §7 of doc 04 | revenue waterfall, stack heatmap, asset allocation, dispatch, ladder |
@@ -93,8 +94,19 @@ Nothing downstream changes. Then re-calibrate in `config.py` /
 - **Certification** samples worst-case simultaneous calls at each EFA block
   start (`CERT_START_OFFSETS` in config adds more sample times) and applies
   block-level scale cuts; it is the v1 of the paper's envelope loop.
-- **Stochastic stage** is the light out-of-sample variant (fixed first-stage
-  commitments re-dispatched per scenario); the full two-stage model is
-  Stage-3 work.
+- **Decision staging**: a single solve co-optimises the day-ahead layer
+  (energy profile + availability commitments) and the within-day recourse
+  layer (BM, DFS) under perfect foresight — the full-information upper bound
+  B4. **B5 (market-sequential)** takes decisions in gate order: the day-ahead
+  stage is solved with BM/DFS unavailable and certified; the schedule and
+  commitments are then frozen and BM/DFS fill the residual aggregate headroom
+  slot by slot (a per-slot LP with one shared pool per direction, solved in
+  closed form by winner-take-pool, respecting DFS primacy and the connection
+  cap). The B4−B5 gap is the value of within-day foresight.
+- **Stochastic stage** is the light out-of-sample variant: fixed first-stage
+  commitments **and** day-ahead purchase profile (the metered grid trajectory
+  is pinned to its first-stage value, per the paper's balanced-facility
+  assumption), re-dispatched per scenario with internal dispatch and BM/DFS
+  as recourse; the full two-stage model is Stage-3 work.
 - Days are independent (cyclic UPS/TES end-state constraints, as in Paper 1),
   so annual runs parallelise with `--jobs`.

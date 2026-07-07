@@ -10,6 +10,14 @@ the facility model built by facility.build_facility_model:
   - stored-energy reservations for UPS and TES                     (Eq. 28-30)
   - net-cost objective                                             (Eq. 31)
 
+Decision staging (paper Section 4, decision-gate paragraph): the commitment
+variables r belong to the day-ahead gate, while the delivered-energy
+variables (BM offers/bids, DFS deliveries) are within-day RECOURSE
+decisions. A single solve of this model co-optimises both layers under
+perfect foresight and is therefore the full-information upper bound (B4);
+gate-sequential operation is evaluated by benchmarks.py (B5) and the
+first-stage/recourse split under uncertainty by run_scenarios.py.
+
 Conservative linearisations (documented in the paper):
   * IT turn-down headroom uses a single utilisation floor at the largest
     IT-eligible duration TAU_IT_MAX_H; the floor power is evaluated through
@@ -154,7 +162,9 @@ def add_market_layer(m, params, mkt: MarketDay, opts: StackOptions):
     m._alloc_at, m._committed_at = alloc_at, committed_at
 
     # ------------------------------------------------------------------
-    # Delivered-energy positions: BM, DFS
+    # Delivered-energy positions: BM, DFS (within-day recourse variables;
+    # co-optimised with the day-ahead layer only in the full-information
+    # upper bound, see module docstring)
     # ------------------------------------------------------------------
     m.x_bm_off = pyo.Var(T, within=pyo.NonNegativeReals, initialize=0)
     m.x_bm_bid = pyo.Var(T, within=pyo.NonNegativeReals, initialize=0)
