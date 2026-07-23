@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "flexdc",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["run_dashboard.py", "--no-browser", "--port", "5137"],
+      "port": 5137
+    }
+  ]
+}

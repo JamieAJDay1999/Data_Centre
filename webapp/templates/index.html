@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Centre Flexibility — Interactive Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/static/dashboard/css/style.css" />
+  <script src="/static/dashboard/vendor/plotly.min.js"></script>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="30" height="30">
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#14B8A6"/>
+                <stop offset="0.5" stop-color="#0EA5E9"/>
+                <stop offset="1" stop-color="#6366F1"/>
+              </linearGradient>
+            </defs>
+            <rect x="3" y="6" width="26" height="6" rx="2" fill="url(#logoGrad)"/>
+            <rect x="3" y="14" width="26" height="6" rx="2" fill="url(#logoGrad)" opacity="0.75"/>
+            <rect x="3" y="22" width="26" height="6" rx="2" fill="url(#logoGrad)" opacity="0.5"/>
+            <circle cx="7.5" cy="9" r="1.1" fill="#fff"/>
+            <circle cx="7.5" cy="17" r="1.1" fill="#fff"/>
+            <circle cx="7.5" cy="25" r="1.1" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">FlexDC</span>
+          <span class="brand-sub">Data Centre Lab</span>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button class="nav-item active" data-section="overview">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
+          <span>Overview</span>
+        </button>
+        <button class="nav-item" data-section="baseline">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M4 20V10m5 10V4m5 16v-7m5 7V8"/></svg>
+          <span>Baseline</span>
+        </button>
+        <button class="nav-item" data-section="optimisation">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8m0 0h-5m5 0v5"/></svg>
+          <span>Optimisation</span>
+        </button>
+        <button class="nav-item" data-section="flexibility">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M4 4h16v6H4zM4 14h16v6H4zM8 7h.01M8 17h.01"/></svg>
+          <span>Flexibility</span>
+        </button>
+        <button class="nav-item" data-section="model">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M12 2l9 5-9 5-9-5 9-5Zm0 10l9-5m-9 5v10m-9-15v10l9 5"/></svg>
+          <span>Model &amp; Inputs</span>
+        </button>
+        <button class="nav-item" data-section="scenario">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M10 3H3v7h7V3Zm11 0h-7v4h7V3Zm0 8h-7v10h7V11ZM10 14H3v7h7v-7Z"/></svg>
+          <span>Scenario Lab</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="status" id="statusChip">
+          <span class="dot" id="statusDot"></span>
+          <span id="statusText">Connecting…</span>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light / dark">
+          <svg class="ic sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66 5.66l1.41 1.41M4.93 4.93l1.41 1.41m0 11.32l-1.41 1.41M19.07 4.93l-1.41 1.41M12 8a4 4 0 100 8 4 4 0 000-8Z"/></svg>
+          <svg class="ic moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79Z"/></svg>
+          <span class="theme-label">Theme</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ===================== MAIN ===================== -->
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menuToggle" aria-label="Toggle navigation">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div class="topbar-titles">
+          <h1 id="pageTitle">Overview</h1>
+          <p id="pageSubtitle">A cost- and carbon-aware view of a flexible data centre</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="pill" id="datasetPill">15-min · 24 h horizon</span>
+        </div>
+      </header>
+
+      <div class="content" id="content">
+
+        <!-- ============ OVERVIEW ============ -->
+        <section class="section active" id="section-overview">
+          <div class="hero">
+            <div class="hero-copy">
+              <span class="eyebrow">MILP flexibility study · Pyomo</span>
+              <h2>How much grid flexibility can a data centre deliver — and what does it save?</h2>
+              <p>This dashboard explores a mixed-integer optimisation model of a 1&nbsp;MW-class data centre.
+                 It quantifies the cost of running the site, the savings from shifting flexible compute and
+                 dispatching on-site storage, and the demand-response duration the site can sustain across the day.</p>
+              <div class="hero-cta">
+                <button class="btn btn-primary" data-goto="optimisation">See the savings</button>
+                <button class="btn btn-ghost" data-goto="flexibility">Explore flexibility</button>
+              </div>
+            </div>
+            <div class="hero-visual">
+              <div id="schematic" class="schematic-host"></div>
+            </div>
+          </div>
+
+          <div class="kpi-grid" id="overviewKpis">
+            <div class="kpi-card skeleton"></div>
+            <div class="kpi-card skeleton"></div>
+            <div class="kpi-card skeleton"></div>
+            <div class="kpi-card skeleton"></div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>Where the energy goes</h3>
+                <span class="card-note">Baseline day</span>
+              </div>
+              <div class="chart" id="overviewDonut" style="height:320px"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>The three questions this model answers</h3></div>
+              <div class="steps">
+                <div class="step">
+                  <div class="step-badge" style="--c:var(--c-slate)">1</div>
+                  <div><h4>Baseline</h4><p>What does it cost to run the site under a time-of-use tariff, with no flexibility?</p></div>
+                </div>
+                <div class="step">
+                  <div class="step-badge" style="--c:var(--c-emerald)">2</div>
+                  <div><h4>Optimise</h4><p>Shift flexible workloads and dispatch UPS + thermal storage to cut the electricity bill.</p></div>
+                </div>
+                <div class="step">
+                  <div class="step-badge" style="--c:var(--c-amber)">3</div>
+                  <div><h4>Flex</h4><p>How long can the site hold a demand change of a given size, at any hour of the day?</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ BASELINE ============ -->
+        <section class="section" id="section-baseline">
+          <div class="kpi-grid" id="baselineKpis"></div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><h3>Grid power &amp; electricity price</h3><span class="card-note">stacked draw vs tariff</span></div>
+              <div class="chart" id="baselinePower" style="height:380px"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Thermal response</h3><span class="card-note">key temperatures</span></div>
+              <div class="chart" id="baselineTemps" style="height:380px"></div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><h3>Operating cost through the day</h3><span class="card-note">£ per 15 min</span></div>
+              <div class="chart" id="baselineCost" style="height:320px"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>IT workload</h3><span class="card-note">inflexible vs flexible</span></div>
+              <div class="chart" id="baselineWorkload" style="height:320px"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ OPTIMISATION ============ -->
+        <section class="section" id="section-optimisation">
+          <div class="kpi-grid" id="optKpis"></div>
+          <div class="card wide">
+            <div class="card-head"><h3>Optimised vs baseline power</h3><span class="card-note">load-shifting against the tariff</span></div>
+            <div class="chart" id="optPower" style="height:400px"></div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><h3>Cumulative electricity cost</h3><span class="card-note">savings open up over the day</span></div>
+              <div class="chart" id="optCostCum" style="height:340px"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Storage dispatch</h3><span class="card-note">UPS charge / discharge</span></div>
+              <div class="chart" id="optStorage" style="height:340px"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ FLEXIBILITY ============ -->
+        <section class="section" id="section-flexibility">
+          <div class="kpi-grid" id="flexKpis"></div>
+          <div class="card wide">
+            <div class="card-head">
+              <h3>Flexibility envelope</h3>
+              <span class="card-note">how long a demand change can be sustained · click a cell for detail</span>
+            </div>
+            <div class="chart" id="flexHeatmap" style="height:460px"></div>
+            <p class="legend-hint">
+              <span class="chip chip-rose">Negative kW = load reduction (curtailment)</span>
+              <span class="chip chip-sky">Positive kW = load increase (absorption)</span>
+              Colour shows the maximum duration (hours) the site can hold that change.
+            </p>
+          </div>
+          <div class="card wide" id="flexDetailCard" hidden>
+            <div class="card-head">
+              <h3 id="flexDetailTitle">Event detail</h3>
+              <span class="card-note" id="flexDetailNote"></span>
+            </div>
+            <div class="grid-2">
+              <div class="chart" id="flexDetailPower" style="height:340px"></div>
+              <div class="chart" id="flexDetailStorage" style="height:340px"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ MODEL & INPUTS ============ -->
+        <section class="section" id="section-model">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><h3>System schematic</h3><span class="card-note">energy &amp; heat flows</span></div>
+              <div id="schematicLarge" class="schematic-host tall"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Model at a glance</h3></div>
+              <div class="spec-grid" id="specGrid"></div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><h3>Input: demand &amp; tariff</h3><span class="card-note">what drives the model</span></div>
+              <div class="chart" id="inputProfiles" style="height:340px"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Workload shiftability</h3><span class="card-note">deferrable fraction by tranche</span></div>
+              <div class="chart" id="inputShift" style="height:340px"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SCENARIO LAB ============ -->
+        <section class="section" id="section-scenario">
+          <div class="grid-scenario">
+            <div class="card controls-card">
+              <div class="card-head"><h3>Scenario controls</h3></div>
+              <div class="controls" id="scenarioControls"></div>
+              <div class="control-actions">
+                <button class="btn btn-primary" id="runScenarioBtn">
+                  <span class="btn-label">Run optimisation</span>
+                  <span class="spinner" hidden></span>
+                </button>
+                <button class="btn btn-ghost" id="resetScenarioBtn">Reset</button>
+              </div>
+              <p class="controls-hint">Each run re-solves the MILP live with your parameters
+                (~1–2&nbsp;s). Savings compare a matched baseline to the optimised schedule.</p>
+            </div>
+            <div class="scenario-results">
+              <div class="kpi-grid compact" id="scenarioKpis">
+                <div class="empty-hint">Set your parameters and press <strong>Run optimisation</strong> to see live results.</div>
+              </div>
+              <div class="card">
+                <div class="card-head"><h3>Live result — power profile</h3><span class="card-note" id="scenarioNote"></span></div>
+                <div class="chart" id="scenarioPower" style="height:380px"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="/static/dashboard/js/schematic.js"></script>
+  <script src="/static/dashboard/js/charts.js"></script>
+  <script src="/static/dashboard/js/app.js"></script>
+</body>
+</html>

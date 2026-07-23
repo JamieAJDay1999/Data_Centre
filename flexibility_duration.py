@@ -12,6 +12,7 @@ import time
 from inputs.parameters_optimisation import ModelParameters, generate_tariff
 # This imported function will need to be updated separately to handle Pyomo model objects
 from plotting_and_saving.flexibility_duration_results_and_plots import extract_detailed_results, plot_flex_contribution_grid, save_heatmap_from_results
+from solver_utils import create_solver, set_time_limit
 
 # --- Path Configuration ------------------------------------------------------
 # Define base directories for data and images
@@ -139,9 +140,15 @@ def add_it_and_job_constraints(m, params, data):
     for s in m.TEXT_SLOTS:
         m.WeightSum.add(sum(m.w[s, i] for i in m.PW_POINTS) == 1)
 
-    def sos_rule(model, s):
-        return [model.w[s, i] for i in model.PW_POINTS]
-    m.CPU_SOS2 = pyo.SOSConstraint(m.TEXT_SLOTS, rule=sos_rule, sos=2)
+    m.SEGMENTS = pyo.RangeSet(0, num_pw_points - 2)
+    m.pw_segment = pyo.Var(m.TEXT_SLOTS, m.SEGMENTS, within=pyo.Binary)
+    m.PiecewiseAdjacency = pyo.ConstraintList()
+    for s in m.TEXT_SLOTS:
+        m.PiecewiseAdjacency.add(sum(m.pw_segment[s, seg] for seg in m.SEGMENTS) == 1)
+        m.PiecewiseAdjacency.add(m.w[s, 0] <= m.pw_segment[s, 0])
+        m.PiecewiseAdjacency.add(m.w[s, num_pw_points - 1] <= m.pw_segment[s, num_pw_points - 2])
+        for i in range(1, num_pw_points - 1):
+            m.PiecewiseAdjacency.add(m.w[s, i] <= m.pw_segment[s, i - 1] + m.pw_segment[s, i])
     
     m.CPUandPower = pyo.ConstraintList()
     for s in m.TEXT_SLOTS:
@@ -315,10 +322,9 @@ def find_max_duration(params, data, baseline_df, start_timestep, flex_kw, search
         
         model = build_duration_model(params, data, initial_state, baseline_df, start_timestep, flex_kw, mid_duration)
         
-        # MODIFIED: Use Pyomo solver
-        solver = pyo.SolverFactory('scip') # Or 'glpk', 'scip', etc.
-        solver.options['limits/time'] = SOLVER_TIME_LIMIT_SECONDS
-        results = solver.solve(model, tee=False)
+        solver, solver_name = create_solver()
+        set_time_limit(solver, solver_name, SOLVER_TIME_LIMIT_SECONDS)
+        results = solver.solve(model, tee=False, load_solutions=False)
         
         term_cond = results.solver.termination_condition 
         #if term_cond in [TerminationCondition.optimal, TerminationCondition.maxTimeLimit]:
@@ -387,13 +393,15 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
                 initial_state = baseline_df.loc[ts].to_dict()
                 model = build_duration_model(params, data, initial_state, baseline_df, ts, fm, max_dur_steps)
                 
-                # MODIFIED: Use Pyomo solver for the final detailed run
-                solver = pyo.SolverFactory('scip')
-                solver.options['limits/time'] = SOLVER_TIME_LIMIT_SECONDS
-                results = solver.solve(model, tee=False)
+                solver, solver_name = create_solver()
+                set_time_limit(solver, solver_name, SOLVER_TIME_LIMIT_SECONDS)
+                results = solver.solve(model, tee=False, load_solutions=False)
                 
-                # MODIFIED: Check Pyomo termination condition
-                #if results.solver.termination_condition == TerminationCondition.optimal:
+                if results.solver.termination_condition != TerminationCondition.optimal:
+                    print(f"  -> Detailed run did not find an optimal solution: {results.solver.termination_condition}")
+                    continue
+
+                model.solutions.load_from(results)
                 results_df = extract_detailed_results(model, params, data, ts, max_dur_steps, baseline_df)
                 
                 csv_filename = f"flex_duration_detailed_results_ts{ts}_flex{str(fm).replace('-', 'neg')}.csv"
@@ -418,8 +426,8 @@ def main(flex_magnitudes, timesteps, include_banked_results, search_type,generat
     )
 
 if __name__ == '__main__':
-    timesteps = [75,80, 85, 90, 95]# [1] + list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
+    timesteps = [1] + list(range(5, 97, 5))  # Start at 1, then every 5th timestep up to 96
     flex_magnitudes =  [ -100, -150, -200, -250, -300, -350, -400, -450, -500]
-    include_banked_results = "flex_duration_results.csv"
+    include_banked_results = None #"flex_duration_results.csv"
     main(flex_magnitudes, timesteps, include_banked_results, search_type='linear', generate_plots=True)
     #[10, 20, 25, 30, 35, 40, 50, 55, 60, 70, 75, 80, 85, 90, 95]#

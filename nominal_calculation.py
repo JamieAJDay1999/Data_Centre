@@ -10,6 +10,7 @@ from inputs.parameters_optimisation import ModelParameters, generate_tariff
 # MODIFIED: Removed import of add_it_and_job_constraints, as it will be defined locally
 from constraints import add_ups_constraints, add_power_balance_constraints, add_cooling_constraints
 from plotting_and_saving.nom_opt_charts import gen_charts
+from solver_utils import create_solver
 # --- Path Configuration ------------------------------------------------------
 DATA_DIR_INPUTS = pathlib.Path("static/data/inputs")
 DATA_DIR_OUTPUTS = pathlib.Path("static/data/nominal_outputs")
@@ -86,7 +87,15 @@ def build_model(params: ModelParameters, data: dict, linear: bool = False):
         
         m.w = pyo.Var(m.TEXT_SLOTS, m.PW_POINTS, within=pyo.NonNegativeReals)
         m.cpu_power_factor = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals)
-        m.cpu_sos2 = pyo.SOSConstraint(m.TEXT_SLOTS, var=m.w, sos=2)
+        m.PW_SEGMENTS = pyo.RangeSet(0, m.num_pw_points - 2)
+        m.pw_segment = pyo.Var(m.TEXT_SLOTS, m.PW_SEGMENTS, within=pyo.Binary)
+        m.PiecewiseAdjacency = pyo.ConstraintList()
+        for s in m.TEXT_SLOTS:
+            m.PiecewiseAdjacency.add(sum(m.pw_segment[s, seg] for seg in m.PW_SEGMENTS) == 1)
+            m.PiecewiseAdjacency.add(m.w[s, 0] <= m.pw_segment[s, 0])
+            m.PiecewiseAdjacency.add(m.w[s, m.num_pw_points - 1] <= m.pw_segment[s, m.num_pw_points - 2])
+            for i in range(1, m.num_pw_points - 1):
+                m.PiecewiseAdjacency.add(m.w[s, i] <= m.pw_segment[s, i - 1] + m.pw_segment[s, i])
 
         add_it_and_job_constraints_pwl_nominal(m, params, data)
     else:
@@ -342,7 +351,7 @@ def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, 
     ax2.grid(True)
     fig1.tight_layout()
     fig1.savefig(IMAGE_DIR / 'nominal_cost_and_price.png')
-    print("✅ Nominal cost chart saved.")
+    print("Nominal cost chart saved.")
 
     gen_charts(df, time_slots_ext, IMAGE_DIR)
 
@@ -367,7 +376,7 @@ def create_and_save_charts(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, 
     
     fig7.tight_layout(rect=[0, 0, 0.9, 1])
     fig7.savefig(IMAGE_DIR / 'it_load_stacked_bar.png')
-    print("✅ IT workload stacked bar chart saved.")
+    print("IT workload stacked bar chart saved.")
 
     plt.close('all')
     print("\nAll charts have been generated and saved.")
@@ -381,7 +390,8 @@ def run_single_calculation(params: ModelParameters, input_data: dict, msg=False,
     print(f"Building and solving model for nominal case ({model_type})...")
     model = build_model(params, input_data, linear=linear)
 
-    solver = pyo.SolverFactory('scip')
+    solver, solver_name = create_solver()
+    print(f"Using Pyomo solver: {solver_name}")
     results = solver.solve(model, tee=msg)
 
     if results.solver.termination_condition == pyo.TerminationCondition.optimal:

@@ -16,7 +16,7 @@ def gen_charts(df, time_slots_ext, IMAGE_DIR):
     ax3_tes.grid(True)
     fig2.tight_layout()
     fig2.savefig(IMAGE_DIR / 'tes_performance.png')
-    print("✅ TES performance chart saved.")
+    print("TES performance chart saved.")
 
     # --- Figure 3: Data Centre Temperatures ---
     fig3, ax4 = plt.subplots(figsize=(12, 6))
@@ -31,7 +31,7 @@ def gen_charts(df, time_slots_ext, IMAGE_DIR):
     ax4.grid(True)
     fig3.tight_layout()
     fig3.savefig(IMAGE_DIR / 'dc_temperatures.png')
-    print("✅ Data centre temperatures chart saved.")
+    print("Data centre temperatures chart saved.")
 
     # --- Figure 4: Cooling System Power Components ---
     fig4, ax5 = plt.subplots(figsize=(12, 6))
@@ -45,7 +45,7 @@ def gen_charts(df, time_slots_ext, IMAGE_DIR):
     ax5.grid(True)
     fig4.tight_layout()
     fig4.savefig(IMAGE_DIR / 'cooling_power_components.png')
-    print("✅ Cooling system power components chart saved.")
+    print("Cooling system power components chart saved.")
 
     # --- Figure 5: Thermal Cooling Power (q) ---
     fig5, ax6 = plt.subplots(figsize=(12, 6))
@@ -61,7 +61,7 @@ def gen_charts(df, time_slots_ext, IMAGE_DIR):
     ax6.grid(True)
     fig5.tight_layout()
     fig5.savefig(IMAGE_DIR / 'thermal_cooling_power.png')
-    print("✅ Thermal cooling power chart saved.")
+    print("Thermal cooling power chart saved.")
 
     # --- Figure 6: Cumulative Cost ---
     fig6, ax7 = plt.subplots(figsize=(12, 7))
@@ -73,4 +73,4 @@ def gen_charts(df, time_slots_ext, IMAGE_DIR):
     ax7.grid(True)
     fig6.tight_layout()
     fig6.savefig(IMAGE_DIR / 'cumulative_nominal_cost.png')
-    print("✅ Cumulative cost chart saved.")
+    print("Cumulative cost chart saved.")

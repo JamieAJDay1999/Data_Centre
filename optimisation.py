@@ -11,6 +11,7 @@ from matplotlib.ticker import MaxNLocator # Import the ticker tool
 from inputs.parameters_optimisation import ModelParameters, generate_tariff
 from constraints import add_it_and_job_constraints, add_ups_constraints, add_power_balance_constraints, add_cooling_constraints
 from plotting_and_saving.nom_opt_charts import gen_charts
+from solver_utils import create_solver
 
 # --- Path Configuration ------------------------------------------------------
 # Define base directories for data, images, and debugging
@@ -351,7 +352,7 @@ def create_power_chart(df: pd.DataFrame, IMAGE_DIR: pathlib.Path):
 
     # REMOVED: fig.tight_layout() is no longer needed
     fig.savefig(IMAGE_DIR / 'power_consumption_chart.png')
-    print("✅ Power consumption chart saved.")
+    print("Power consumption chart saved.")
     plt.show()
 
 
@@ -405,7 +406,7 @@ def create_workload_chart(df: pd.DataFrame, flex_load_origin_df: pd.DataFrame, d
 
     # REMOVED: fig.tight_layout() is no longer needed
     fig.savefig(IMAGE_DIR / 'it_workload_chart.png')
-    print("✅ IT workload chart saved.")
+    print("IT workload chart saved.")
     plt.show()
 
 
@@ -505,7 +506,7 @@ def create_power_stack_chart(df: pd.DataFrame, image_dir: pathlib.Path):
     fig.tight_layout()
     output_path = image_dir / 'power_resource_bar_chart_reordered.png'
     fig.savefig(output_path)
-    print(f"✅ Power bar chart saved to '{output_path}'")
+    print(f"Power bar chart saved to '{output_path}'")
     plt.show()
 
 def run_single_optimization(params: ModelParameters, input_data: dict, msg=False):
@@ -515,7 +516,8 @@ def run_single_optimization(params: ModelParameters, input_data: dict, msg=False
     print("Building and solving model with Pyomo...")
     model = build_model(params, input_data)
 
-    solver = pyo.SolverFactory('scip')
+    solver, solver_name = create_solver()
+    print(f"Using Pyomo solver: {solver_name}")
 
     # Change 1: Add 'load_solutions=False' to the solve command.
     # This tells Pyomo to run the solver but wait to load the results.

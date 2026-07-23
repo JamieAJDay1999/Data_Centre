@@ -1,3 +1,5 @@
 /static
 /venv
 /archive/data
+__pycache__/
+*.py[cod]

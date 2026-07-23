@@ -26,11 +26,17 @@ def add_it_and_job_constraints(m, params, data):
         # The weights for each time slot must sum to 1.
         m.WeightSum.add(sum(m.w[s, i] for i in m.PW_POINTS) == 1)
 
-    # FIX: Correctly declare the indexed SOS2 constraint
-    # We define a rule that, for each time slot 's', returns the list of variables for the SOS2 set.
-    def sos_rule(model, s):
-        return [model.w[s, i] for i in model.PW_POINTS]
-    m.CPU_SOS2 = pyo.SOSConstraint(m.TEXT_SLOTS, rule=sos_rule, sos=2)
+    # Enforce SOS2-style adjacency with regular linear constraints so solvers
+    # like HiGHS can handle the piecewise model without native SOS support.
+    m.SEGMENTS = pyo.RangeSet(0, num_pw_points - 2)
+    m.pw_segment = pyo.Var(m.TEXT_SLOTS, m.SEGMENTS, within=pyo.Binary)
+    m.PiecewiseAdjacency = pyo.ConstraintList()
+    for s in m.TEXT_SLOTS:
+        m.PiecewiseAdjacency.add(sum(m.pw_segment[s, seg] for seg in m.SEGMENTS) == 1)
+        m.PiecewiseAdjacency.add(m.w[s, 0] <= m.pw_segment[s, 0])
+        m.PiecewiseAdjacency.add(m.w[s, num_pw_points - 1] <= m.pw_segment[s, num_pw_points - 2])
+        for i in range(1, num_pw_points - 1):
+            m.PiecewiseAdjacency.add(m.w[s, i] <= m.pw_segment[s, i - 1] + m.pw_segment[s, i])
 
     # 4. Define total_cpu and the power factor based on these weights.
     m.CPUandPower = pyo.ConstraintList()

@@ -4,8 +4,9 @@ numpy>=1.23.0
 
 # Optimization framework
 pyomo>=6.5.0
-# Note: Pyomo requires a solver backend. The code uses SCIP solver.
-# Install SCIP separately or use an alternative solver like:
+# HiGHS solver backend used by the automatic Pyomo solver fallback.
+highspy>=1.7.0
+# Optional alternative solver backends:
 # - GLPK (free, open-source): install system package or use conda
 # - CBC (free, open-source): install system package or use conda
 # - SCIP (academic license): download from https://www.scipopt.org/
@@ -14,6 +15,10 @@ pyomo>=6.5.0
 # Visualization
 matplotlib>=3.6.0
 seaborn>=0.12.0
+
+# Interactive web dashboard (webapp/ + run_dashboard.py).
+# Plotly is vendored client-side (static/dashboard/vendor), so only Flask is needed.
+flask>=3.0.0
 
 # Testing (optional, used in archive)
 pytest>=7.0.0
