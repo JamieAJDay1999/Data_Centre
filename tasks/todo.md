@@ -140,3 +140,38 @@
 - Recommended a sequential rolling-MPC architecture with boundary-indexed physical states, workload backlog, DST-complete timestamps, signed-price safeguards, and chained checkpoints.
 - Included transitional and monolithic alternatives, phased implementation tasks, decision gates, validation fixtures, annual KPIs, and sensitivity execution guidance.
 - Validated the Markdown structure, ASCII encoding, file status, and whitespace with repository checks.
+
+# Rolling-Year Optimisation Implementation
+
+- [x] Add explicit serialisable physical and workload boundary states.
+- [x] Build a continuous UTC/local 2025 quarter-hour timeline including both DST days.
+- [x] Implement a boundary-indexed horizon MILP with TES/UPS mode exclusivity.
+- [x] Carry physical state and deferred workload between sequential daily solves.
+- [x] Add original-price settlement-cost accounting and committed-only outputs.
+- [x] Add fingerprinted daily checkpoints and deterministic resume behaviour.
+- [x] Add a `run_rolling_year.py` CLI while retaining the independent-day runner.
+- [x] Verify two-day handoff, signed prices, DST coverage, workload conservation, and cost reconciliation.
+- [x] Document commands, outputs, solver behaviour, and known first-version limitations.
+
+## Acceptance criteria
+
+- A scenario is solved as sequential linked daily horizons, never as independent days.
+- Every committed 2025 quarter-hour appears exactly once, including clock-change dates.
+- All physical boundary states pass exactly from one daily solve to the next.
+- Flexible workload is neither lost nor duplicated at a day boundary.
+- Original signed prices are accepted and realised cost is calculated from committed grid import.
+- Clean and resumed short runs produce numerically identical stitched outputs.
+
+## Results
+
+- Added `rolling_optimisation/` and the `run_rolling_year.py` entry point.
+- Validated all 35,040 quarter-hours and 365 local dates, including 92- and
+  100-interval clock-change days.
+- Replaced the unstable 15-minute explicit thermal step with a linear
+  implicit-Euler step so exact physical initial states are feasible.
+- Passed a linked two-day signed-price run and deterministic checkpoint resume:
+  zero state residual, zero UPS/TES overlap, workload residual below
+  3e-15 CPU-hours, and settlement-cost reconciliation within 2e-12 GBP.
+- Solved both daylight-saving days and the difficult 4 October negative-price
+  case; time-limited incumbents retain their solver bound and recorded gap.
+- Added three default unit/data tests plus an opt-in solver integration test.

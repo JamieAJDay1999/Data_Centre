@@ -1,0 +1,231 @@
+{
+  "audits": {
+    "closing_workload_cpu_h": 0.6184500000000002,
+    "committed_grid_energy_kwh": 18789.7036457015,
+    "committed_settlement_cost_gbp": -18.431326078438996,
+    "committed_workload_cpu_h": 6.65404999999999,
+    "initial_state_max_residual": 0.0,
+    "max_tes_charge_discharge_overlap_kw": 0.0,
+    "max_ups_charge_discharge_overlap_kw": 0.0,
+    "objective_reconciliation_gbp": 0.0,
+    "opening_workload_cpu_h": 7.2724999999999875,
+    "workload_conservation_residual_cpu_h": -2.6645352591003757e-15
+  },
+  "closing_state": {
+    "cold_aisle_temperature_c": 23.0,
+    "hot_aisle_temperature_c": 26.31919884898339,
+    "it_temperature_c": 28.98392477198827,
+    "rack_temperature_c": 26.343128264376123,
+    "tes_energy_kwh": 270.00000000000006,
+    "ups_energy_kwh": 300.0
+  },
+  "closing_workload": [
+    {
+      "arrival_utc": "2025-10-04T20:00:00+00:00",
+      "cohort_id": "2025-10-04T20:00:00+00:00__t4",
+      "latest_start_utc": "2025-10-04T23:00:00+00:00",
+      "remaining_cpu_hours": 0.008750000000000228,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T20:15:00+00:00",
+      "cohort_id": "2025-10-04T20:15:00+00:00__t4",
+      "latest_start_utc": "2025-10-04T23:15:00+00:00",
+      "remaining_cpu_hours": 0.015374999999999998,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T20:30:00+00:00",
+      "cohort_id": "2025-10-04T20:30:00+00:00__t4",
+      "latest_start_utc": "2025-10-04T23:30:00+00:00",
+      "remaining_cpu_hours": 0.015374999999999998,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T20:45:00+00:00",
+      "cohort_id": "2025-10-04T20:45:00+00:00__t4",
+      "latest_start_utc": "2025-10-04T23:45:00+00:00",
+      "remaining_cpu_hours": 0.015374999999999998,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T21:00:00+00:00",
+      "cohort_id": "2025-10-04T21:00:00+00:00__t3",
+      "latest_start_utc": "2025-10-04T23:00:00+00:00",
+      "remaining_cpu_hours": 0.020000000000000004,
+      "tranche": 3
+    },
+    {
+      "arrival_utc": "2025-10-04T21:00:00+00:00",
+      "cohort_id": "2025-10-04T21:00:00+00:00__t4",
+      "latest_start_utc": "2025-10-05T00:00:00+00:00",
+      "remaining_cpu_hours": 0.015,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T21:15:00+00:00",
+      "cohort_id": "2025-10-04T21:15:00+00:00__t3",
+      "latest_start_utc": "2025-10-04T23:15:00+00:00",
+      "remaining_cpu_hours": 0.015,
+      "tranche": 3
+    },
+    {
+      "arrival_utc": "2025-10-04T21:15:00+00:00",
+      "cohort_id": "2025-10-04T21:15:00+00:00__t4",
+      "latest_start_utc": "2025-10-05T00:15:00+00:00",
+      "remaining_cpu_hours": 0.015,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T21:30:00+00:00",
+      "cohort_id": "2025-10-04T21:30:00+00:00__t3",
+      "latest_start_utc": "2025-10-04T23:30:00+00:00",
+      "remaining_cpu_hours": 0.017500000000000016,
+      "tranche": 3
+    },
+    {
+      "arrival_utc": "2025-10-04T21:30:00+00:00",
+      "cohort_id": "2025-10-04T21:30:00+00:00__t4",
+      "latest_start_utc": "2025-10-05T00:30:00+00:00",
+      "remaining_cpu_hours": 0.041,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T21:45:00+00:00",
+      "cohort_id": "2025-10-04T21:45:00+00:00__t3",
+      "latest_start_utc": "2025-10-04T23:45:00+00:00",
+      "remaining_cpu_hours": 0.025625,
+      "tranche": 3
+    },
+    {
+      "arrival_utc": "2025-10-04T21:45:00+00:00",
+      "cohort_id": "2025-10-04T21:45:00+00:00__t4",
+      "latest_start_utc": "2025-10-05T00:45:00+00:00",
+      "remaining_cpu_hours": 0.041,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T22:00:00+00:00",
+      "cohort_id": "2025-10-04T22:00:00+00:00__t2",
+      "latest_start_utc": "2025-10-04T23:00:00+00:00",
+      "remaining_cpu_hours": 0.012599999999999998,
+      "tranche": 2
+    },
+    {
+      "arrival_utc": "2025-10-04T22:00:00+00:00",
+      "cohort_id": "2025-10-04T22:00:00+00:00__t3",
+      "latest_start_utc": "2025-10-05T00:00:00+00:00",
+      "remaining_cpu_hours": 0.02625,
+      "tranche": 3
+    },
+    {
+      "arrival_utc": "2025-10-04T22:00:00+00:00",
+      "cohort_id": "2025-10-04T22:00:00+00:00__t4",
+      "latest_start_utc": "2025-10-05T01:00:00+00:00",
+      "remaining_cpu_hours": 0.04725,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T22:15:00+00:00",
+      "cohort_id": "2025-10-04T22:15:00+00:00__t2",
+      "latest_start_utc": "2025-10-04T23:15:00+00:00",
+      "remaining_cpu_hours": 0.0189,
+      "tranche": 2
+    },
+    {
+      "arrival_utc": "2025-10-04T22:15:00+00:00",
+      "cohort_id": "2025-10-04T22:15:00+00:00__t3",
+      "latest_start_utc": "2025-10-05T00:15:00+00:00",
+      "remaining_cpu_hours": 0.02625,
+      "tranche": 3
+    },
+    {
+      "arrival_utc": "2025-10-04T22:15:00+00:00",
+      "cohort_id": "2025-10-04T22:15:00+00:00__t4",
+      "latest_start_utc": "2025-10-05T01:15:00+00:00",
+      "remaining_cpu_hours": 0.03675,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T22:30:00+00:00",
+      "cohort_id": "2025-10-04T22:30:00+00:00__t1",
+      "latest_start_utc": "2025-10-04T23:00:00+00:00",
+      "remaining_cpu_hours": 0.021,
+      "tranche": 1
+    },
+    {
+      "arrival_utc": "2025-10-04T22:30:00+00:00",
+      "cohort_id": "2025-10-04T22:30:00+00:00__t2",
+      "latest_start_utc": "2025-10-04T23:30:00+00:00",
+      "remaining_cpu_hours": 0.0168,
+      "tranche": 2
+    },
+    {
+      "arrival_utc": "2025-10-04T22:30:00+00:00",
+      "cohort_id": "2025-10-04T22:30:00+00:00__t3",
+      "latest_start_utc": "2025-10-05T00:30:00+00:00",
+      "remaining_cpu_hours": 0.025199999999999997,
+      "tranche": 3
+    },
+    {
+      "arrival_utc": "2025-10-04T22:30:00+00:00",
+      "cohort_id": "2025-10-04T22:30:00+00:00__t4",
+      "latest_start_utc": "2025-10-05T01:30:00+00:00",
+      "remaining_cpu_hours": 0.042,
+      "tranche": 4
+    },
+    {
+      "arrival_utc": "2025-10-04T22:45:00+00:00",
+      "cohort_id": "2025-10-04T22:45:00+00:00__t1",
+      "latest_start_utc": "2025-10-04T23:15:00+00:00",
+      "remaining_cpu_hours": 0.01119999999999974,
+      "tranche": 1
+    },
+    {
+      "arrival_utc": "2025-10-04T22:45:00+00:00",
+      "cohort_id": "2025-10-04T22:45:00+00:00__t2",
+      "latest_start_utc": "2025-10-04T23:45:00+00:00",
+      "remaining_cpu_hours": 0.021,
+      "tranche": 2
+    },
+    {
+      "arrival_utc": "2025-10-04T22:45:00+00:00",
+      "cohort_id": "2025-10-04T22:45:00+00:00__t3",
+      "latest_start_utc": "2025-10-05T00:45:00+00:00",
+      "remaining_cpu_hours": 0.021,
+      "tranche": 3
+    },
+    {
+      "arrival_utc": "2025-10-04T22:45:00+00:00",
+      "cohort_id": "2025-10-04T22:45:00+00:00__t4",
+      "latest_start_utc": "2025-10-05T01:45:00+00:00",
+      "remaining_cpu_hours": 0.04725,
+      "tranche": 4
+    }
+  ],
+  "committed_csv_sha256": "8c6c8be0efad16be3ed7a6bdd355795bf3a33d683c8366eaf576b1ab4c4085ea",
+  "core_steps": 96,
+  "date": "2025-10-04",
+  "fingerprint": "ee346de494bc43618a58e83ac42b06a410358422dfc149392cd7e3fc817d38eb",
+  "opening_state": {
+    "cold_aisle_temperature_c": 20,
+    "hot_aisle_temperature_c": 27,
+    "it_temperature_c": 28.5,
+    "rack_temperature_c": 26,
+    "tes_energy_kwh": 500.0,
+    "ups_energy_kwh": 600.0
+  },
+  "opening_workload": [],
+  "predecessor_checkpoint_hash": "ROOT",
+  "schema_version": 1,
+  "solver": {
+    "lower_bound_gbp": -Infinity,
+    "name": "scip",
+    "objective_gbp": -24.265280485288248,
+    "relative_gap": null,
+    "runtime_s": 30.124807100000908,
+    "status": "ok",
+    "termination_condition": "maxTimeLimit",
+    "upper_bound_gbp": Infinity
+  }
+}

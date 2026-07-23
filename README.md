@@ -147,6 +147,47 @@ python optimisation.py
 ```
 Performs cost-minimizing optimization with flexible workloads.
 
+### Running the linked rolling year
+
+The production annual path is `run_rolling_year.py`. It solves one local trading
+day at a time with a three-hour look-ahead, commits only that day, and passes the
+physical and outstanding-workload state into the following solve.
+
+```powershell
+# Validate all 365 dates and 35,040 quarter-hours without solving
+python run_rolling_year.py --validate-only
+
+# Small linked smoke test
+python run_rolling_year.py --start-date 2025-01-01 --end-date 2025-01-02
+
+# Full sequential chains
+python run_rolling_year.py --mode baseline
+python run_rolling_year.py --mode optimised
+```
+
+SCIP is preferred. If it is unavailable, the runner automatically uses HiGHS
+when `highspy` is installed. Daily checkpoints and committed interval results
+are written under `static/data/rolling_year_outputs/<scenario_id>/`; rerunning
+the same command validates and resumes the checkpoint chain.
+
+The rolling implementation:
+
+- includes the 92- and 100-quarter-hour daylight-saving dates;
+- uses boundary states for UPS energy, TES energy, and four temperatures;
+- carries deferred workload cohorts and absolute deadlines across days;
+- prevents simultaneous UPS or TES charging/discharging;
+- retains original signed settlement prices;
+- calculates realised cost from committed grid import only; and
+- uses a stable linear implicit-Euler discretisation for the thermal states.
+
+`run_imrp_year_sample.py` remains available as the legacy independent-day
+screening workflow. Its 363 daily cases are not a continuous annual trajectory.
+
+The first rolling baseline keeps workload inflexible and disables UPS/TES
+operation while using the common thermal model. A paper-specific fixed
+temperature/setpoint baseline can be added after the linked annual chain is
+accepted.
+
 ### Flexibility Analysis
 ```bash
 python flexibility_duration.py

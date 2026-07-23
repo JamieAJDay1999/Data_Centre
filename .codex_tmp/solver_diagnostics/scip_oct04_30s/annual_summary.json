@@ -1,0 +1,19 @@
+{
+  "committed_intervals": 96,
+  "cost_reconciliation_gbp": 0.0,
+  "final_outstanding_workload_cpu_h": 0.6184500000000002,
+  "grid_energy_kwh": 18789.7036457015,
+  "local_dates": 1,
+  "maximum_daily_boundary_residual": 0.0,
+  "maximum_initial_state_residual": 0.0,
+  "maximum_recorded_solver_gap": null,
+  "maximum_tes_overlap_kw": 0.0,
+  "maximum_ups_overlap_kw": 0.0,
+  "maximum_workload_conservation_residual_cpu_h": 2.6645352591003757e-15,
+  "mode": "optimised",
+  "non_optimal_horizons": 1,
+  "peak_grid_import_kw": 1659.6105137394413,
+  "scenario_id": "scip_oct04_30s",
+  "settlement_cost_gbp": -18.431326078438996,
+  "total_solver_runtime_s": 30.124807100000908
+}

@@ -2,3 +2,6 @@
 /venv
 /archive/data
 /rev_stack/results
+/.codex_tmp/rolling_smoke/
+__pycache__/
+*.pyc
