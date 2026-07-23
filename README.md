@@ -180,6 +180,16 @@ The rolling implementation:
 - calculates realised cost from committed grid import only; and
 - uses a stable linear implicit-Euler discretisation for the thermal states.
 
+The signed-price MILP was subsequently tightened for negative-price days. The
+central defaults use a four-segment non-uniform DLOG IT-power curve and one
+mode binary per storage asset, reducing a normal optimised horizon from about
+1,512 to 432 binaries. Solver-gap acceptance, optional physical throughput
+costs, terminal values, import/reserve limits, explicit price-treatment
+sensitivities and end-of-year workload look-ahead checks are exposed through
+`run_rolling_year.py`. The implementation decisions, approximation error,
+benchmark results and commands are recorded in
+[`docs/negative_price_reformulation.md`](docs/negative_price_reformulation.md).
+
 `run_imrp_year_sample.py` remains available as the legacy independent-day
 screening workflow. Its 363 daily cases are not a continuous annual trajectory.
 

@@ -1,7 +1,7 @@
 /static
-/venv
+/.venv
 /archive/data
 /rev_stack/results
-/.codex_tmp/rolling_smoke/
+/.codex_tmp/
 __pycache__/
 *.pyc

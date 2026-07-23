@@ -8,7 +8,11 @@ import pytest
 
 from rolling_optimisation.config import RollingConfig, default_initial_state
 from rolling_optimisation.model import new_workload_cohorts, solve_horizon
-from rolling_optimisation.timeline import build_annual_timeline, local_day_core_indices
+from rolling_optimisation.timeline import (
+    add_optimisation_prices,
+    build_annual_timeline,
+    local_day_core_indices,
+)
 from rolling_optimisation.types import OperationalState, WorkloadCohort
 
 
@@ -48,6 +52,32 @@ def test_state_and_workload_round_trip() -> None:
         tranche=4,
     )
     assert WorkloadCohort.from_dict(cohort.to_dict()) == cohort
+
+
+def test_logarithmic_piecewise_configuration_validation() -> None:
+    config = RollingConfig()
+    assert config.it_power_representation == "DLOG"
+    assert config.it_power_segments == 4
+    with pytest.raises(ValueError, match="power of two"):
+        RollingConfig(it_power_segments=6, it_power_representation="DLOG")
+
+
+def test_price_treatments_preserve_settlement_series(timeline: pd.DataFrame) -> None:
+    original = timeline["settlement_price_gbp_per_mwh"].copy()
+    signed = add_optimisation_prices(timeline, "signed")
+    capped = add_optimisation_prices(timeline, "floor_zero")
+    shifted = add_optimisation_prices(timeline, "shift_year_min")
+
+    pd.testing.assert_series_equal(
+        signed["settlement_price_gbp_per_mwh"], original
+    )
+    pd.testing.assert_series_equal(
+        capped["settlement_price_gbp_per_mwh"], original
+    )
+    assert capped["optimisation_price_gbp_per_mwh"].min() == 0
+    assert shifted.loc[
+        shifted["is_target_year"], "optimisation_price_gbp_per_mwh"
+    ].min() == pytest.approx(0)
 
 
 def test_generated_workload_matches_flexible_arrivals(timeline: pd.DataFrame) -> None:
@@ -109,6 +139,12 @@ def test_two_linked_signed_price_horizons(timeline: pd.DataFrame) -> None:
     )
     assert first.audits["max_ups_charge_discharge_overlap_kw"] == pytest.approx(0)
     assert first.audits["max_tes_charge_discharge_overlap_kw"] == pytest.approx(0)
+    assert first.audits["core_workload_unserved_after_lookahead_cpu_h"] == pytest.approx(
+        0
+    )
+    assert first.solver["found_feasible_incumbent"]
+    assert first.solver["binary_variables"] == 64
+    assert first.audits["maximum_it_power_approximation_error_kw"] < 6.25
     direct = (
         first.committed["grid_import_kw"]
         * first.committed["settlement_price_gbp_per_mwh"]
@@ -116,3 +152,35 @@ def test_two_linked_signed_price_horizons(timeline: pd.DataFrame) -> None:
         * config.dt_hours
     ).sum()
     assert first.committed["settlement_cost_gbp"].sum() == pytest.approx(direct)
+
+
+@pytest.mark.integration
+def test_optional_physical_costs_and_limits_reconcile(timeline: pd.DataFrame) -> None:
+    solver = _available_solver()
+    if solver is None:
+        pytest.skip("No supported MILP solver is available")
+    config = RollingConfig(
+        scenario_id="physical_cost_test",
+        solver_name=solver,
+        solver_time_limit_s=30,
+        mip_gap=0.01,
+        ups_reserve_kwh=400,
+        grid_import_limit_kw=1700,
+        ups_throughput_cost_gbp_per_kwh=0.01,
+        tes_throughput_cost_gbp_per_kwh_th=0.002,
+        terminal_ups_value_gbp_per_kwh=0.02,
+        terminal_tes_value_gbp_per_kwh_th=0.001,
+    )
+    result = solve_horizon(
+        config,
+        timeline.iloc[12 : 12 + 4 + config.lookahead_steps],
+        4,
+        default_initial_state(config),
+    )
+
+    assert result.audits["objective_reconciliation_gbp"] == pytest.approx(0)
+    assert result.audits["effective_grid_import_limit_kw"] == 1700
+    assert (
+        result.committed["state_start_ups_energy_kwh"].min()
+        >= config.ups_reserve_kwh
+    )

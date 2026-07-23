@@ -62,6 +62,7 @@ def _select_solver(config: RollingConfig):
             elif name == "appsi_highs":
                 solver.options["time_limit"] = config.solver_time_limit_s
                 solver.options["mip_rel_gap"] = config.mip_gap
+                solver.config.load_solution = False
             return name, solver
     raise RuntimeError(
         f"No requested MILP solver is available. Tried: {', '.join(candidates)}"
@@ -126,7 +127,14 @@ def solve_horizon(
     m.B = pyo.RangeSet(0, n_steps)
 
     # Physical boundary states.
-    m.e_ups_kwh = pyo.Var(m.B, bounds=(params.e_min_kwh, params.e_max_kwh))
+    ups_min_kwh = params.e_min_kwh
+    if config.ups_reserve_kwh is not None:
+        ups_min_kwh = max(ups_min_kwh, config.ups_reserve_kwh)
+    if ups_min_kwh > params.e_max_kwh:
+        raise ValueError(
+            f"UPS reserve {ups_min_kwh} kWh exceeds capacity {params.e_max_kwh} kWh"
+        )
+    m.e_ups_kwh = pyo.Var(m.B, bounds=(ups_min_kwh, params.e_max_kwh))
     m.e_tes_kwh = pyo.Var(
         m.B, bounds=(params.E_TES_min_kWh, params.TES_capacity_kWh)
     )
@@ -146,7 +154,13 @@ def solve_horizon(
     m.initial_state.add(m.t_hot[0] == initial_state.hot_aisle_temperature_c)
 
     # Workload and exact piecewise-linear CPU power.
-    m.total_cpu = pyo.Var(m.I, bounds=(0.0, params.max_cpu_usage))
+    m.total_cpu = pyo.Var(
+        m.I,
+        bounds=lambda mod, step: (
+            float(horizon.at[step, "inflexible_cpu"]),
+            params.max_cpu_usage,
+        ),
+    )
     m.p_it_total_kw = pyo.Var(
         m.I, bounds=(params.idle_power_kw, params.max_power_kw)
     )
@@ -186,52 +200,94 @@ def solve_horizon(
             == float(horizon.at[step, "inflexible_cpu"]) + flexible_rate
         )
 
-    breakpoints = np.linspace(0.0, 1.0, 11)
-    power_factors = breakpoints**1.32
-    m.P = pyo.RangeSet(0, len(breakpoints) - 1)
-    m.SEG = pyo.RangeSet(0, len(breakpoints) - 2)
-    m.weight = pyo.Var(m.I, m.P, within=pyo.NonNegativeReals)
-    m.segment = pyo.Var(m.I, m.SEG, within=pyo.Binary)
-    m.piecewise = pyo.ConstraintList()
-    for step in range(n_steps):
-        m.piecewise.add(sum(m.weight[step, point] for point in m.P) == 1)
-        m.piecewise.add(sum(m.segment[step, segment] for segment in m.SEG) == 1)
-        m.piecewise.add(m.weight[step, 0] <= m.segment[step, 0])
-        m.piecewise.add(
-            m.weight[step, len(breakpoints) - 1]
-            <= m.segment[step, len(breakpoints) - 2]
-        )
-        for point in range(1, len(breakpoints) - 1):
+    breakpoints = (
+        np.linspace(0.0, 1.0, config.it_power_segments + 1)
+        ** config.it_power_breakpoint_exponent
+    )
+    power_values = (
+        params.idle_power_kw
+        + (params.max_power_kw - params.idle_power_kw) * breakpoints**1.32
+    )
+    audit_cpu = np.linspace(0.0, 1.0, 10_001)
+    exact_power = (
+        params.idle_power_kw
+        + (params.max_power_kw - params.idle_power_kw) * audit_cpu**1.32
+    )
+    approximation_error = (
+        np.interp(audit_cpu, breakpoints, power_values) - exact_power
+    )
+    maximum_it_power_error_kw = float(np.max(np.abs(approximation_error)))
+    mean_it_power_error_kw = float(np.mean(approximation_error))
+    if config.mode == "baseline":
+        m.baseline_it_power = pyo.ConstraintList()
+        for step in range(n_steps):
+            fixed_cpu = float(
+                horizon.at[step, "inflexible_cpu"]
+                + horizon.at[step, "flexible_cpu"]
+            )
+            fixed_power = float(np.interp(fixed_cpu, breakpoints, power_values))
+            m.baseline_it_power.add(m.p_it_total_kw[step] == fixed_power)
+    elif config.it_power_representation == "CUSTOM":
+        m.P = pyo.RangeSet(0, len(breakpoints) - 1)
+        m.SEG = pyo.RangeSet(0, len(breakpoints) - 2)
+        m.weight = pyo.Var(m.I, m.P, within=pyo.NonNegativeReals)
+        m.segment = pyo.Var(m.I, m.SEG, within=pyo.Binary)
+        m.piecewise = pyo.ConstraintList()
+        for step in range(n_steps):
+            m.piecewise.add(sum(m.weight[step, point] for point in m.P) == 1)
+            m.piecewise.add(sum(m.segment[step, segment] for segment in m.SEG) == 1)
+            m.piecewise.add(m.weight[step, 0] <= m.segment[step, 0])
             m.piecewise.add(
-                m.weight[step, point]
-                <= m.segment[step, point - 1] + m.segment[step, point]
+                m.weight[step, len(breakpoints) - 1]
+                <= m.segment[step, len(breakpoints) - 2]
             )
-        m.piecewise.add(
-            m.total_cpu[step]
-            == sum(
-                float(breakpoints[point]) * m.weight[step, point] for point in m.P
+            for point in range(1, len(breakpoints) - 1):
+                m.piecewise.add(
+                    m.weight[step, point]
+                    <= m.segment[step, point - 1] + m.segment[step, point]
+                )
+            m.piecewise.add(
+                m.total_cpu[step]
+                == sum(
+                    float(breakpoints[point]) * m.weight[step, point]
+                    for point in m.P
+                )
             )
-        )
-        m.piecewise.add(
-            m.p_it_total_kw[step]
-            == params.idle_power_kw
-            + (params.max_power_kw - params.idle_power_kw)
-            * sum(
-                float(power_factors[point]) * m.weight[step, point] for point in m.P
+            m.piecewise.add(
+                m.p_it_total_kw[step]
+                == sum(
+                    float(power_values[point]) * m.weight[step, point]
+                    for point in m.P
+                )
             )
+    else:
+        m.it_power_curve = pyo.Piecewise(
+            m.I,
+            m.p_it_total_kw,
+            m.total_cpu,
+            pw_pts=breakpoints.tolist(),
+            f_rule=power_values.tolist(),
+            pw_constr_type="EQ",
+            pw_repn=config.it_power_representation,
         )
 
     # Interval actions.
     storage_bound = (0.0, 0.0) if config.mode == "baseline" else None
-    m.p_grid_it_kw = pyo.Var(m.I, within=pyo.NonNegativeReals)
+    m.p_grid_it_kw = pyo.Var(
+        m.I, within=pyo.NonNegativeReals, bounds=(0.0, params.max_power_kw)
+    )
     m.p_ups_ch_kw = pyo.Var(
-        m.I, within=pyo.NonNegativeReals, bounds=storage_bound
+        m.I,
+        within=pyo.NonNegativeReals,
+        bounds=storage_bound or (0.0, params.p_max_ch_kw),
     )
     m.p_ups_disch_kw = pyo.Var(
-        m.I, within=pyo.NonNegativeReals, bounds=storage_bound
+        m.I,
+        within=pyo.NonNegativeReals,
+        bounds=storage_bound or (0.0, min(params.p_max_disch_kw, params.max_power_kw)),
     )
-    m.z_ups_ch = pyo.Var(m.I, within=pyo.Binary)
-    m.z_ups_disch = pyo.Var(m.I, within=pyo.Binary)
+    if config.mode == "optimised":
+        m.z_ups_charge_mode = pyo.Var(m.I, within=pyo.Binary)
 
     tes_bound = (0.0, 0.0) if config.mode == "baseline" else (0.0, params.TES_w_charge_max)
     tes_dis_bound = (
@@ -244,8 +300,8 @@ def solve_horizon(
     m.q_cool_w = pyo.Var(m.I, within=pyo.NonNegativeReals)
     m.q_ch_tes_w = pyo.Var(m.I, bounds=tes_bound)
     m.q_dis_tes_w = pyo.Var(m.I, bounds=tes_dis_bound)
-    m.z_tes_ch = pyo.Var(m.I, within=pyo.Binary)
-    m.z_tes_disch = pyo.Var(m.I, within=pyo.Binary)
+    if config.mode == "optimised":
+        m.z_tes_charge_mode = pyo.Var(m.I, within=pyo.Binary)
     m.t_in = pyo.Var(m.I, bounds=(18.0, 30.0))
 
     m.physics = pyo.ConstraintList()
@@ -255,11 +311,16 @@ def solve_horizon(
             m.p_it_total_kw[step]
             == m.p_grid_it_kw[step] + m.p_ups_disch_kw[step]
         )
-        m.physics.add(m.p_ups_ch_kw[step] <= params.p_max_ch_kw * m.z_ups_ch[step])
-        m.physics.add(
-            m.p_ups_disch_kw[step] <= params.p_max_disch_kw * m.z_ups_disch[step]
-        )
-        m.physics.add(m.z_ups_ch[step] + m.z_ups_disch[step] <= 1)
+        if config.mode == "optimised":
+            m.physics.add(
+                m.p_ups_ch_kw[step]
+                <= params.p_max_ch_kw * m.z_ups_charge_mode[step]
+            )
+            m.physics.add(
+                m.p_ups_disch_kw[step]
+                <= min(params.p_max_disch_kw, params.max_power_kw)
+                * (1 - m.z_ups_charge_mode[step])
+            )
         m.physics.add(
             m.e_ups_kwh[step + 1]
             == m.e_ups_kwh[step]
@@ -267,14 +328,16 @@ def solve_horizon(
             - m.p_ups_disch_kw[step] / params.eta_disch * config.dt_hours
         )
 
-        m.physics.add(
-            m.q_ch_tes_w[step] <= params.TES_w_charge_max * m.z_tes_ch[step]
-        )
-        m.physics.add(
-            m.q_dis_tes_w[step]
-            <= params.TES_w_discharge_max * m.z_tes_disch[step]
-        )
-        m.physics.add(m.z_tes_ch[step] + m.z_tes_disch[step] <= 1)
+        if config.mode == "optimised":
+            m.physics.add(
+                m.q_ch_tes_w[step]
+                <= params.TES_w_charge_max * m.z_tes_charge_mode[step]
+            )
+            m.physics.add(
+                m.q_dis_tes_w[step]
+                <= params.TES_w_discharge_max
+                * (1 - m.z_tes_charge_mode[step])
+            )
         m.physics.add(m.q_ch_tes_w[step] == params.COP_HVAC * m.p_chiller_tes_w[step])
         m.physics.add(
             m.q_cool_w[step]
@@ -377,20 +440,63 @@ def solve_horizon(
         )
 
     m.grid_import_kw = pyo.Expression(m.I, rule=grid_import)
+    structural_grid_limit_kw = (
+        params.max_power_kw
+        + params.P_chiller_max / 1000.0
+        + params.nominal_overhead_addition
+        + params.p_max_ch_kw
+    )
+    effective_grid_limit_kw = structural_grid_limit_kw
+    if config.grid_import_limit_kw is not None:
+        effective_grid_limit_kw = min(
+            effective_grid_limit_kw, config.grid_import_limit_kw
+        )
+    m.grid_import_limit = pyo.Constraint(
+        m.I,
+        rule=lambda mod, step: mod.grid_import_kw[step] <= effective_grid_limit_kw,
+    )
+
+    energy_cost = sum(
+        config.dt_hours
+        * m.grid_import_kw[step]
+        * float(prices[step])
+        / 1000.0
+        for step in range(n_steps)
+    )
+    ups_throughput_cost = sum(
+        config.dt_hours
+        * config.ups_throughput_cost_gbp_per_kwh
+        * (m.p_ups_ch_kw[step] + m.p_ups_disch_kw[step])
+        for step in range(n_steps)
+    )
+    tes_throughput_cost = sum(
+        config.dt_hours
+        * config.tes_throughput_cost_gbp_per_kwh_th
+        * (m.q_ch_tes_w[step] + m.q_dis_tes_w[step])
+        / 1000.0
+        for step in range(n_steps)
+    )
+    terminal_value = (
+        config.terminal_ups_value_gbp_per_kwh
+        * (m.e_ups_kwh[n_steps] - m.e_ups_kwh[0])
+        + config.terminal_tes_value_gbp_per_kwh_th
+        * (m.e_tes_kwh[n_steps] - m.e_tes_kwh[0])
+    )
     m.objective = pyo.Objective(
-        expr=sum(
-            config.dt_hours
-            * m.grid_import_kw[step]
-            * float(prices[step])
-            / 1000.0
-            for step in range(n_steps)
-        ),
+        expr=energy_cost + ups_throughput_cost + tes_throughput_cost - terminal_value,
         sense=pyo.minimize,
     )
 
     solver_name, solver = _select_solver(config)
+    binary_variables = sum(
+        variable.is_binary()
+        for variable in m.component_data_objects(pyo.Var, active=True)
+    )
     started = time.perf_counter()
-    results = solver.solve(m, tee=tee)
+    if solver_name == "appsi_highs":
+        results = solver.solve(m, tee=tee, load_solutions=False)
+    else:
+        results = solver.solve(m, tee=tee)
     runtime = time.perf_counter() - started
     termination = results.solver.termination_condition
     accepted = {
@@ -398,10 +504,19 @@ def solve_horizon(
         pyo.TerminationCondition.feasible,
         pyo.TerminationCondition.maxTimeLimit,
     }
-    if termination not in accepted:
+    upper_bound = getattr(results.problem, "upper_bound", None)
+    try:
+        finite_incumbent = upper_bound is not None and np.isfinite(float(upper_bound))
+    except (TypeError, ValueError):
+        finite_incumbent = False
+    if termination not in accepted or (
+        termination == pyo.TerminationCondition.maxTimeLimit and not finite_incumbent
+    ):
         raise RuntimeError(
-            f"{solver_name} did not return an accepted solution: {termination}"
+            f"{solver_name} did not return a feasible accepted solution: {termination}"
         )
+    if solver_name == "appsi_highs":
+        solver.load_vars()
 
     solved_initial = _state_from_model(m, 0)
     initial_residual = _max_state_difference(solved_initial, initial_state)
@@ -476,6 +591,15 @@ def solve_horizon(
             )
     closing_work = sum(cohort.remaining_cpu_hours for cohort in next_workload)
     workload_residual = opening_work - committed_work - closing_work
+    unserved_after_lookahead = 0.0
+    for cohort in carried + core_generated:
+        processed_over_horizon = sum(
+            pyo.value(m.work_rate[cohort.cohort_id, step]) * config.dt_hours
+            for step in allowed[cohort.cohort_id]
+        )
+        unserved_after_lookahead += max(
+            0.0, cohort.remaining_cpu_hours - processed_over_horizon
+        )
 
     max_ups_overlap = max(
         min(pyo.value(m.p_ups_ch_kw[step]), pyo.value(m.p_ups_disch_kw[step]))
@@ -486,12 +610,49 @@ def solve_horizon(
         / 1000.0
         for step in range(n_steps)
     )
-    objective_recalculated = sum(
+    energy_objective_recalculated = sum(
         config.dt_hours
         * pyo.value(m.grid_import_kw[step])
         * float(prices[step])
         / 1000.0
         for step in range(n_steps)
+    )
+    ups_throughput_cost_recalculated = sum(
+        config.dt_hours
+        * config.ups_throughput_cost_gbp_per_kwh
+        * (
+            pyo.value(m.p_ups_ch_kw[step])
+            + pyo.value(m.p_ups_disch_kw[step])
+        )
+        for step in range(n_steps)
+    )
+    tes_throughput_cost_recalculated = sum(
+        config.dt_hours
+        * config.tes_throughput_cost_gbp_per_kwh_th
+        * (
+            pyo.value(m.q_ch_tes_w[step])
+            + pyo.value(m.q_dis_tes_w[step])
+        )
+        / 1000.0
+        for step in range(n_steps)
+    )
+    terminal_value_recalculated = (
+        config.terminal_ups_value_gbp_per_kwh
+        * (
+            pyo.value(m.e_ups_kwh[n_steps])
+            - pyo.value(m.e_ups_kwh[0])
+        )
+        + config.terminal_tes_value_gbp_per_kwh_th
+        * (
+            pyo.value(m.e_tes_kwh[n_steps])
+            - pyo.value(m.e_tes_kwh[0])
+        )
+    )
+    objective_recalculated = (
+        energy_objective_recalculated
+        + ups_throughput_cost_recalculated
+        + tes_throughput_cost_recalculated
+        - terminal_value_recalculated
     )
     audits = {
         "initial_state_max_residual": initial_residual,
@@ -499,10 +660,18 @@ def solve_horizon(
         "opening_workload_cpu_h": opening_work,
         "committed_workload_cpu_h": committed_work,
         "closing_workload_cpu_h": closing_work,
+        "core_workload_unserved_after_lookahead_cpu_h": unserved_after_lookahead,
         "max_ups_charge_discharge_overlap_kw": max_ups_overlap,
         "max_tes_charge_discharge_overlap_kw": max_tes_overlap_kw,
         "objective_reconciliation_gbp": pyo.value(m.objective)
         - objective_recalculated,
+        "energy_objective_gbp": energy_objective_recalculated,
+        "ups_throughput_cost_gbp": ups_throughput_cost_recalculated,
+        "tes_throughput_cost_gbp": tes_throughput_cost_recalculated,
+        "terminal_value_gbp": terminal_value_recalculated,
+        "maximum_it_power_approximation_error_kw": maximum_it_power_error_kw,
+        "mean_it_power_approximation_error_kw": mean_it_power_error_kw,
+        "effective_grid_import_limit_kw": effective_grid_limit_kw,
         "committed_settlement_cost_gbp": float(committed["settlement_cost_gbp"].sum()),
         "committed_grid_energy_kwh": float(
             committed["grid_import_kw"].sum() * config.dt_hours
@@ -513,6 +682,11 @@ def solve_horizon(
     if abs(workload_residual) > config.workload_tolerance_cpu_h:
         raise RuntimeError(
             f"Workload conservation residual {workload_residual} exceeds tolerance"
+        )
+    if unserved_after_lookahead > config.workload_tolerance_cpu_h:
+        raise RuntimeError(
+            "Core workload remains unserved after the full look-ahead: "
+            f"{unserved_after_lookahead} CPU-h"
         )
     if max_ups_overlap > config.flow_tolerance_kw:
         raise RuntimeError("UPS charged and discharged simultaneously")
@@ -527,6 +701,19 @@ def solve_horizon(
         upper_bound = float(upper_bound)
         if np.isfinite(lower_bound) and np.isfinite(upper_bound):
             relative_gap = abs(upper_bound - lower_bound) / max(1.0, abs(upper_bound))
+    meets_requested_gap = (
+        relative_gap is not None and relative_gap <= config.mip_gap + 1e-12
+    )
+    meets_accepted_gap = (
+        relative_gap is not None
+        and relative_gap <= config.maximum_accepted_gap + 1e-12
+    )
+    if termination == pyo.TerminationCondition.optimal:
+        solution_quality = "optimal"
+    elif meets_accepted_gap:
+        solution_quality = "time_limit_gap_accepted"
+    else:
+        solution_quality = "time_limit_gap_exceeded"
     solver_metadata = {
         "name": solver_name,
         "termination_condition": str(termination),
@@ -536,7 +723,19 @@ def solve_horizon(
         "lower_bound_gbp": lower_bound,
         "upper_bound_gbp": upper_bound,
         "relative_gap": relative_gap,
+        "found_feasible_incumbent": bool(finite_incumbent),
+        "meets_requested_gap": bool(meets_requested_gap),
+        "meets_accepted_gap": bool(meets_accepted_gap),
+        "solution_quality": solution_quality,
+        "binary_variables": binary_variables,
+        "it_power_segments": config.it_power_segments,
+        "it_power_representation": config.it_power_representation,
     }
+    if config.fail_on_gap_exceeded and not meets_accepted_gap:
+        raise RuntimeError(
+            f"{solver_name} returned gap {relative_gap}, exceeding the accepted "
+            f"threshold {config.maximum_accepted_gap}"
+        )
     return HorizonResult(
         committed=committed,
         next_state=next_state,

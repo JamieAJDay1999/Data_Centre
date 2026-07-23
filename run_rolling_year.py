@@ -47,6 +47,54 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--solver-time-limit", type=int, default=300)
     parser.add_argument("--mip-gap", type=float, default=0.001)
     parser.add_argument(
+        "--maximum-accepted-gap",
+        type=float,
+        default=0.01,
+        help="quality threshold reported separately from the requested solver gap",
+    )
+    parser.add_argument(
+        "--fail-on-gap-exceeded",
+        action="store_true",
+        help="stop before checkpointing a horizon outside maximum-accepted-gap",
+    )
+    parser.add_argument(
+        "--it-power-segments",
+        type=int,
+        default=4,
+        help="segment count for the IT power curve",
+    )
+    parser.add_argument(
+        "--it-power-representation",
+        choices=["CUSTOM", "DLOG", "LOG", "INC", "CC"],
+        default="DLOG",
+    )
+    parser.add_argument(
+        "--it-power-breakpoint-exponent",
+        type=float,
+        default=1.5,
+        help="greater than one concentrates breakpoints at low CPU utilisation",
+    )
+    parser.add_argument(
+        "--price-treatment",
+        choices=["signed", "floor_zero", "shift_year_min"],
+        default="signed",
+        help="signed is the central case; alternatives are sensitivity cases",
+    )
+    parser.add_argument("--grid-import-limit-kw", type=float, default=None)
+    parser.add_argument("--ups-reserve-kwh", type=float, default=None)
+    parser.add_argument(
+        "--ups-throughput-cost-gbp-per-kwh", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--tes-throughput-cost-gbp-per-kwh-th", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--terminal-ups-value-gbp-per-kwh", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--terminal-tes-value-gbp-per-kwh-th", type=float, default=0.0
+    )
+    parser.add_argument(
         "--tail-price-mode",
         choices=["actual", "repeat_last"],
         default="actual",
@@ -70,6 +118,18 @@ def main() -> None:
         solver_name=args.solver,
         solver_time_limit_s=args.solver_time_limit,
         mip_gap=args.mip_gap,
+        maximum_accepted_gap=args.maximum_accepted_gap,
+        fail_on_gap_exceeded=args.fail_on_gap_exceeded,
+        it_power_segments=args.it_power_segments,
+        it_power_representation=args.it_power_representation,
+        it_power_breakpoint_exponent=args.it_power_breakpoint_exponent,
+        price_treatment=args.price_treatment,
+        grid_import_limit_kw=args.grid_import_limit_kw,
+        ups_reserve_kwh=args.ups_reserve_kwh,
+        ups_throughput_cost_gbp_per_kwh=args.ups_throughput_cost_gbp_per_kwh,
+        tes_throughput_cost_gbp_per_kwh_th=args.tes_throughput_cost_gbp_per_kwh_th,
+        terminal_ups_value_gbp_per_kwh=args.terminal_ups_value_gbp_per_kwh,
+        terminal_tes_value_gbp_per_kwh_th=args.terminal_tes_value_gbp_per_kwh_th,
     )
     price_path = args.price_input.resolve()
     load_path = args.load_input.resolve()

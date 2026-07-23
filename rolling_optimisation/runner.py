@@ -15,6 +15,7 @@ import pandas as pd
 from .config import RollingConfig, default_initial_state
 from .model import solve_horizon
 from .timeline import (
+    add_optimisation_prices,
     build_annual_timeline,
     combined_input_hash,
     local_day_core_indices,
@@ -183,6 +184,15 @@ def _write_annual_outputs(
             row["solver"]["termination_condition"] != "optimal"
             for row in checkpoint_rows
         ),
+        "gap_exceeded_horizons": sum(
+            not row["solver"].get("meets_accepted_gap", False)
+            for row in checkpoint_rows
+        ),
+        "gap_exceeded_dates": [
+            row["date"]
+            for row in checkpoint_rows
+            if not row["solver"].get("meets_accepted_gap", False)
+        ],
         "maximum_recorded_solver_gap": max(
             (
                 row["solver"]["relative_gap"]
@@ -196,6 +206,11 @@ def _write_annual_outputs(
         ),
         "final_outstanding_workload_cpu_h": sum(
             cohort.remaining_cpu_hours for cohort in final_workload
+        ),
+        "final_workload_unserved_after_planned_lookahead_cpu_h": float(
+            checkpoint_rows[-1]["audits"][
+                "core_workload_unserved_after_lookahead_cpu_h"
+            ]
         ),
     }
     _atomic_json(run_dir / "annual_summary.json", summary)
@@ -233,6 +248,7 @@ def run_rolling_scenario(
         config.lookahead_steps,
         tail_price_mode,
     )
+    timeline = add_optimisation_prices(timeline, config.price_treatment)
     days = local_day_core_indices(timeline, year)
     if start_date:
         days = [item for item in days if item[0] >= start_date]
@@ -249,7 +265,7 @@ def run_rolling_scenario(
 
     metadata_path = run_dir / "run_metadata.json"
     requested = {
-        "schema_version": 1,
+        "schema_version": 2,
         "fingerprint": fingerprint,
         "input_hash": input_hash,
         "code_hash": code_hash,
@@ -339,7 +355,7 @@ def run_rolling_scenario(
         )
         _atomic_csv(csv_path, result.committed)
         payload = {
-            "schema_version": 1,
+            "schema_version": 2,
             "fingerprint": fingerprint,
             "date": date,
             "core_steps": core_steps,
@@ -358,8 +374,9 @@ def run_rolling_scenario(
         previous_checkpoint_hash = _sha256(checkpoint_path)
         frames.append(result.committed)
         checkpoint_rows.append(payload)
+        quality = result.solver["solution_quality"]
         print(
-            f"[{position}/{len(days)}] {date}: solved "
+            f"[{position}/{len(days)}] {date}: {quality} "
             f"({core_steps} intervals, {result.solver['runtime_s']:.2f}s, "
             f"{len(workload)} carried cohorts)"
         )

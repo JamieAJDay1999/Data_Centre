@@ -161,3 +161,26 @@ def local_day_core_indices(timeline: pd.DataFrame, year: int) -> list[tuple[str,
     if len(rows) != expected_days:
         raise AssertionError(f"Expected {expected_days} local dates, found {len(rows)}")
     return rows
+
+
+def add_optimisation_prices(
+    timeline: pd.DataFrame,
+    treatment: str,
+) -> pd.DataFrame:
+    """Add an objective-price column while preserving signed settlement prices."""
+
+    if treatment not in {"signed", "floor_zero", "shift_year_min"}:
+        raise ValueError("Unknown price treatment")
+    result = timeline.copy()
+    settlement = result["settlement_price_gbp_per_mwh"]
+    if treatment == "signed":
+        optimisation = settlement
+    elif treatment == "floor_zero":
+        optimisation = settlement.clip(lower=0.0)
+    else:
+        target_minimum = float(
+            result.loc[result["is_target_year"], "settlement_price_gbp_per_mwh"].min()
+        )
+        optimisation = settlement + max(0.0, -target_minimum)
+    result["optimisation_price_gbp_per_mwh"] = optimisation
+    return result
