@@ -336,7 +336,7 @@ def run_tier1_case(case: dict) -> dict:
     row["runtime_s"] = round(time.time() - t_start, 1)
     with open(d["root"] / "tier1_result.json", "w") as f:
         json.dump(row, f, indent=2)
-    print(f"✅ Tier 1 {case['case_id']}: saving {row['saving_pct']:.2f}% "
+    print(f"[ok] Tier 1 {case['case_id']}: saving {row['saving_pct']:.2f}% "
           f"(base {row['base_cost_gbp']:.2f} GBP) in {row['runtime_s']}s")
     return row
 

@@ -46,9 +46,11 @@ def build_model(params: ModelParameters, data: dict, linear: bool = False):
     m.p_grid_od_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
     m.p_it_total_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
 
-    # UPS Variables
-    m.p_ups_ch_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
-    m.p_ups_disch_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, initialize=0)
+    # The nominal baseline is storage-free. Pin both UPS power variables to
+    # zero explicitly; leaving charging unbounded makes negative-price cases
+    # unbounded because charging appears in the cost objective.
+    m.p_ups_ch_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, bounds=(0, 0), initialize=0)
+    m.p_ups_disch_kw = pyo.Var(m.TEXT_SLOTS, within=pyo.NonNegativeReals, bounds=(0, 0), initialize=0)
     m.e_ups_kwh = pyo.Var(m.TEXT_SLOTS, bounds=(params.e_min_kwh, params.e_max_kwh), initialize=params.e_start_kwh)
     m.z_ch = pyo.Var(m.TEXT_SLOTS, within=pyo.Binary, initialize=0)
     m.z_disch = pyo.Var(m.TEXT_SLOTS, within=pyo.Binary, initialize=0)
