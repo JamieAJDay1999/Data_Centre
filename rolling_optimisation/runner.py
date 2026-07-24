@@ -16,6 +16,7 @@ from .config import RollingConfig, default_initial_state
 from .model import solve_horizon
 from .timeline import (
     add_optimisation_prices,
+    apply_flexible_workload_multiplier,
     build_annual_timeline,
     combined_input_hash,
     local_day_core_indices,
@@ -247,6 +248,9 @@ def run_rolling_scenario(
         year,
         config.lookahead_steps,
         tail_price_mode,
+    )
+    timeline = apply_flexible_workload_multiplier(
+        timeline, config.flexible_workload_multiplier
     )
     timeline = add_optimisation_prices(timeline, config.price_treatment)
     days = local_day_core_indices(timeline, year)

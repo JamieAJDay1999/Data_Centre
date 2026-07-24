@@ -184,3 +184,19 @@ def add_optimisation_prices(
         optimisation = settlement + max(0.0, -target_minimum)
     result["optimisation_price_gbp_per_mwh"] = optimisation
     return result
+
+
+def apply_flexible_workload_multiplier(
+    timeline: pd.DataFrame,
+    multiplier: float,
+) -> pd.DataFrame:
+    """Scale flexible share while preserving total CPU demand in every interval."""
+
+    if multiplier <= 0:
+        raise ValueError("flexible workload multiplier must be positive")
+    result = timeline.copy()
+    total_cpu = result["inflexible_cpu"] + result["flexible_cpu"]
+    flexible_cpu = (result["flexible_cpu"] * multiplier).clip(upper=total_cpu)
+    result["flexible_cpu"] = flexible_cpu
+    result["inflexible_cpu"] = total_cpu - flexible_cpu
+    return result

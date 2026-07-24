@@ -8,9 +8,7 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as pyo
 
-from inputs.parameters_optimisation import ModelParameters
-
-from .config import RollingConfig
+from .config import RollingConfig, model_parameters
 from .timeline import TRANCHE_DELAYS
 from .types import HorizonResult, OperationalState, WorkloadCohort
 
@@ -102,7 +100,7 @@ def solve_horizon(
     if n_steps - core_steps < config.lookahead_steps:
         raise ValueError("Horizon does not contain the configured look-ahead")
 
-    params = ModelParameters(dt_seconds=config.dt_seconds)
+    params = model_parameters(config)
     carried = list(carried_workload)
     generated = [] if config.mode == "baseline" else new_workload_cohorts(horizon, config)
     cohorts = carried + generated

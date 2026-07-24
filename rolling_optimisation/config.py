@@ -33,6 +33,9 @@ class RollingConfig:
     tes_throughput_cost_gbp_per_kwh_th: float = 0.0
     terminal_ups_value_gbp_per_kwh: float = 0.0
     terminal_tes_value_gbp_per_kwh_th: float = 0.0
+    ups_capacity_multiplier: float = 1.0
+    tes_capacity_multiplier: float = 1.0
+    flexible_workload_multiplier: float = 1.0
     baseline_cold_aisle_setpoint_c: float = 22.5
     state_tolerance: float = 1e-5
     flow_tolerance_kw: float = 1e-3
@@ -94,6 +97,14 @@ class RollingConfig:
         for name, value in nonnegative.items():
             if value < 0:
                 raise ValueError(f"{name} must be non-negative")
+        positive_multipliers = {
+            "ups_capacity_multiplier": self.ups_capacity_multiplier,
+            "tes_capacity_multiplier": self.tes_capacity_multiplier,
+            "flexible_workload_multiplier": self.flexible_workload_multiplier,
+        }
+        for name, value in positive_multipliers.items():
+            if value <= 0:
+                raise ValueError(f"{name} must be positive")
 
     @property
     def dt_hours(self) -> float:
@@ -113,8 +124,27 @@ class RollingConfig:
         return hashlib.sha256(encoded).hexdigest()
 
 
-def default_initial_state(config: RollingConfig) -> OperationalState:
+def model_parameters(config: RollingConfig) -> ModelParameters:
+    """Resolve central physical parameters and the sensitivity multipliers."""
+
     params = ModelParameters(dt_seconds=config.dt_seconds)
+    ups_initial_fraction = params.e_start_kwh / params.e_nom_kwh
+    params.e_nom_kwh *= config.ups_capacity_multiplier
+    params.e_min_kwh = params.soc_min * params.e_nom_kwh
+    params.e_max_kwh = params.soc_max * params.e_nom_kwh
+    params.e_start_kwh = ups_initial_fraction * params.e_nom_kwh
+
+    tes_initial_fraction = params.TES_initial_charge_kWh / params.TES_capacity_kWh
+    params.TES_kwh_cap *= config.tes_capacity_multiplier
+    params.TES_capacity_kWh = params.TES_kwh_cap
+    params.TES_initial_charge_kWh = (
+        tes_initial_fraction * params.TES_capacity_kWh
+    )
+    return params
+
+
+def default_initial_state(config: RollingConfig) -> OperationalState:
+    params = model_parameters(config)
     return OperationalState(
         ups_energy_kwh=params.e_start_kwh,
         tes_energy_kwh=params.TES_initial_charge_kWh,

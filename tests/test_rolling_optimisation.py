@@ -6,10 +6,15 @@ import pandas as pd
 import pyomo.environ as pyo
 import pytest
 
-from rolling_optimisation.config import RollingConfig, default_initial_state
+from rolling_optimisation.config import (
+    RollingConfig,
+    default_initial_state,
+    model_parameters,
+)
 from rolling_optimisation.model import new_workload_cohorts, solve_horizon
 from rolling_optimisation.timeline import (
     add_optimisation_prices,
+    apply_flexible_workload_multiplier,
     build_annual_timeline,
     local_day_core_indices,
 )
@@ -60,6 +65,38 @@ def test_logarithmic_piecewise_configuration_validation() -> None:
     assert config.it_power_segments == 4
     with pytest.raises(ValueError, match="power of two"):
         RollingConfig(it_power_segments=6, it_power_representation="DLOG")
+
+
+def test_sensitivity_multipliers_preserve_capacity_fractions() -> None:
+    config = RollingConfig(
+        ups_capacity_multiplier=0.5,
+        tes_capacity_multiplier=1.5,
+        flexible_workload_multiplier=1.5,
+    )
+    params = model_parameters(config)
+    state = default_initial_state(config)
+
+    assert params.e_nom_kwh == pytest.approx(300)
+    assert params.e_min_kwh == pytest.approx(150)
+    assert params.e_max_kwh == pytest.approx(300)
+    assert state.ups_energy_kwh == pytest.approx(300)
+    assert params.TES_capacity_kWh == pytest.approx(1500)
+    assert state.tes_energy_kwh == pytest.approx(750)
+
+    with pytest.raises(ValueError, match="must be positive"):
+        RollingConfig(ups_capacity_multiplier=0)
+
+
+def test_flexible_multiplier_preserves_interval_demand(
+    timeline: pd.DataFrame,
+) -> None:
+    original_total = timeline["inflexible_cpu"] + timeline["flexible_cpu"]
+    scaled = apply_flexible_workload_multiplier(timeline, 1.5)
+    scaled_total = scaled["inflexible_cpu"] + scaled["flexible_cpu"]
+
+    pd.testing.assert_series_equal(scaled_total, original_total)
+    assert (scaled["flexible_cpu"] <= scaled_total).all()
+    assert (scaled["inflexible_cpu"] >= 0).all()
 
 
 def test_price_treatments_preserve_settlement_series(timeline: pd.DataFrame) -> None:
@@ -184,3 +221,34 @@ def test_optional_physical_costs_and_limits_reconcile(timeline: pd.DataFrame) ->
         result.committed["state_start_ups_energy_kwh"].min()
         >= config.ups_reserve_kwh
     )
+
+
+@pytest.mark.integration
+def test_sensitivity_multipliers_solve_at_combined_extremes(
+    timeline: pd.DataFrame,
+) -> None:
+    solver = _available_solver()
+    if solver is None:
+        pytest.skip("No supported MILP solver is available")
+    config = RollingConfig(
+        scenario_id="sensitivity_extremes_test",
+        solver_name=solver,
+        solver_time_limit_s=30,
+        mip_gap=0.01,
+        ups_capacity_multiplier=0.5,
+        tes_capacity_multiplier=0.5,
+        flexible_workload_multiplier=1.5,
+    )
+    scaled = apply_flexible_workload_multiplier(
+        timeline, config.flexible_workload_multiplier
+    )
+    result = solve_horizon(
+        config,
+        scaled.iloc[12 : 12 + 4 + config.lookahead_steps],
+        4,
+        default_initial_state(config),
+    )
+
+    assert result.solver["found_feasible_incumbent"]
+    assert result.committed["state_start_ups_energy_kwh"].max() <= 300 + 1e-6
+    assert result.committed["state_start_tes_energy_kwh"].max() <= 500 + 1e-6
