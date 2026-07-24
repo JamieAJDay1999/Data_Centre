@@ -92,52 +92,52 @@ The commands below are run from the repository root.
 Select and inspect the weeks without solving:
 
 ```powershell
-python run_monthly_week_sensitivity.py --year 2025 --select-only
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --select-only
 ```
 
 Optionally inspect a case without solving:
 
 ```powershell
-python run_monthly_week_sensitivity.py --year 2025 --case central --dry-run
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --case central --dry-run
 ```
 
 Run the sampled baseline:
 
 ```powershell
-python run_monthly_week_sensitivity.py --year 2025 --case baseline
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --case baseline
 ```
 
 Run the central optimised case:
 
 ```powershell
-python run_monthly_week_sensitivity.py --year 2025 --case central
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --case central
 ```
 
 Run the UPS endpoints independently:
 
 ```powershell
-python run_monthly_week_sensitivity.py --year 2025 --case ups_min
-python run_monthly_week_sensitivity.py --year 2025 --case ups_max
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --case ups_min
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --case ups_max
 ```
 
 Run the TES endpoints independently:
 
 ```powershell
-python run_monthly_week_sensitivity.py --year 2025 --case tes_min
-python run_monthly_week_sensitivity.py --year 2025 --case tes_max
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --case tes_min
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --case tes_max
 ```
 
 Run the flexible-workload endpoints independently:
 
 ```powershell
-python run_monthly_week_sensitivity.py --year 2025 --case flex_min
-python run_monthly_week_sensitivity.py --year 2025 --case flex_max
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --case flex_min
+python -m rolling_optimisation.run_monthly_week_sensitivity --year 2025 --case flex_max
 ```
 
 Run the central, UPS and TES cases sequentially in one resumable batch:
 
 ```powershell
-python run_remaining_monthly_week_cases.py --year 2025
+python -m rolling_optimisation.run_remaining_monthly_week_cases --year 2025
 ```
 
 The batch wrapper skips completed cases, resumes partial cases through their
@@ -147,7 +147,7 @@ after all five cases finish.
 Run all six intermediate cases in a resumable batch:
 
 ```powershell
-python run_intermediate_monthly_week_cases.py --year 2025
+python -m rolling_optimisation.run_intermediate_monthly_week_cases --year 2025
 ```
 
 Completed block checkpoints are resumable. Re-running the same command resumes
@@ -156,13 +156,13 @@ completed weeks rather than solving them again.
 Compare every case completed so far:
 
 ```powershell
-python summarise_monthly_week_sensitivity.py --year 2025
+python -m rolling_optimisation.summarise_monthly_week_sensitivity --year 2025
 ```
 
 Require all seven optimised cases to be present:
 
 ```powershell
-python summarise_monthly_week_sensitivity.py --year 2025 --require-all
+python -m rolling_optimisation.summarise_monthly_week_sensitivity --year 2025 --require-all
 ```
 
 ## Annualisation

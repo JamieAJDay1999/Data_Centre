@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from rolling_optimisation.timeline import build_annual_timeline
-from run_monthly_week_sensitivity import (
+from rolling_optimisation.run_monthly_week_sensitivity import (
     PRICE_FEATURES,
     select_representative_weeks,
 )

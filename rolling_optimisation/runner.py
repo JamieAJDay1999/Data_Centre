@@ -236,9 +236,7 @@ def run_rolling_scenario(
 
     input_paths = [price_path, load_profile_path, shiftability_path]
     input_hash = combined_input_hash(input_paths)
-    code_paths = sorted((root / "rolling_optimisation").glob("*.py")) + [
-        root / "run_rolling_year.py"
-    ]
+    code_paths = sorted((root / "rolling_optimisation").glob("*.py"))
     code_hash = combined_input_hash(code_paths)
     fingerprint = config.fingerprint(input_hash, code_hash)
     timeline = build_annual_timeline(

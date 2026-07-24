@@ -163,7 +163,8 @@ Existing model: ~108 slots, ~3.5 k continuous vars, ~220 binaries (UPS z_ch/z_di
 SOS2 ×108 — solves in seconds with SCIP. The stacking layer adds ~10 products × 6
 blocks ≈ 60 commitment vars + O(10³) linear constraints: negligible. Annual runs =
 365 independent daily solves (embarrassingly parallel — reuse the
-`sensitivity_sweep.py` ProcessPool pattern). The stochastic variant multiplies the
+`sensitivity_analysis/sensitivity_sweep.py` ProcessPool pattern). The stochastic
+variant multiplies the
 physical block by |Ω|; keep |Ω| ≤ 20 and relax UPS binaries to continuous where the
 min-charge thresholds aren't binding (validate on sample days).
 

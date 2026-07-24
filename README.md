@@ -88,6 +88,17 @@ The codebase implements a mixed-integer linear programming (MILP) optimization m
   - Heatmaps of achievable flexibility durations
   - Source-wise contribution analysis
 
+### Extended Workflows
+
+- `rolling_optimisation/`: linked rolling-year model, command-line runners,
+  formulation benchmark, and monthly-week sensitivity workflow.
+- `sensitivity_analysis/`: legacy independent-day sensitivity sweep, IMRP
+  annual sampler, and sensitivity figure generation.
+- `paper/regenerate_paper_figures.py`: rebuilds paper figures from existing
+  result data without rerunning the optimisation.
+- `plotting_and_saving/gen_data_heatmap.py`: prepares the complete flexibility
+  heatmap data grid.
+
 ### Data Management
 
 #### `static/data/` Directory Structure:
@@ -103,7 +114,7 @@ The codebase implements a mixed-integer linear programming (MILP) optimization m
 
 ### Utility Modules
 
-#### `dc_utilisation/data_centre_utilisation.py`
+#### `Archive/dc_utilisation/data_centre_utilisation.py`
 - **Purpose**: Analysis of real data center utilization patterns
 - **Functionality**:
   - Processes anonymized data center demand profiles
@@ -149,20 +160,21 @@ Performs cost-minimizing optimization with flexible workloads.
 
 ### Running the linked rolling year
 
-The production annual path is `run_rolling_year.py`. It solves one local trading
-day at a time with a three-hour look-ahead, commits only that day, and passes the
+The production annual path is
+`rolling_optimisation/run_rolling_year.py`. It solves one local trading day at
+a time with a three-hour look-ahead, commits only that day, and passes the
 physical and outstanding-workload state into the following solve.
 
 ```powershell
 # Validate all 365 dates and 35,040 quarter-hours without solving
-python run_rolling_year.py --validate-only
+python -m rolling_optimisation.run_rolling_year --validate-only
 
 # Small linked smoke test
-python run_rolling_year.py --start-date 2025-01-01 --end-date 2025-01-02
+python -m rolling_optimisation.run_rolling_year --start-date 2025-01-01 --end-date 2025-01-02
 
 # Full sequential chains
-python run_rolling_year.py --mode baseline
-python run_rolling_year.py --mode optimised
+python -m rolling_optimisation.run_rolling_year --mode baseline
+python -m rolling_optimisation.run_rolling_year --mode optimised
 ```
 
 SCIP is preferred. If it is unavailable, the runner automatically uses HiGHS
@@ -186,12 +198,14 @@ mode binary per storage asset, reducing a normal optimised horizon from about
 1,512 to 432 binaries. Solver-gap acceptance, optional physical throughput
 costs, terminal values, import/reserve limits, explicit price-treatment
 sensitivities and end-of-year workload look-ahead checks are exposed through
-`run_rolling_year.py`. The implementation decisions, approximation error,
+`rolling_optimisation/run_rolling_year.py`. The implementation decisions,
+approximation error,
 benchmark results and commands are recorded in
 [`docs/negative_price_reformulation.md`](docs/negative_price_reformulation.md).
 
-`run_imrp_year_sample.py` remains available as the legacy independent-day
-screening workflow. Its 363 daily cases are not a continuous annual trajectory.
+`sensitivity_analysis/run_imrp_year_sample.py` remains available as the legacy
+independent-day screening workflow. Its 363 daily cases are not a continuous
+annual trajectory.
 
 The first rolling baseline keeps workload inflexible and disables UPS/TES
 operation while using the common thermal model. A paper-specific fixed

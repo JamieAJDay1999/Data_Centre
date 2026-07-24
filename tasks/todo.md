@@ -81,7 +81,9 @@
 
 ## Results
 
-- Added `run_imrp_year_sample.py`, reusing `sensitivity_sweep.run_tier1_case()` rather than duplicating the nominal and optimisation model logic.
+- Added `sensitivity_analysis/run_imrp_year_sample.py`, reusing
+  `sensitivity_analysis.sensitivity_sweep.run_tier1_case()` rather than
+  duplicating the nominal and optimisation model logic.
 - Confirmed 363 eligible 2025 days and selected 50 unique dates spanning 1 January to 31 December at 7–9 day intervals.
 - Excluded only 30 March (23 periods) and 26 October (25 periods) from fixed 24-hour runs.
 - Verified the 108 model steps contain the selected day's 96 quarter-hours followed by 12 quarter-hours from the actual next day.
@@ -149,7 +151,8 @@
 - [x] Carry physical state and deferred workload between sequential daily solves.
 - [x] Add original-price settlement-cost accounting and committed-only outputs.
 - [x] Add fingerprinted daily checkpoints and deterministic resume behaviour.
-- [x] Add a `run_rolling_year.py` CLI while retaining the independent-day runner.
+- [x] Add a `rolling_optimisation/run_rolling_year.py` CLI while retaining the
+  independent-day runner.
 - [x] Verify two-day handoff, signed prices, DST coverage, workload conservation, and cost reconciliation.
 - [x] Document commands, outputs, solver behaviour, and known first-version limitations.
 
@@ -164,7 +167,7 @@
 
 ## Results
 
-- Added `rolling_optimisation/` and the `run_rolling_year.py` entry point.
+- Added `rolling_optimisation/` and its `run_rolling_year.py` entry point.
 - Validated all 35,040 quarter-hours and 365 local dates, including 92- and
   100-interval clock-change days.
 - Replaced the unstable 15-minute explicit thermal step with a linear

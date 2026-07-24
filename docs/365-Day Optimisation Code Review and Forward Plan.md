@@ -31,18 +31,18 @@ The existing independent-day runner should be retained, renamed, and used for pr
 The current full available-day command is:
 
 ```powershell
-python run_imrp_year_sample.py --sample-days all --floor-negative-prices
+python -m sensitivity_analysis.run_imrp_year_sample --sample-days all --floor-negative-prices
 ```
 
 The main orchestration path is:
 
-1. `run_imrp_year_sample.py:68-142` loads observed IMRP prices and constructs a 27-hour price vector for each eligible date.
-2. `run_imrp_year_sample.py:145-175` turns dates into independent sensitivity-style cases.
-3. `run_imrp_year_sample.py:216-250` monkey-patches the existing nominal, optimisation, and flexibility modules with the observed tariff and case-specific paths.
-4. `run_imrp_year_sample.py:259-283` loops through dates serially and resumes a case whenever `tier1_result.json` already exists.
-5. `sensitivity_sweep.py:296-341` runs Scenario 1 nominal operation and Scenario 2 optimisation for each date.
-6. `run_imrp_year_sample.py:291-350` merges daily JSON results and calculates distribution statistics.
-7. `run_imrp_year_sample.py:438-580` writes CSV, JSON, and HTML reports.
+1. `sensitivity_analysis/run_imrp_year_sample.py:68-142` loads observed IMRP prices and constructs a 27-hour price vector for each eligible date.
+2. `sensitivity_analysis/run_imrp_year_sample.py:145-175` turns dates into independent sensitivity-style cases.
+3. `sensitivity_analysis/run_imrp_year_sample.py:216-250` monkey-patches the existing nominal, optimisation, and flexibility modules with the observed tariff and case-specific paths.
+4. `sensitivity_analysis/run_imrp_year_sample.py:259-283` loops through dates serially and resumes a case whenever `tier1_result.json` already exists.
+5. `sensitivity_analysis/sensitivity_sweep.py:296-341` runs Scenario 1 nominal operation and Scenario 2 optimisation for each date.
+6. `sensitivity_analysis/run_imrp_year_sample.py:291-350` merges daily JSON results and calculates distribution statistics.
+7. `sensitivity_analysis/run_imrp_year_sample.py:438-580` writes CSV, JSON, and HTML reports.
 
 Each model uses:
 
@@ -84,7 +84,10 @@ These are strong foundations for a proper rolling runner.
 
 ## 3.1 The current annual run is 363 independent days
 
-`run_imrp_year_sample.py:265-277` invokes each date as a separate case. `sensitivity_sweep.py:236-255` constructs a fresh `ModelParameters` object for every case. No previous-day result or state is accepted by the next model.
+`sensitivity_analysis/run_imrp_year_sample.py:265-277` invokes each date as a
+separate case. `sensitivity_analysis/sensitivity_sweep.py:236-255` constructs a
+fresh `ModelParameters` object for every case. No previous-day result or state
+is accepted by the next model.
 
 Consequences:
 
@@ -159,7 +162,9 @@ The next solve must include both newly arriving work and carried outstanding wor
 
 ## 3.6 The two daylight-saving days are omitted
 
-`run_imrp_year_sample.py:105-124` accepts only dates with periods exactly `1..24`. The 23-hour spring transition and 25-hour autumn transition are excluded, leaving 363 dates.
+`sensitivity_analysis/run_imrp_year_sample.py:105-124` accepts only dates with
+periods exactly `1..24`. The 23-hour spring transition and 25-hour autumn
+transition are excluded, leaving 363 dates.
 
 A true annual chain cannot skip those intervals because the state before the gap would be passed directly to a non-adjacent physical time.
 
@@ -174,7 +179,10 @@ The acceptance condition is not merely 365 labels. Every source interval must be
 
 ## 3.7 Negative prices are currently handled by a mixed recovery rule
 
-`run_imrp_year_sample.py:130-138` can clip negative prices to zero. The stored annual artifacts contain 337 cases solved with original non-negative horizons and 26 recovered cases solved after clipping negative values. This produces a mixed annual price policy.
+`sensitivity_analysis/run_imrp_year_sample.py:130-138` can clip negative prices
+to zero. The stored annual artifacts contain 337 cases solved with original
+non-negative horizons and 26 recovered cases solved after clipping negative
+values. This produces a mixed annual price policy.
 
 The original-price failures exposed physical and modelling weaknesses rather than proving that signed prices are invalid. In particular:
 
@@ -213,13 +221,17 @@ The state-index refactor should remove this relation. Interval-zero controls sho
 
 ## 3.9 Annual cost accounting is not a stitched time-series total
 
-`sensitivity_sweep.py:259-276` reports each optimised daily cost as:
+`sensitivity_analysis/sensitivity_sweep.py:259-276` reports each optimised
+daily cost as:
 
 ```text
 optimised core cost + (optimised extension cost - nominal extension cost)
 ```
 
-The next day is then solved independently over the overlapping hours. Component costs in `sensitivity_sweep.py:279-293` cover only the first 96 slots, so they do not reconcile with the headline cost that includes an extension adjustment.
+The next day is then solved independently over the overlapping hours. Component
+costs in `sensitivity_analysis/sensitivity_sweep.py:279-293` cover only the
+first 96 slots, so they do not reconcile with the headline cost that includes
+an extension adjustment.
 
 In a corrected rolling run:
 
@@ -231,7 +243,8 @@ In a corrected rolling run:
 
 ## 3.10 Checkpoints do not prove compatibility
 
-The current resume check tests only whether `tier1_result.json` exists (`run_imrp_year_sample.py:273-277`). It does not verify:
+The current resume check tests only whether `tier1_result.json` exists
+(`sensitivity_analysis/run_imrp_year_sample.py:273-277`). It does not verify:
 
 - input-data hash;
 - price treatment;
@@ -261,7 +274,10 @@ Future runs should record this automatically rather than relying on a value writ
 
 ## 3.12 The annual load assumption is static
 
-The current annual wrapper changes the observed tariff by date but copies the same load and shiftability profiles into every case (`sensitivity_sweep.py:194-233`). This can be valid for a controlled price-year experiment, but it is not an annual demand trace.
+The current annual wrapper changes the observed tariff by date but copies the
+same load and shiftability profiles into every case
+(`sensitivity_analysis/sensitivity_sweep.py:194-233`). This can be valid for a
+controlled price-year experiment, but it is not an annual demand trace.
 
 The study must choose and state one of two interpretations:
 
@@ -525,8 +541,10 @@ Use receding-horizon backlog semantics:
 
 ### Tasks
 
-- Add a dedicated rolling runner, for example `run_rolling_year.py`.
-- Keep `run_imrp_year_sample.py` as the independent-day screening runner.
+- Add a dedicated rolling runner, for example
+  `rolling_optimisation/run_rolling_year.py`.
+- Keep `sensitivity_analysis/run_imrp_year_sample.py` as the independent-day
+  screening runner.
 - Inject paths, tariff arrays, configuration, state, and solver settings directly.
 - Run dates or interval blocks sequentially within a scenario.
 - Write only committed timestep results to the stitched annual output.

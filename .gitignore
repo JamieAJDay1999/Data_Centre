@@ -3,5 +3,12 @@
 /archive/data
 /rev_stack/results
 /.codex_tmp/
+/.pytest_cache/
+/lp_debug/
 __pycache__/
 *.pyc
+*.aux
+*.bbl
+*.blg
+*.log
+*.out

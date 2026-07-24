@@ -105,7 +105,8 @@ that they change energy use and dispatch.
 
 ## Timing benchmark
 
-`run_rolling_formulation_benchmark.py` reuses the completed old run's opening
+`rolling_optimisation/run_rolling_formulation_benchmark.py` reuses the
+completed old run's opening
 physical states and workload backlogs. This isolates formulation performance:
 the date, signed prices, opening state and workload state are identical. The
 revised cases below used HiGHS, a 60-second limit and a requested 0.1% gap.
@@ -163,7 +164,7 @@ its optional `diagrams` dependency was absent.
 Central signed-price run with strict checkpoint quality:
 
 ```powershell
-python run_rolling_year.py --year 2025 --mode optimised `
+python -m rolling_optimisation.run_rolling_year --year 2025 --mode optimised `
   --scenario-id 2025_optimised_reformulated `
   --fail-on-gap-exceeded
 ```
@@ -171,13 +172,13 @@ python run_rolling_year.py --year 2025 --mode optimised `
 Repeatable hard-day benchmark:
 
 ```powershell
-python run_rolling_formulation_benchmark.py --time-limit 60
+python -m rolling_optimisation.run_rolling_formulation_benchmark --time-limit 60
 ```
 
 Higher-resolution IT-curve sensitivity:
 
 ```powershell
-python run_rolling_year.py --year 2025 --mode optimised `
+python -m rolling_optimisation.run_rolling_year --year 2025 --mode optimised `
   --scenario-id 2025_optimised_dlog8 `
   --it-power-segments 8 --it-power-representation DLOG `
   --it-power-breakpoint-exponent 1.5
@@ -186,7 +187,7 @@ python run_rolling_year.py --year 2025 --mode optimised `
 Physical-cost example, only after values have been justified:
 
 ```powershell
-python run_rolling_year.py --year 2025 --mode optimised `
+python -m rolling_optimisation.run_rolling_year --year 2025 --mode optimised `
   --scenario-id calibrated_physical_costs `
   --ups-throughput-cost-gbp-per-kwh <value> `
   --tes-throughput-cost-gbp-per-kwh-th <value> `

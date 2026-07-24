@@ -121,7 +121,8 @@ premium; utilisation-shock stress (φ ×2, ×5).
 
 **Stage 4 — Sensitivities & scenarios (each = one bar in a tornado chart).**
 - FR saturation: EAC prices ×{0.5, 1, 2}; spread widening: DA volatility ×{1, 1.5, 2}
-  (reuse the mean-preserving-spread machinery from `sensitivity_sweep.py`).
+  (reuse the mean-preserving-spread machinery from
+  `sensitivity_analysis/sensitivity_sweep.py`).
 - Flexible workload share ×{0.5, 1, 1.5}; UPS SoC floor {30, 50, 70} %.
 - Genset on/off; DSO in-zone/out; Scotland siting (LCM on).
 - Scale: 10 vs 100 MW; asset sizing: UPS energy ×{1, 2, 4} (would you *build*
