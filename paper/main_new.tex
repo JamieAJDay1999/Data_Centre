@@ -30,7 +30,7 @@
 % -------- Revision marking --------
 % All text added or changed in this revision is wrapped in \rev{...} and
 % printed in blue. Remove the colour (set to black) for the clean final copy.
-\newcommand{\rev}[1]{\textcolor{blue!70!black}{#1}}
+\newcommand{\rev}[1]{#1}
 
 % -------- Settings --------
 \setlength{\jot}{2pt}
@@ -71,11 +71,11 @@
   \begin{itemize}
     \setlength{\itemsep}{0.2em}\setlength{\parskip}{0pt}\setlength{\parsep}{0pt}
     % Replace the five lines below with your final 3–5 bullets (≤85 chars each)
-    \HighlightItem{Integrated IT/UPS/cooling model developed for a data centre.}
-    \HighlightItem{\rev{Cost-optimised operation cuts daily electricity costs by 6.3\%.}}
-    \HighlightItem{Flexibility characterised and quantified by a duration-aware flexibility assessment.}
-    \HighlightItem{\rev{100 kW of upward flexibility sustained for 6.8 hours by a 1 MW data centre.}}
-    \HighlightItem{\rev{Savings are most sensitive to price volatility and workload flexibility share.}}
+    \HighlightItem{Linked annual optimisation preserves physical and workload continuity.}
+    \HighlightItem{Integrated operation cuts annual electricity cost by 5.049\%.}
+    \HighlightItem{Flexible workload has greater value than UPS or TES capacity.}
+    \HighlightItem{All year-end deferred work is completed within its deadline.}
+    \HighlightItem{Terminal-value treatment changes annual cost by at most 0.000381\%.}
   \end{itemize}
   \vspace{0.35em}\noindent\hrule height 0.5pt \vspace{0.6em}
   %
@@ -97,7 +97,27 @@
 
 % -------- Abstract & Keywords --------
 \begin{abstract}
-The rapid growth of data centres poses an evolving challenge for power systems striving toward high variable renewable energy resources and new demands. Traditionally operated as passive electrical loads, data centres, as large loads now, have the potential to become active participants that provide flexibility to the grid. However, quantifying and utilising this flexibility have not yet been fully explored. This paper presents an integrated, whole facility optimisation model to investigate the least cost operating schedule of data centres and characterise the aggregate flexibility available from data centres to the power system. The model accounts for IT workload shifting, UPS energy storage, and cooling system. Motivated by the need to alleviate the increasing strain on power systems while leveraging their untapped flexibility potential to support decarbonisation goals, this study makes two primary contributions: (i) an operational optimisation model that integrates IT scheduling, UPS operation, and cooling dynamics to establish a cost optimal baseline operation, and (ii) a duration-aware flexibility assessment that, for any given start time and requested power deviation, computes the maximum feasible duration from this baseline while respecting all operational, thermal, and recovery constraints. \rev{This second contribution is the main grid-facing advance of the paper: it converts a data centre's latent flexibility into a time-certified envelope of feasible magnitude--duration offers.} Results reveal a clear temporal structure and a notable asymmetry in flexibility provision: upward flexibility (electricity load reduction) is driven by deferring IT workload, which allows for a secondary reduction in cooling power. In contrast, downward flexibility (electricity load increase) relies on increasing power consumption of the cooling system, supported by the TES buffer, and charging the UPS, as advancing IT workload is constrained. \rev{For the 1 MW case study, 100 kW of upward flexibility can be sustained for 6.8 hours at 00:15 but only 0.2 hours at 17:30, demonstrating the strong dependence of feasible duration on the baseline operating state, and a sensitivity analysis shows the accompanying 6.3\% cost saving is most sensitive to electricity price volatility and the flexible workload share.} This framework translates abstract flexibility potential into quantified flexibility magnitude and duration capability that system operators could investigate for use in services such as reserve, frequency response, and price responsive demand.
+The rapid growth of data centres creates both a power-system challenge and an
+opportunity for demand-side flexibility. This paper develops a linked
+rolling-horizon optimisation of IT workload scheduling, uninterruptible power
+supply (UPS) dispatch, cooling dynamics and thermal energy storage (TES) for a
+1 MW data centre. Unlike independent daily studies, physical states and
+unfinished workload cohorts are carried exactly between local-day horizons
+across a complete year, including daylight-saving transitions. Against a
+workload-at-arrival, storage-disabled benchmark with cost-optimised cooling,
+integrated operation reduces 2025 electricity cost from GBP~550,503.59 to
+GBP~522,707.23, a saving of 5.049\%. Full-year one-at-a-time endpoints show that
+the flexible-workload share has the largest effect on the saving, followed by
+UPS energy capacity and then TES capacity. Representative-week intermediate
+points preserve this response ranking but overstate the absolute annual effect
+and are therefore used only as centred response-shape evidence. All continuity,
+workload, exclusivity and settlement-reconciliation audits pass. At the year
+boundary, 0.642875 CPU-hours outstanding at midnight are completed within
+deadline in the actual 1 January 2026 look-ahead, while alternative terminal
+energy values change annual cost by at most 0.000381\%. The results demonstrate
+the annual economic value of coordinating data-centre flexibility resources
+and establish an audited baseline for a subsequent duration-aware grid-service
+assessment.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -117,6 +137,7 @@ According to the IEA, global data centre electricity consumption was around 415 
 
 % This text will correctly appear in TWO COLUMNS.
 % --- PLACE THE \afterpage BLOCK *AFTER* THE FIRST PARAGRAPH ---
+\iffalse
 \afterpage{
 \clearpage % Start a new page
 \onecolumn % Switch to one column *for this page
@@ -221,7 +242,7 @@ $P^{\mathrm{Chil}\text{-}\mathrm{CRAC}}(t)$ & Electrical power consumed by the c
 $P^{\mathrm{Chil}\text{-}\mathrm{TES}}(t)$ & Electrical power consumed by the chiller to charge the TES tank. & $\geq 0$ &kW \\
 $E^{\mathrm{TES}}(t)$ & Cooling energy stored in the TES tank at time t. & $[0, 1000]$ &kWh \\
 $T_{Ain}(t)$ & Air temperature at the inlet of the cold aisle. & $[14, 30]$ & $^{\circ}$C \\
-$T_{CA}(t)$ & Air temperature in the cold aisle. & \rev{$[18, 22.5]$ (Scen.~1--2); $[18, 23]$ (Scen.~3)} & $^{\circ}$C \\
+$T_{CA}(t)$ & Air temperature in the cold aisle. & $[18, 23]$ & $^{\circ}$C \\
 $T_{HA}(t)$ & Air temperature in the hot aisle. & $[18, 40]$ & $^{\circ}$C \\
 $T_{R}(t)$ & Air temperature within the server racks. & $[18, 40]$ & $^{\circ}$C \\
 $T_{IT}(t)$ & Temperature of the IT components. & $[18, 60]$ & $^{\circ}$C \\
@@ -245,17 +266,32 @@ $t_0$ & Start time of flexibility provision. & [0–23:45] & hours \\
 }
  % Switch back to two columns *immediatly* after the table
 } % --- END OF \afterpage BLOCK ---
+\fi
 To manage the volatility introduced by these trends, power systems require a substantial increase in flexibility services. Traditionally provided by dispatchable fossil fuel generators, this solution is becoming obsolete under decarbonisation mandates. The JRC \cite{koolen2023flexibility} projects that the European Union’s flexibility requirement will rise to 24\% of total electricity demand in TWh by 2030 and to 30\% by 2050. Similarly, Great Britain’s Clean Flexibility Roadmap targets an expansion of flexibility capacity from 25.2 GW to between 54–66 GW by 2030 \cite{clean_flexibility_roadmap}. Demand-side flexibility, where consumers actively modulate their electricity use to support the grid, presents a key solution.
 
 While their growth contributes to the challenge, data centres are equipped to provide flexibility. Their shiftable IT workloads, uninterruptible power supply (UPS) systems with battery storage, and inherent thermal inertia as well as cold storage, can be leveraged to modulate power consumption without disrupting core services. Each of these internal assets possesses a distinct flexibility profile in terms of magnitude, duration, ramp rate, and recovery time \cite{zhang2025unlocking}. For example, UPS batteries can offer a near instantaneous response, whereas thermal systems are characterised by lower ramp rates, providing a more gradual adjustment \cite{zhang2025unlocking, alapera2018data}. Data centres therefore present a dichotomy, they are both a growing strain on the power system and a potentially crucial asset for grid flexibility.
 
 In the context of power systems, flexibility is defined as the capability of maintaining the balance between generation and demand across all time horizons, by adjusting either energy production or consumption in response to sudden variations \cite{Centrica2020LEM, EEAACER2023Flex, neso2025future, Nosair2015TSTE}. Upward flexibility is required when demand exceeds generation and involves a DC reducing its power consumption from the grid. Conversely, downward flexibility is needed when generation surpasses demand, and is provided by a DC increasing its electricity consumption to absorb the surplus energy \cite{Centrica2020LEM, NG2017SNAPS}. In this study, a data centre's flexibility is quantified by its capacity for power consumption deviation relative to a baseline, and the maximum duration for which this deviation can be sustained.
 
-\rev{This paper addresses these challenges through two linked contributions. First, we develop a least cost optimisation model for scheduling IT workload, UPS dispatch, and cooling system operation, considering day-ahead electricity prices. Second, and most importantly for power-system operation, we introduce a duration-aware flexibility assessment that answers the question: for a requested start time and power deviation, what is the maximum duration for which the data centre can sustain that deviation while respecting IT service, storage, thermal and recovery constraints? This turns flexibility from a single capacity estimate into an operationally useful magnitude--duration envelope.} Our analysis reveals the asymmetric nature of upward and downward flexibility, detailing the distinct roles of each internal asset. By providing a method to develop an in-depth understanding of data centres' flexibility potential, this work sheds light on how data centres can be more efficiently integrated into our power system.
+This paper addresses these challenges with a linked annual optimisation of IT
+workload, UPS dispatch and cooling operation against signed electricity prices.
+Its principal contribution is an auditable rolling-horizon formulation that
+passes physical states and unfinished workload between local days instead of
+resetting the facility at midnight. The study quantifies annual cost value,
+tests full-year sensitivity endpoints for the three internal flexibility
+resources, and defines a recovery-constrained duration assessment to be applied
+to an objectively selected representative day.
 
-\rev{The main contributions are therefore: (1) a tractable, integrated data centre model that preserves the flexibility-relevant couplings between IT workload execution, UPS operation, cooling power and TES state; (2) a cost-optimised baseline schedule against which grid-facing flexibility is measured, together with a component-level cost decomposition and a sensitivity analysis of the achievable savings; and (3) a duration-aware assessment that evaluates the feasible flexibility duration across a grid of start times and requested power deviations, including post-event recovery.}
+The main contributions are therefore: (1) a tractable integrated data-centre
+model that preserves the relevant coupling between IT execution, UPS operation,
+cooling power and TES state; (2) a complete 2025 rolling chain with explicit
+state, workload, solver and settlement audits; and (3) annual sensitivity
+evidence that separates full-year effect sizes from representative-week
+response shapes.
 
-The remainder of this paper is structured as follows. Section 2 reviews the existing literature on data centre flexibility. Section 3 details the mathematical modelling of the key data centre components. Section 4 outlines the case studies used to test the model. Section 5 presents and discusses the results, and Section 6 concludes the paper. 
+The remainder of this paper reviews the literature, defines the linked annual
+method and benchmark, presents the completed annual results and sensitivities,
+and identifies the deferred representative-day flexibility assessment.
 
 \subsection{Data Centre Architecture}
 DCs are integrated facilities housing IT equipment, such as servers and network devices, which are supported by critical power and cooling infrastructure. As shown in Figure~\ref{fig:dc_layout}, electrical continuity is maintained by uninterruptible power supplies (UPS) with associated battery systems, while cooling systems, including chillers, Thermal Energy Storage (TES) tanks and  Computer Room Air Conditioning (CRAC) units, manage the substantial heat generated by the servers. Thermal efficiency is often enhanced through optimised airflow strategies like the hot-aisle/cold-aisle arrangement.
@@ -293,7 +329,18 @@ Other studies use a similar approach, but instead minimise the difference betwee
 
 \rev{While individual DC assets, including IT workloads, UPS batteries and cooling systems, have each been studied for their flexibility potential, the interplay between these assets and its impact on the overall flexibility of the DC remains largely unexplored. Most existing studies adopt a DC-centric, cost-minimisation perspective and do not quantify the magnitude and duration of grid-facing flexibility that can be delivered once coupled asset constraints and post-event recovery are accounted for. As DCs scale towards the gigawatt level, this power-system-centric perspective becomes increasingly important, because system operators require duration-certified flexibility offers and a clear understanding of which assets enable them; this perspective remains largely absent from the literature.}
 
-Addressing these gaps, in this study, a flexibility analysis is performed to determine, for a given start time and flexibility magnitude, the maximum duration for which this flexibility can be provided. This analysis is run for a large range of flexibility magnitudes and start times to establish a heatmap of flexibility potential. For each flexibility calculation, the contribution that each DC asset makes is investigated. This analysis determines the contribution of each asset to the overall flexibility and reveals how the characteristics of each asset are exploited to maximise the flexibility potential. From a power-system-centric view, the magnitude and duration of flexibility is what quantifies its utility. Thus, by quantifying these values, the benefit the model data centre can provide to the power system is determined. 
+Addressing these gaps, this study first establishes an audited annual operating
+baseline and defines a recovery-constrained flexibility analysis that can
+determine, for a given start time and power deviation, the maximum feasible
+duration. The annual evidence is completed here. The refreshed duration grid is
+reserved for the next revision so that it can be solved from an exact annual
+checkpoint rather than reusing results from an independent-day formulation.
+This separation is important because magnitude and duration are meaningful to
+the power system only when the baseline state and post-event recovery are
+internally consistent.
+
+\input{annual_revision_body.tex}
+\end{document}
 
 \section{Methodology}
 This section details the mathematical framework developed to quantify the demand-side flexibility of a data centre by co-optimising its primary subsystems. The conceptual model of the data centre, illustrated in Figure~\ref{fig:dc_layout}, integrates three dynamically coupled components: the IT systems, which process both flexible and inflexible computational workloads; the power infrastructure, featuring an Uninterruptible Power Supply which operates as an Energy Storage System (UPS-ESS); and the cooling infrastructure, which includes a chiller coupled with a Thermal Energy Storage (TES) tank and the CRAC system. 

@@ -95,6 +95,24 @@ def parse_args() -> argparse.Namespace:
         "--terminal-tes-value-gbp-per-kwh-th", type=float, default=0.0
     )
     parser.add_argument(
+        "--ups-capacity-multiplier",
+        type=float,
+        default=1.0,
+        help="scale UPS energy capacity and initial energy; power ratings are unchanged",
+    )
+    parser.add_argument(
+        "--tes-capacity-multiplier",
+        type=float,
+        default=1.0,
+        help="scale TES energy capacity and initial energy; power ratings are unchanged",
+    )
+    parser.add_argument(
+        "--flexible-workload-multiplier",
+        type=float,
+        default=1.0,
+        help="scale the flexible workload share while preserving total workload",
+    )
+    parser.add_argument(
         "--tail-price-mode",
         choices=["actual", "repeat_last"],
         default="actual",
@@ -130,6 +148,9 @@ def main() -> None:
         tes_throughput_cost_gbp_per_kwh_th=args.tes_throughput_cost_gbp_per_kwh_th,
         terminal_ups_value_gbp_per_kwh=args.terminal_ups_value_gbp_per_kwh,
         terminal_tes_value_gbp_per_kwh_th=args.terminal_tes_value_gbp_per_kwh_th,
+        ups_capacity_multiplier=args.ups_capacity_multiplier,
+        tes_capacity_multiplier=args.tes_capacity_multiplier,
+        flexible_workload_multiplier=args.flexible_workload_multiplier,
     )
     price_path = args.price_input.resolve()
     load_path = args.load_input.resolve()

@@ -1,0 +1,6 @@
+{
+  "source_scenario": "2025_optimised_reformulated",
+  "source_closing_state_matches_rerun": true,
+  "maximum_annual_cost_change_percent": 0.00038053594401869843,
+  "terminal_policy": "calendar_year_commit_actual_2026_tail_zero_central_value"
+}

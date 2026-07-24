@@ -60,7 +60,22 @@ class WorkloadCohort:
 @dataclass
 class HorizonResult:
     committed: pd.DataFrame
+    planned: pd.DataFrame
     next_state: OperationalState
+    terminal_state: OperationalState
     next_workload: list[WorkloadCohort]
     solver: dict[str, Any]
     audits: dict[str, float]
+
+
+@dataclass(frozen=True)
+class FlexibilityRequest:
+    """Grid-power request imposed on part of a solved rolling horizon."""
+
+    baseline_grid_import_kw: tuple[float, ...]
+    start_step: int
+    duration_steps: int
+    delta_kw: float
+    tolerance_kw: float = 0.1
+    recovery_state: OperationalState | None = None
+    recovery_temperature_tolerance_c: float = 0.05

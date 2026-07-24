@@ -5,6 +5,9 @@
 /.codex_tmp/
 /.pytest_cache/
 /lp_debug/
+/tmp/
+/paper/main_new.pdf
+/paper/highlights.txt
 __pycache__/
 *.pyc
 *.aux

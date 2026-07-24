@@ -1,0 +1,73 @@
+{
+  "committed_settlement_cost_change_gbp": 7.508467756351138,
+  "core_workload_unserved_after_lookahead_cpu_h": 0.0,
+  "exact_reproduction_at_tolerance": false,
+  "final_date": "2025-12-31",
+  "input_hash": "bd5f02c07c3d93d2c11181856a805689ced970083fce69d01e4d8983ad06ae61",
+  "maximum_closing_state_difference": 0.08364287334563869,
+  "maximum_committed_numeric_difference": 300.0,
+  "numeric_match_tolerance": 1e-08,
+  "opening_source": "2025-12-30",
+  "opening_state": {
+    "cold_aisle_temperature_c": 23.0,
+    "hot_aisle_temperature_c": 30.734522406443514,
+    "it_temperature_c": 36.18213326236447,
+    "rack_temperature_c": 30.73290009294877,
+    "tes_energy_kwh": -0.0,
+    "ups_energy_kwh": 300.0
+  },
+  "opening_workload_cpu_h": 0.6406499999999999,
+  "predecessor_checkpoint_sha256": "f9961c18694d10b4d003a932beae7baa064eecd09b4e30f059f9a6c4b5695066",
+  "rerun_closing_workload_cpu_h": 0.642875,
+  "rerun_code_hash": "d28742303b0f5042aedbfd508ba28baa2bdd29c11f61c9f937864073b9fa40b7",
+  "rerun_committed_settlement_cost_gbp": 1470.0722011093842,
+  "rerun_solver": {
+    "binary_variables": 432,
+    "found_feasible_incumbent": true,
+    "it_power_representation": "DLOG",
+    "it_power_segments": 4,
+    "lower_bound_gbp": 1559.5226704057511,
+    "meets_accepted_gap": true,
+    "meets_requested_gap": true,
+    "name": "appsi_highs",
+    "objective_gbp": 1559.6143845191646,
+    "relative_gap": 5.8805634472088566e-05,
+    "runtime_s": 0.5505140999994182,
+    "solution_quality": "optimal",
+    "status": "ok",
+    "termination_condition": "optimal",
+    "upper_bound_gbp": 1559.6143845191646
+  },
+  "rerun_utc": "2026-07-24T13:47:43.828562+00:00",
+  "scenario": "2025_optimised",
+  "source_checkpoint_sha256": "c5f7f1e099882a9a9bbbb597e123d7b966e2cefc58964bc29691e8e4c3df5ae0",
+  "source_closing_workload_cpu_h": 0.642875,
+  "source_code_hash": "e4aba2bfe318572494373b39dd3edbd3ef70baf6b9bf2e9020d2e9ea7b9cc79a",
+  "source_code_hash_matches_rerun": false,
+  "source_committed_settlement_cost_gbp": 1462.563733353033,
+  "source_solver": {
+    "lower_bound_gbp": 1551.5469738036752,
+    "name": "appsi_highs",
+    "objective_gbp": 1551.5469738036752,
+    "relative_gap": 0.0,
+    "runtime_s": 1.2160924999998315,
+    "status": "ok",
+    "termination_condition": "optimal",
+    "upper_bound_gbp": 1551.5469738036752
+  },
+  "tail": {
+    "prices_gbp_per_mwh": [
+      46.49,
+      40.19,
+      28.99
+    ],
+    "quarter_hour_intervals": 12,
+    "source_date": "2026-01-01",
+    "source_periods": [
+      1,
+      2,
+      3
+    ]
+  },
+  "year": 2025
+}

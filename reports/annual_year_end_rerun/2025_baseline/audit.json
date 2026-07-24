@@ -1,0 +1,73 @@
+{
+  "committed_settlement_cost_change_gbp": 7.522171308430188,
+  "core_workload_unserved_after_lookahead_cpu_h": 0.0,
+  "exact_reproduction_at_tolerance": false,
+  "final_date": "2025-12-31",
+  "input_hash": "bd5f02c07c3d93d2c11181856a805689ced970083fce69d01e4d8983ad06ae61",
+  "maximum_closing_state_difference": 0.02103955723954698,
+  "maximum_committed_numeric_difference": 7.765313552715156,
+  "numeric_match_tolerance": 1e-08,
+  "opening_source": "2025-12-30",
+  "opening_state": {
+    "cold_aisle_temperature_c": 23.0,
+    "hot_aisle_temperature_c": 31.05200373144209,
+    "it_temperature_c": 36.7424955606015,
+    "rack_temperature_c": 31.05187673094809,
+    "tes_energy_kwh": 500.0,
+    "ups_energy_kwh": 600.0
+  },
+  "opening_workload_cpu_h": 0,
+  "predecessor_checkpoint_sha256": "408bc42d3c13db1af46974306a9241ae166eaeff370955145e0c8a2dc4df3e00",
+  "rerun_closing_workload_cpu_h": 0,
+  "rerun_code_hash": "d28742303b0f5042aedbfd508ba28baa2bdd29c11f61c9f937864073b9fa40b7",
+  "rerun_committed_settlement_cost_gbp": 1493.287483090263,
+  "rerun_solver": {
+    "binary_variables": 0,
+    "found_feasible_incumbent": true,
+    "it_power_representation": "DLOG",
+    "it_power_segments": 4,
+    "lower_bound_gbp": 1580.7404532818955,
+    "meets_accepted_gap": true,
+    "meets_requested_gap": true,
+    "name": "appsi_highs",
+    "objective_gbp": 1580.740453281896,
+    "relative_gap": 0.0,
+    "runtime_s": 0.08923779999895487,
+    "solution_quality": "optimal",
+    "status": "ok",
+    "termination_condition": "optimal",
+    "upper_bound_gbp": 1580.7404532818955
+  },
+  "rerun_utc": "2026-07-24T13:47:40.965437+00:00",
+  "scenario": "2025_baseline",
+  "source_checkpoint_sha256": "4c289354c247412b7d6ea254e9a9a10260686df1005c00ed67aa0a4b49ddc379",
+  "source_closing_workload_cpu_h": 0,
+  "source_code_hash": "e4aba2bfe318572494373b39dd3edbd3ef70baf6b9bf2e9020d2e9ea7b9cc79a",
+  "source_code_hash_matches_rerun": false,
+  "source_committed_settlement_cost_gbp": 1485.765311781833,
+  "source_solver": {
+    "lower_bound_gbp": 1572.6890556506828,
+    "name": "appsi_highs",
+    "objective_gbp": 1572.6890556506826,
+    "relative_gap": 0.0,
+    "runtime_s": 0.3259717000000819,
+    "status": "ok",
+    "termination_condition": "optimal",
+    "upper_bound_gbp": 1572.6890556506828
+  },
+  "tail": {
+    "prices_gbp_per_mwh": [
+      46.49,
+      40.19,
+      28.99
+    ],
+    "quarter_hour_intervals": 12,
+    "source_date": "2026-01-01",
+    "source_periods": [
+      1,
+      2,
+      3
+    ]
+  },
+  "year": 2025
+}

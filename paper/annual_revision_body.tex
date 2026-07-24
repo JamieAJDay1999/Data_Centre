@@ -1,0 +1,286 @@
+\section{Methodology}\label{sec:methodology}
+
+\subsection{Rolling-horizon formulation}
+
+The data centre is modelled at 15-minute resolution as an integrated mixed-integer
+linear programme (MILP). Each local calendar day forms the committed core of one
+solve and is followed by a three-hour look-ahead. The core therefore contains
+92, 96 or 100 intervals at the daylight-saving transitions, while the look-ahead
+always contains 12 intervals. Only core intervals are included in the reported
+calendar-year cost. The look-ahead establishes a feasible continuation for
+workload and physical states.
+
+The state at the end of a committed core,
+\begin{equation}
+ \boldsymbol{x}_{d}^{\mathrm{end}} =
+ \left(E^{\mathrm{UPS}},E^{\mathrm{TES}},T_{\mathrm{IT}},
+ T_{\mathrm{R}},T_{\mathrm{CA}},T_{\mathrm{HA}}\right),
+\end{equation}
+is imposed exactly as the initial state of day $d+1$. Outstanding flexible
+workload is passed in the same way as timestamped cohorts with absolute
+deadlines. This linking prevents the artificial daily reset of stored energy,
+temperature or deferred work.
+
+\subsection{IT workload and electrical power}
+
+The workload trace specifies inflexible CPU utilisation and four flexible
+tranches whose maximum delays are 0.5, 1, 2 and 3 hours. If $a_{c}$ is the
+CPU-hours in cohort $c$ and $\mathcal{W}_{c}$ is its feasible execution window,
+the scheduled fraction $u_{c,t}$ satisfies
+\begin{align}
+ \sum_{t\in\mathcal{W}_{c}} u_{c,t}\Delta t &= a_c,\\
+ u_t^{\mathrm{inflex}}+\sum_c u_{c,t} &\leq 1.
+\end{align}
+The first equation is enforced within the available horizon when the deadline
+is visible; otherwise the unexecuted balance is carried forward. The complete
+three-hour look-ahead is long enough to expose every deadline generated in a
+core.
+
+IT power is a convex nonlinear function of aggregate CPU utilisation in the
+source equipment model. It is represented by a four-segment non-uniform DLOG
+piecewise-linear approximation. Across the feasible utilisation range, the
+maximum approximation error is 6.241 kW, or 0.624\% of the 1 MW IT rating.
+
+\subsection{UPS, cooling and thermal states}
+
+The UPS energy recursion is
+\begin{equation}
+ E^{\mathrm{UPS}}_{t+1}=E^{\mathrm{UPS}}_t+
+ \eta_{\mathrm{ch}}P^{\mathrm{UPS}}_{\mathrm{ch},t}\Delta t-
+ \frac{P^{\mathrm{UPS}}_{\mathrm{dis},t}}{\eta_{\mathrm{dis}}}\Delta t .
+\end{equation}
+Binary mode variables prevent simultaneous charging and discharging. The
+central UPS has a 600 kWh energy capacity and a 50\% lower state-of-charge
+bound. The first annual interval starts at 600 kWh; thereafter no daily cyclic
+condition is imposed.
+
+The chiller supplies the CRAC directly and can also charge the 1000 kWh-th TES.
+The TES may discharge to the CRAC, with mutually exclusive charge and discharge
+modes. TES begins at 500 kWh-th and uses 0.9 charge and discharge efficiencies.
+The four-node facility thermal model is discretised with backward
+(implicit) Euler boundary states. Both benchmark and optimised cases use the
+same $18$--$23\,^{\circ}$C cold-aisle range. A conservative operating rule,
+\begin{equation}
+ Q^{\mathrm{cool}}_t \geq P^{\mathrm{IT}}_t ,
+\end{equation}
+requires contemporaneous cooling provision to be at least the IT heat load.
+This avoids treating unvalidated heat accumulation as a flexibility resource.
+Outdoor temperature is fixed at $22\,^{\circ}$C and the chiller coefficient of
+performance at 5 throughout the stylised annual experiment.
+
+Total grid import is
+\begin{equation}
+ P^{\mathrm{grid}}_t=P^{\mathrm{grid,IT}}_t+
+ P^{\mathrm{UPS}}_{\mathrm{ch},t}+P^{\mathrm{ch,CRAC}}_t+
+ P^{\mathrm{ch,TES}}_t+P^{\mathrm{OD}},
+\end{equation}
+where $P^{\mathrm{OD}}$ is the constant auxiliary load. The objective minimises
+the signed settlement cost over the complete core and look-ahead:
+\begin{equation}
+ \min \sum_t \pi_t P^{\mathrm{grid}}_t\Delta t/1000 .
+\end{equation}
+Negative prices are retained. The central model assigns no storage degradation
+cost, standing loss, additional UPS reserve or terminal-energy credit.
+
+\subsection{Annual cases and sensitivity design}
+
+The annual benchmark executes workload at arrival and disables UPS and TES
+dispatch, while retaining cost-optimised cooling within the same temperature
+bounds. The optimised case activates flexible workload scheduling and both
+storage systems. This is a comparison of operational flexibility with the
+implemented benchmark; it is not a comparison against a fixed $22.5\,^{\circ}$C
+cooling set point.
+
+The input price is the actual signed 2025 Intermittent Market Reference Price
+(IMRP) series, expanded from hourly to quarter-hour resolution. The local-clock
+workload profile repeats daily, while an absolute UTC timeline preserves both
+daylight-saving transitions. Pyomo and HiGHS are used with a requested relative
+MILP gap of 0.1\%, a 300-second daily limit and a normal accepted gap of 1\%.
+
+Full-year one-at-a-time endpoints vary flexible-workload share, UPS energy
+capacity and TES energy capacity to $0.5\times$ and $1.5\times$ their central
+values. Storage power ratings are held fixed and starting stored-energy
+fractions are preserved. Twelve representative weeks provide the intermediate
+$0.75\times$ and $1.25\times$ response shape. Because the sampled central saving
+differs from the annual saving, sampled curves are centred on their own central
+case and are not reported as annual estimates.
+
+\subsection{Representative-day flexibility assessment}\label{sec:scenario 3}
+
+The duration-aware flexibility formulation evaluates a request beginning at
+$t_0$ with grid deviation $\Delta P$ from the annual optimised baseline. During
+the event,
+\begin{equation}
+ \left|P^{\mathrm{grid}}_t-
+ \left(P^{\mathrm{grid,base}}_t+\Delta P\right)\right|
+ \leq \epsilon_P ,
+\end{equation}
+and a binary search finds the longest feasible duration. Recovery constraints
+require the terminal UPS, TES and four thermal states to return to the baseline
+continuation state. An objective representative day is selected by the smallest
+standardised distance to annual price, grid, CPU, cost and opening-state
+statistics; this procedure selects 22 September 2025.
+
+\textbf{Draft status:} the refreshed Scenario 3 solve has deliberately been
+deferred. No duration-envelope values from the obsolete independent-day model
+are carried into the annual results below. The prepared runner reconstructs the
+selected day from its audited annual checkpoint and will populate the
+flexibility heatmap and component decompositions in a subsequent revision.
+
+\section{Annual Results and Discussion}\label{sec:results}
+
+\subsection{Central annual result}
+
+The workload-at-arrival benchmark costs GBP~550,503.59 in 2025, whereas the
+integrated optimisation costs GBP~522,707.23. The resulting saving is
+GBP~27,796.37, or 5.049\%. Table~\ref{tab:annual-endpoints} gives the central
+case and all completed full-year sensitivity endpoints.
+
+\input{generated/annual_endpoint_table.tex}
+
+The optimised case imports 6.794 GWh compared with 6.718 GWh in the benchmark.
+The economic benefit therefore arises from moving electrical consumption to
+lower-priced intervals, not from reducing annual electricity use. The 1 MW
+facility's annual peak import rises from 974.9 kW to 1681.9 kW as storage
+charging and deferred-work recovery are concentrated in favourable intervals.
+Consequently, the result should be interpreted as an energy-market operating
+cost benefit; network-capacity charges or an explicit grid-import limit would
+change the dispatch.
+
+\begin{figure*}[!t]
+ \centering
+ \subfloat[Grid import and IMRP price.]{%
+  \includegraphics[width=0.49\textwidth]{images/Figure_4a.png}
+  \label{fig:representative-grid}}
+ \hfill
+ \subfloat[Workload execution.]{%
+  \includegraphics[width=0.49\textwidth]{images/Figure_4b.png}
+  \label{fig:representative-workload}}
+ \caption{Annual baseline and optimised operation on the objectively selected
+ representative day, 22 September 2025.}
+ \label{fig:representative-day}
+\end{figure*}
+
+\begin{figure}[!t]
+ \centering
+ \includegraphics[width=\columnwidth]{images/Figure_5.png}
+ \caption{Optimised component dispatch on 22 September 2025. Negative bars
+ denote UPS discharge; the dotted line is benchmark grid import.}
+ \label{fig:representative-dispatch}
+\end{figure}
+
+Figures~\ref{fig:representative-day} and \ref{fig:representative-dispatch}
+illustrate how flexible work, UPS dispatch and cooling are coordinated on the
+selected day. They are descriptive slices through the linked annual trajectory,
+not independent daily optimisations: opening storage, temperature and workload
+states are taken directly from the 21 September checkpoint.
+
+\subsection{Sensitivity and asset ranking}
+
+Flexible-workload share is the dominant tested internal parameter. Halving it
+reduces the annual saving to 3.522\%, while increasing it by half raises the
+saving to 6.257\%. The corresponding changes from the central result are
+$-1.528$ and $+1.208$ percentage points. UPS capacity ranks second: its endpoint
+range is 4.565--5.501\%. TES capacity has the smallest effect, with a
+4.800--5.167\% range. Thus the frozen ranking is flexible workload, UPS energy
+capacity, then TES energy capacity.
+
+\begin{figure*}[!t]
+ \centering
+ \includegraphics[width=0.92\textwidth]{images/Figure_9.png}
+ \caption{Sensitivity response relative to the respective central case.
+ Solid blue endpoints are full-year runs; dashed grey intermediate curves are
+ from twelve representative weeks and show response shape only.}
+ \label{fig:sensitivity-response}
+\end{figure*}
+
+Figure~\ref{fig:sensitivity-response} combines the full-year endpoints with the
+centred representative-week curves. The sampled central saving is 6.713\%,
+compared with 5.049\% annually, so the sampled absolute percentages would
+overstate annual effects. Their use here is limited to confirming direction,
+curvature and the same parameter ranking. No interaction effects are inferred
+from the one-at-a-time design.
+
+\subsection{Continuity, solver quality and terminal treatment}
+
+Every annual chain passes timestamp coverage, state hand-off, workload
+conservation, charge/discharge exclusivity and settlement-cost reconciliation
+audits. The few time-limited daily solves retain feasible incumbents. The
+largest exceptional relative gap occurs in the low-flexibility case on 25 May:
+a 900-second rerun leaves a 5.652\% relative gap because the objective is close
+to zero and negative, but the absolute incumbent-bound width is only GBP~0.102.
+The committed cost changes by approximately GBP~0.002, the downstream state is
+unchanged and every physical audit passes. It is retained with this explicit
+qualification.
+
+At midnight after 31 December, 0.642875 CPU-hours from the central core remains
+within deadline. It is fully completed in the 1 January 2026 look-ahead, which
+uses the available actual IMRP values of GBP~46.49, 40.19 and 28.99/MWh for the
+first three settlement periods. Calendar-year reporting includes only 2025
+committed intervals; the look-ahead is a feasibility certificate and includes
+ordinary 2026 demand that cannot be attributed to 2025.
+
+The central convention assigns zero value to terminal UPS and TES energy. A
+continuation-value test spanning the median to the maximum observed 1 January
+price changes the annual cost by at most 0.000381\%. At the maximum tested
+value, the final horizon retains 600 kWh in the UPS and 1000 kWh-th in TES
+instead of ending at their lower states. This negligible annual effect supports
+the zero-value central convention while making its implication transparent.
+
+\subsection{Scope and limitations}
+
+The analysis is a stylised annual operating experiment rather than a forecast
+for a specific facility. Ambient temperature, COP and the local-clock workload
+shape are fixed, storage ageing and standing losses are omitted, and network
+tariffs and service revenues are outside scope. The conservative
+$Q^{\mathrm{cool}}\geq P^{\mathrm{IT}}$ rule also limits the use of building
+thermal mass. The cost results establish the value and relative importance of
+the modelled resources under signed energy prices; they do not alone establish
+the profitability of a commercial flexibility product.
+
+\section{Conclusion}
+
+Linked rolling optimisation across all of 2025 reduces the model data centre's
+electricity cost from GBP~550,503.59 to GBP~522,707.23, a saving of 5.049\%.
+The calculation preserves physical and workload continuity across every local
+day, including daylight-saving transitions, and reconciles directly to signed
+IMRP settlement prices.
+
+Full-year endpoints show that workload flexibility is the most influential
+tested internal resource, followed by UPS energy capacity and then TES energy
+capacity. Representative-week intermediate points preserve this ranking and
+response shape but overstate the absolute annual effect, so they are used only
+as centred comparative evidence. Year-end continuation-value tests alter
+annual cost by no more than 0.000381\%, and all 0.642875 CPU-hours outstanding
+at midnight are completed within deadline in the actual 1 January look-ahead.
+
+The next revision will apply the prepared duration-aware flexibility runner to
+22 September 2025 using the exact annual checkpoint state. That study will add
+recovery-certified magnitude-duration envelopes without mixing results from
+the superseded independent-day formulation. Further work should incorporate
+weather-varying cooling performance, storage degradation, network constraints,
+service revenues and factorial interactions between resources.
+
+% -------- Bibliography --------
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\section*{Acknowledgements}
+
+This work was supported by the Engineering and Physical Sciences Research
+Council (EPSRC) and the Economic and Social Research Council (ESRC) through
+funding provided to the Energy Demand Research Centre (grant number
+EP/Y010078/1).
+
+\section*{CRediT Authorship Contribution Statement}
+
+\noindent \textbf{Mehmet T{\"u}rker Takci:} Writing -- original draft,
+Investigation, Methodology, Conceptualization.
+
+\medskip
+\noindent \textbf{James Day:} Writing -- original draft, Investigation,
+Methodology, Conceptualization.
+
+\medskip
+\noindent \textbf{Meysam Qadrdan:} Review \& editing, Supervision,
+Conceptualization.

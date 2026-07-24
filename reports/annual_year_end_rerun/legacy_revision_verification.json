@@ -1,0 +1,25 @@
+{
+  "model_revision": "466d998bb9502e8101f7aaf4d14512a0560b9fab",
+  "purpose": "Verify the two pre-reformulation annual scenarios with their historical model implementation.",
+  "tail": {
+    "source_date": "2026-01-01",
+    "source_periods": [1, 2, 3],
+    "prices_gbp_per_mwh": [46.49, 40.19, 28.99]
+  },
+  "records": [
+    {
+      "scenario": "2025_baseline",
+      "committed_settlement_cost_change_gbp": -2.2737367544323206e-13,
+      "maximum_committed_numeric_difference": 5.115907697472721e-13,
+      "maximum_closing_state_difference": 0.0,
+      "exact_reproduction_at_1e-8_tolerance": true
+    },
+    {
+      "scenario": "2025_optimised",
+      "committed_settlement_cost_change_gbp": 4.547473508864641e-13,
+      "maximum_committed_numeric_difference": 3.637978807091713e-12,
+      "maximum_closing_state_difference": 0.0,
+      "exact_reproduction_at_1e-8_tolerance": true
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "committed_settlement_cost_change_gbp": 0.0,
+  "core_workload_unserved_after_lookahead_cpu_h": 0.0,
+  "exact_reproduction_at_tolerance": true,
+  "final_date": "2025-12-31",
+  "input_hash": "bd5f02c07c3d93d2c11181856a805689ced970083fce69d01e4d8983ad06ae61",
+  "maximum_closing_state_difference": 0.0,
+  "maximum_committed_numeric_difference": 4.831690603168681e-13,
+  "numeric_match_tolerance": 1e-08,
+  "opening_source": "2025-12-30",
+  "opening_state": {
+    "cold_aisle_temperature_c": 23.0,
+    "hot_aisle_temperature_c": 31.064326479795263,
+    "it_temperature_c": 36.763535117841045,
+    "rack_temperature_c": 31.064199942113646,
+    "tes_energy_kwh": 500.0,
+    "ups_energy_kwh": 600.0
+  },
+  "opening_workload_cpu_h": 0,
+  "predecessor_checkpoint_sha256": "3e894e7dd62e2e89a6cc3a55561590288ae58a38f7de119e009e93c7259e023e",
+  "rerun_closing_workload_cpu_h": 0,
+  "rerun_code_hash": "d28742303b0f5042aedbfd508ba28baa2bdd29c11f61c9f937864073b9fa40b7",
+  "rerun_committed_settlement_cost_gbp": 1493.2911813420023,
+  "rerun_solver": {
+    "binary_variables": 0,
+    "found_feasible_incumbent": true,
+    "it_power_representation": "DLOG",
+    "it_power_segments": 4,
+    "lower_bound_gbp": 1580.7441515336347,
+    "meets_accepted_gap": true,
+    "meets_requested_gap": true,
+    "name": "appsi_highs",
+    "objective_gbp": 1580.744151533635,
+    "relative_gap": 0.0,
+    "runtime_s": 0.09877580000102171,
+    "solution_quality": "optimal",
+    "status": "ok",
+    "termination_condition": "optimal",
+    "upper_bound_gbp": 1580.7441515336347
+  },
+  "rerun_utc": "2026-07-24T13:47:41.233638+00:00",
+  "scenario": "2025_baseline_reformulated",
+  "source_checkpoint_sha256": "e18f9a10deeee48b6f642b4b8833eef92381c372a3044743a9c7b00354b4a34d",
+  "source_closing_workload_cpu_h": 0,
+  "source_code_hash": "438c776e6d2701c26c3886264d03ae8d1989fc18ccdd2fbe6fe858d235b14584",
+  "source_code_hash_matches_rerun": false,
+  "source_committed_settlement_cost_gbp": 1493.2911813420023,
+  "source_solver": {
+    "binary_variables": 0,
+    "found_feasible_incumbent": true,
+    "it_power_representation": "DLOG",
+    "it_power_segments": 4,
+    "lower_bound_gbp": 1580.7441515336347,
+    "meets_accepted_gap": true,
+    "meets_requested_gap": true,
+    "name": "appsi_highs",
+    "objective_gbp": 1580.744151533635,
+    "relative_gap": 0.0,
+    "runtime_s": 0.08659589999842865,
+    "solution_quality": "optimal",
+    "status": "ok",
+    "termination_condition": "optimal",
+    "upper_bound_gbp": 1580.7441515336347
+  },
+  "tail": {
+    "prices_gbp_per_mwh": [
+      46.49,
+      40.19,
+      28.99
+    ],
+    "quarter_hour_intervals": 12,
+    "source_date": "2026-01-01",
+    "source_periods": [
+      1,
+      2,
+      3
+    ]
+  },
+  "year": 2025
+}

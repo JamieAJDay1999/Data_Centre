@@ -6,6 +6,7 @@ import pandas as pd
 import pyomo.environ as pyo
 import pytest
 
+import rolling_optimisation.run_rolling_year as annual_runner
 from rolling_optimisation.config import (
     RollingConfig,
     default_initial_state,
@@ -18,7 +19,11 @@ from rolling_optimisation.timeline import (
     build_annual_timeline,
     local_day_core_indices,
 )
-from rolling_optimisation.types import OperationalState, WorkloadCohort
+from rolling_optimisation.types import (
+    FlexibilityRequest,
+    OperationalState,
+    WorkloadCohort,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -85,6 +90,64 @@ def test_sensitivity_multipliers_preserve_capacity_fractions() -> None:
 
     with pytest.raises(ValueError, match="must be positive"):
         RollingConfig(ups_capacity_multiplier=0)
+
+
+def test_annual_runner_parses_sensitivity_multipliers(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "run_rolling_year.py",
+            "--ups-capacity-multiplier",
+            "0.5",
+            "--tes-capacity-multiplier",
+            "1.5",
+            "--flexible-workload-multiplier",
+            "1.25",
+        ],
+    )
+
+    args = annual_runner.parse_args()
+
+    assert args.ups_capacity_multiplier == pytest.approx(0.5)
+    assert args.tes_capacity_multiplier == pytest.approx(1.5)
+    assert args.flexible_workload_multiplier == pytest.approx(1.25)
+
+
+def test_annual_runner_forwards_sensitivity_multipliers(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, RollingConfig] = {}
+
+    def fake_run_rolling_scenario(**kwargs: object) -> dict[str, object]:
+        captured["config"] = kwargs["config"]  # type: ignore[assignment]
+        return {}
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "run_rolling_year.py",
+            "--scenario-id",
+            "cli_multiplier_test",
+            "--ups-capacity-multiplier",
+            "0.5",
+            "--tes-capacity-multiplier",
+            "1.5",
+            "--flexible-workload-multiplier",
+            "1.25",
+        ],
+    )
+    monkeypatch.setattr(
+        annual_runner, "run_rolling_scenario", fake_run_rolling_scenario
+    )
+
+    annual_runner.main()
+
+    config = captured["config"]
+    assert config.ups_capacity_multiplier == pytest.approx(0.5)
+    assert config.tes_capacity_multiplier == pytest.approx(1.5)
+    assert config.flexible_workload_multiplier == pytest.approx(1.25)
 
 
 def test_flexible_multiplier_preserves_interval_demand(
@@ -189,6 +252,64 @@ def test_two_linked_signed_price_horizons(timeline: pd.DataFrame) -> None:
         * config.dt_hours
     ).sum()
     assert first.committed["settlement_cost_gbp"].sum() == pytest.approx(direct)
+    assert len(first.planned) == first_core + config.lookahead_steps
+    assert first.terminal_state == OperationalState.from_dict(
+        {
+            key.removeprefix("state_end_"): first.planned.iloc[-1][key]
+            for key in first.planned.columns
+            if key.startswith("state_end_")
+        }
+    )
+
+
+@pytest.mark.integration
+def test_flexibility_request_tracks_grid_target_and_recovers(
+    timeline: pd.DataFrame,
+) -> None:
+    solver = _available_solver()
+    if solver is None:
+        pytest.skip("No supported MILP solver is available")
+    config = RollingConfig(
+        scenario_id="flexibility_request_test",
+        solver_name=solver,
+        solver_time_limit_s=30,
+        mip_gap=0.01,
+    )
+    core_steps = 8
+    start = 24
+    horizon = timeline.iloc[
+        start : start + core_steps + config.lookahead_steps
+    ]
+    baseline = solve_horizon(
+        config, horizon, core_steps, default_initial_state(config)
+    )
+    request = FlexibilityRequest(
+        baseline_grid_import_kw=tuple(baseline.committed["grid_import_kw"]),
+        start_step=2,
+        duration_steps=1,
+        delta_kw=-10.0,
+        recovery_state=baseline.terminal_state,
+    )
+    response = solve_horizon(
+        config,
+        horizon,
+        core_steps,
+        default_initial_state(config),
+        flexibility_request=request,
+    )
+
+    target = baseline.committed.iloc[2]["grid_import_kw"] - 10.0
+    assert response.committed.iloc[2]["grid_import_kw"] == pytest.approx(
+        target, abs=request.tolerance_kw
+    )
+    assert (
+        response.terminal_state.ups_energy_kwh
+        >= baseline.terminal_state.ups_energy_kwh - 1e-6
+    )
+    assert (
+        response.terminal_state.tes_energy_kwh
+        >= baseline.terminal_state.tes_energy_kwh - 1e-6
+    )
 
 
 @pytest.mark.integration

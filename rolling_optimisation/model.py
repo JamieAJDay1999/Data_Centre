@@ -10,7 +10,12 @@ import pyomo.environ as pyo
 
 from .config import RollingConfig, model_parameters
 from .timeline import TRANCHE_DELAYS
-from .types import HorizonResult, OperationalState, WorkloadCohort
+from .types import (
+    FlexibilityRequest,
+    HorizonResult,
+    OperationalState,
+    WorkloadCohort,
+)
 
 
 def _iso(timestamp: pd.Timestamp) -> str:
@@ -89,6 +94,7 @@ def solve_horizon(
     initial_state: OperationalState,
     carried_workload: Iterable[WorkloadCohort] = (),
     *,
+    flexibility_request: FlexibilityRequest | None = None,
     tee: bool = False,
 ) -> HorizonResult:
     """Solve one local-day core plus look-ahead and return only committed actions."""
@@ -453,6 +459,44 @@ def solve_horizon(
         m.I,
         rule=lambda mod, step: mod.grid_import_kw[step] <= effective_grid_limit_kw,
     )
+    if flexibility_request is not None:
+        request = flexibility_request
+        if request.start_step < 0 or request.duration_steps < 1:
+            raise ValueError("Flexibility request start and duration must be positive")
+        stop_step = request.start_step + request.duration_steps
+        if stop_step > core_steps:
+            raise ValueError("Flexibility request must end within the committed core")
+        if len(request.baseline_grid_import_kw) < stop_step:
+            raise ValueError("Flexibility request baseline is shorter than its event")
+        m.flexibility_request = pyo.ConstraintList()
+        for step in range(request.start_step, stop_step):
+            target = (
+                float(request.baseline_grid_import_kw[step]) + request.delta_kw
+            )
+            m.flexibility_request.add(
+                m.grid_import_kw[step] >= target - request.tolerance_kw
+            )
+            m.flexibility_request.add(
+                m.grid_import_kw[step] <= target + request.tolerance_kw
+            )
+        if request.recovery_state is not None:
+            recovery = request.recovery_state
+            m.flexibility_recovery = pyo.ConstraintList()
+            m.flexibility_recovery.add(
+                m.e_ups_kwh[n_steps] >= recovery.ups_energy_kwh
+            )
+            m.flexibility_recovery.add(
+                m.e_tes_kwh[n_steps] >= recovery.tes_energy_kwh
+            )
+            tolerance = request.recovery_temperature_tolerance_c
+            for variable, value in (
+                (m.t_it[n_steps], recovery.it_temperature_c),
+                (m.t_rack[n_steps], recovery.rack_temperature_c),
+                (m.t_cold[n_steps], recovery.cold_aisle_temperature_c),
+                (m.t_hot[n_steps], recovery.hot_aisle_temperature_c),
+            ):
+                m.flexibility_recovery.add(variable >= value - tolerance)
+                m.flexibility_recovery.add(variable <= value + tolerance)
 
     energy_cost = sum(
         config.dt_hours
@@ -522,7 +566,7 @@ def solve_horizon(
     core_boundary = timestamps[core_steps]
 
     rows: list[dict] = []
-    for step in range(core_steps):
+    for step in range(n_steps):
         flexible_processed = (
             float(horizon.at[step, "flexible_cpu"])
             if config.mode == "baseline"
@@ -564,7 +608,9 @@ def solve_horizon(
                 **{f"state_end_{key}": value for key, value in state_end.to_dict().items()},
             }
         )
-    committed = pd.DataFrame(rows)
+    planned = pd.DataFrame(rows)
+    committed = planned.iloc[:core_steps].copy()
+    terminal_state = _state_from_model(m, n_steps)
 
     next_workload: list[WorkloadCohort] = []
     core_generated = [cohort for cohort in generated if cohort.arrival < core_boundary]
@@ -674,6 +720,14 @@ def solve_horizon(
         "committed_grid_energy_kwh": float(
             committed["grid_import_kw"].sum() * config.dt_hours
         ),
+        "lookahead_settlement_cost_gbp": float(
+            planned.iloc[core_steps:]["settlement_cost_gbp"].sum()
+        ),
+        "lookahead_grid_energy_kwh": float(
+            planned.iloc[core_steps:]["grid_import_kw"].sum() * config.dt_hours
+        ),
+        "core_workload_completed_in_lookahead_cpu_h": closing_work
+        - unserved_after_lookahead,
     }
     if initial_residual > config.state_tolerance:
         raise RuntimeError(f"Initial state residual {initial_residual} exceeds tolerance")
@@ -736,7 +790,9 @@ def solve_horizon(
         )
     return HorizonResult(
         committed=committed,
+        planned=planned,
         next_state=next_state,
+        terminal_state=terminal_state,
         next_workload=next_workload,
         solver=solver_metadata,
         audits=audits,
