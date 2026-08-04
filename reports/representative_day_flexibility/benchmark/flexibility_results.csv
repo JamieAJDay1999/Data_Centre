@@ -1,0 +1,3 @@
+date,start_step,start_hour,magnitude_kw,duration_steps,duration_hours,solver_calls,solver_runtime_s,maximum_solver_relative_gap,validated,boundary_verified,maximum_target_error_kw,maximum_recovery_energy_shortfall_kwh,maximum_recovery_temperature_error_c,maximum_component_closure_error_kw,solver_quality,solver_relative_gap,solver_meets_accepted_gap
+2025-09-22,0,0.0,-100.0,0,0.0,5,2.369902299997193,,True,True,,,,,,,
+2025-09-22,60,15.0,25.0,3,0.75,5,3.7674402999982703,0.0003940760558550077,True,True,0.10000000000013642,0.0,0.05000000000000071,1.0516032489249483e-12,optimal,0.000219778042693204,True

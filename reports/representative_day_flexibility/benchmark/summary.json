@@ -1,0 +1,16 @@
+{
+  "date": "2025-09-22",
+  "benchmark": true,
+  "cells": 2,
+  "solver_calls": 10,
+  "solver_runtime_s": 6.137342599995463,
+  "wall_time_s": 6.145079599999008,
+  "time_limit_s_per_solve": 60,
+  "all_cells_validated": true,
+  "all_boundaries_verified": true,
+  "maximum_target_error_kw": 0.10000000000013642,
+  "maximum_recovery_temperature_error_c": 0.05000000000000071,
+  "maximum_component_closure_error_kw": 1.0516032489249483e-12,
+  "cells_with_solver_gap_above_one_percent": 0,
+  "recovery_rule": "UPS/TES no worse than baseline horizon terminal energy; thermal terminal states within 0.05 C of baseline"
+}

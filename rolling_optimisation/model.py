@@ -469,6 +469,27 @@ def solve_horizon(
         if len(request.baseline_grid_import_kw) < stop_step:
             raise ValueError("Flexibility request baseline is shorter than its event")
         m.flexibility_request = pyo.ConstraintList()
+        if request.baseline_total_cpu is not None:
+            if len(request.baseline_total_cpu) < request.start_step:
+                raise ValueError("Flexibility CPU baseline is shorter than its prefix")
+            for step in range(request.start_step):
+                m.flexibility_request.add(
+                    m.total_cpu[step] == float(request.baseline_total_cpu[step])
+                )
+        if request.event_initial_state is not None:
+            event_state = request.event_initial_state
+            for variable, value in (
+                (m.e_ups_kwh[request.start_step], event_state.ups_energy_kwh),
+                (m.e_tes_kwh[request.start_step], event_state.tes_energy_kwh),
+                (m.t_it[request.start_step], event_state.it_temperature_c),
+                (m.t_rack[request.start_step], event_state.rack_temperature_c),
+                (
+                    m.t_cold[request.start_step],
+                    event_state.cold_aisle_temperature_c,
+                ),
+                (m.t_hot[request.start_step], event_state.hot_aisle_temperature_c),
+            ):
+                m.flexibility_request.add(variable == value)
         for step in range(request.start_step, stop_step):
             target = (
                 float(request.baseline_grid_import_kw[step]) + request.delta_kw

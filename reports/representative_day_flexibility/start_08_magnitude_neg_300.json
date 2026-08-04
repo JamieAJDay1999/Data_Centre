@@ -1,0 +1,75 @@
+{
+  "date": "2025-09-22",
+  "start_step": 8,
+  "magnitude_kw": -300.0,
+  "time_limit_s": 60,
+  "result": {
+    "date": "2025-09-22",
+    "start_step": 8,
+    "start_hour": 2.0,
+    "magnitude_kw": -300.0,
+    "duration_steps": 0,
+    "duration_hours": 0.0,
+    "solver_calls": 5,
+    "solver_runtime_s": 2.4590743000007933,
+    "maximum_solver_relative_gap": null,
+    "validated": true,
+    "boundary_verified": true,
+    "duration_is_lower_bound": false
+  },
+  "trials": [
+    {
+      "duration_steps": 1,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.5107723000000988,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_feasibility"
+    },
+    {
+      "duration_steps": 3,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.49437460000081046,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_feasibility"
+    },
+    {
+      "duration_steps": 6,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.5351406999998289,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_feasibility"
+    },
+    {
+      "duration_steps": 12,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.5092684999999619,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_feasibility"
+    },
+    {
+      "duration_steps": 24,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.4095182000000932,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_feasibility"
+    }
+  ],
+  "solver": null,
+  "audits": null,
+  "terminal_state": null
+}

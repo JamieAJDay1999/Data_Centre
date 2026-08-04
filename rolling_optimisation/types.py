@@ -76,6 +76,8 @@ class FlexibilityRequest:
     start_step: int
     duration_steps: int
     delta_kw: float
+    baseline_total_cpu: tuple[float, ...] | None = None
+    event_initial_state: OperationalState | None = None
     tolerance_kw: float = 0.1
     recovery_state: OperationalState | None = None
     recovery_temperature_tolerance_c: float = 0.05

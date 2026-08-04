@@ -16,6 +16,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from figure_style import (
+    BLUE,
+    DARK_GREY,
+    GREEN,
+    GREY,
+    HALF_TEXT_WIDTH,
+    LIGHT_GREY,
+    ORANGE,
+    PINK,
+    SKY,
+    TEXT_WIDTH,
+    hour_axis,
+    legend_above,
+    save,
+    use_paper_style,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ANNUAL = ROOT / "static/data/rolling_year_outputs"
@@ -98,6 +115,72 @@ def build_endpoint_table() -> pd.DataFrame:
     return result
 
 
+def build_cost_component_table() -> pd.DataFrame:
+    """Reconcile annual settlement cost into additive grid-balance terms."""
+
+    component_columns = {
+        "IT electrical demand": "p_it_total_kw",
+        "CRAC chiller": "p_chiller_hvac_kw",
+        "TES charging chiller": "p_chiller_tes_kw",
+    }
+    scenario_frames: dict[str, pd.DataFrame] = {}
+    for label, scenario in (("Baseline", BASELINE), ("Optimised", CENTRAL)):
+        frame = pd.read_csv(ANNUAL / scenario / "annual_committed.csv")
+        frame["UPS net grid effect"] = (
+            frame["p_ups_charge_kw"] - frame["p_ups_discharge_kw"]
+        )
+        represented = (
+            frame["p_it_total_kw"]
+            + frame["p_chiller_hvac_kw"]
+            + frame["p_chiller_tes_kw"]
+            + frame["UPS net grid effect"]
+        )
+        frame["Auxiliary overhead"] = frame["grid_import_kw"] - represented
+        scenario_frames[label] = frame
+
+    rows: list[dict] = []
+    ordered = [
+        *component_columns,
+        "UPS net grid effect",
+        "Auxiliary overhead",
+    ]
+    for component in ordered:
+        column = component_columns.get(component, component)
+        values: dict[str, float] = {}
+        energies: dict[str, float] = {}
+        for label, frame in scenario_frames.items():
+            price = frame["settlement_price_gbp_per_mwh"]
+            values[label] = float((frame[column] * price * 0.25 / 1000).sum())
+            energies[label] = float(frame[column].sum() * 0.25)
+        rows.append(
+            {
+                "component": component,
+                "baseline_cost_gbp": values["Baseline"],
+                "optimised_cost_gbp": values["Optimised"],
+                "cost_change_gbp": values["Optimised"] - values["Baseline"],
+                "baseline_energy_kwh": energies["Baseline"],
+                "optimised_energy_kwh": energies["Optimised"],
+            }
+        )
+    table = pd.DataFrame(rows)
+    total = {
+        "component": "Total settlement cost",
+        "baseline_cost_gbp": float(table["baseline_cost_gbp"].sum()),
+        "optimised_cost_gbp": float(table["optimised_cost_gbp"].sum()),
+        "cost_change_gbp": float(table["cost_change_gbp"].sum()),
+        "baseline_energy_kwh": float(table["baseline_energy_kwh"].sum()),
+        "optimised_energy_kwh": float(table["optimised_energy_kwh"].sum()),
+    }
+    table = pd.concat([table, pd.DataFrame([total])], ignore_index=True)
+    for label, frame in scenario_frames.items():
+        expected = float(frame["settlement_cost_gbp"].sum())
+        column = "baseline_cost_gbp" if label == "Baseline" else "optimised_cost_gbp"
+        if abs(float(table.iloc[-1][column]) - expected) > 1e-6:
+            raise AssertionError(f"{label} component cost does not reconcile")
+    table.to_csv(REPORT / "annual_cost_components.csv", index=False)
+    return table
+
+
 def select_representative_day() -> tuple[str, pd.DataFrame]:
     annual = pd.read_csv(ANNUAL / CENTRAL / "annual_committed.csv")
     annual["timestamp_utc"] = pd.to_datetime(annual["timestamp_utc"], utc=True)
@@ -164,119 +247,174 @@ def _representative_frames(date: str) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 def plot_representative_day(date: str) -> None:
     baseline, central = _representative_frames(date)
-    plt.style.use("seaborn-v0_8-whitegrid")
+    use_paper_style()
+    _plot_day_import_and_price(baseline, central)
+    _plot_day_workload(baseline, central)
+    _plot_day_dispatch(baseline, central)
 
-    fig, axis = plt.subplots(figsize=(11, 6))
+
+def _plot_day_import_and_price(
+    baseline: pd.DataFrame, central: pd.DataFrame
+) -> None:
+    fig, axis = plt.subplots(
+        figsize=(HALF_TEXT_WIDTH, 2.55), layout="constrained"
+    )
+    price_axis = axis.twinx()
+    price_axis.set_zorder(axis.get_zorder() - 1)
+    axis.patch.set_visible(False)
+
+    price = central["settlement_price_gbp_per_mwh"]
+    price_axis.fill_between(
+        central["hour"],
+        price,
+        step="post",
+        color=ORANGE,
+        alpha=0.09,
+        linewidth=0,
+    )
+    price_axis.step(
+        central["hour"],
+        price,
+        where="post",
+        color=ORANGE,
+        linewidth=0.9,
+        label="IMRP price",
+    )
+    price_axis.set_ylabel("IMRP (GBP/MWh)", color="#A8730B")
+    price_axis.tick_params(axis="y", colors="#A8730B")
+    price_axis.spines["right"].set_visible(True)
+    price_axis.spines["right"].set_color("#A8730B")
+    price_axis.grid(False)
+    price_axis.set_ylim(0, float(price.max()) * 1.30)
+
     axis.plot(
         baseline["hour"],
         baseline["grid_import_kw"],
-        color="#6b7280",
-        linewidth=2,
-        label="Baseline grid import",
+        color=GREY,
+        linewidth=1.0,
+        linestyle=(0, (4, 1.6)),
+        label="Benchmark import",
     )
     axis.plot(
         central["hour"],
         central["grid_import_kw"],
-        color="#0072B2",
-        linewidth=2.2,
-        label="Optimised grid import",
+        color=BLUE,
+        linewidth=1.3,
+        label="Optimised import",
     )
-    axis.set_xlabel("Local time (hour)")
     axis.set_ylabel("Grid import (kW)")
-    axis.set_xlim(0, 24)
-    price_axis = axis.twinx()
-    price_axis.step(
-        central["hour"],
-        central["settlement_price_gbp_per_mwh"],
-        where="post",
-        color="#D55E00",
-        alpha=0.75,
-        linewidth=1.6,
-        label="IMRP",
-    )
-    price_axis.set_ylabel("IMRP (GBP/MWh)")
-    handles, labels = axis.get_legend_handles_labels()
-    right_handles, right_labels = price_axis.get_legend_handles_labels()
-    axis.legend(handles + right_handles, labels + right_labels, loc="upper left")
-    axis.set_title(f"Representative operating day: {date}")
-    fig.tight_layout()
-    fig.savefig(IMAGES / "Figure_4a.png", dpi=220)
-    plt.close(fig)
+    axis.set_xlabel("Local time (h)")
+    axis.set_ylim(0, 1500)
+    hour_axis(axis)
 
-    fig, axis = plt.subplots(figsize=(11, 6))
-    axis.plot(
-        baseline["hour"],
-        baseline["total_cpu"],
-        color="#6b7280",
-        linewidth=2,
-        label="Workload at arrival",
+    handles, labels = axis.get_legend_handles_labels()
+    price_handles, price_labels = price_axis.get_legend_handles_labels()
+    legend_above(axis, 3, handles + price_handles, labels + price_labels)
+    save(fig, IMAGES / "Figure_4a.png")
+
+
+def _plot_day_workload(baseline: pd.DataFrame, central: pd.DataFrame) -> None:
+    fig, axis = plt.subplots(
+        figsize=(HALF_TEXT_WIDTH, 2.55), layout="constrained"
     )
-    axis.plot(
-        central["hour"],
-        central["total_cpu"],
-        color="#009E73",
-        linewidth=2,
-        label="Optimised workload",
+    hour = central["hour"]
+    axis.fill_between(
+        hour,
+        0,
+        central["inflexible_cpu"],
+        step="post",
+        color=LIGHT_GREY,
+        label="Inflexible",
     )
     axis.fill_between(
-        central["hour"],
+        hour,
         central["inflexible_cpu"],
         central["total_cpu"],
-        color="#56B4E9",
-        alpha=0.25,
-        label="Processed flexible workload",
+        step="post",
+        color=SKY,
+        alpha=0.65,
+        label="Flexible, as executed",
     )
-    axis.set(xlabel="Local time (hour)", ylabel="CPU utilisation", xlim=(0, 24))
-    axis.legend(loc="upper left")
-    axis.set_title(f"Workload schedule on {date}")
-    fig.tight_layout()
-    fig.savefig(IMAGES / "Figure_4b.png", dpi=220)
-    plt.close(fig)
+    axis.step(
+        baseline["hour"],
+        baseline["total_cpu"],
+        where="post",
+        color=DARK_GREY,
+        linewidth=1.0,
+        linestyle=(0, (4, 1.6)),
+        label="Total at arrival",
+    )
+    axis.step(
+        hour,
+        central["total_cpu"],
+        where="post",
+        color=GREEN,
+        linewidth=1.2,
+        label="Total as executed",
+    )
+    axis.set_ylabel("Aggregate CPU utilisation")
+    axis.set_xlabel("Local time (h)")
+    axis.set_ylim(0, 0.95)
+    hour_axis(axis)
+    legend_above(axis, 2)
+    save(fig, IMAGES / "Figure_4b.png")
 
-    fig, axis = plt.subplots(figsize=(11, 6))
-    x = central["hour"]
-    components = [
-        ("IT from grid", central["p_grid_it_kw"], "#0072B2"),
-        ("CRAC", central["p_chiller_hvac_kw"], "#E69F00"),
-        ("TES charging chiller", central["p_chiller_tes_kw"], "#009E73"),
-        ("UPS charging", central["p_ups_charge_kw"], "#56B4E9"),
+
+def _plot_day_dispatch(baseline: pd.DataFrame, central: pd.DataFrame) -> None:
+    fig, axis = plt.subplots(figsize=(TEXT_WIDTH, 2.85), layout="constrained")
+    hour = central["hour"].to_numpy()
+    stack = [
+        ("Auxiliary", np.full(len(central), 53.095), LIGHT_GREY),
+        ("IT load", central["p_it_total_kw"].to_numpy(), BLUE),
+        ("CRAC chiller", central["p_chiller_hvac_kw"].to_numpy(), ORANGE),
+        ("TES charging", central["p_chiller_tes_kw"].to_numpy(), GREEN),
+        ("UPS charging", central["p_ups_charge_kw"].to_numpy(), PINK),
     ]
     bottom = np.zeros(len(central))
-    for label, values, colour in components:
+    for label, values, colour in stack:
         axis.bar(
-            x,
+            hour,
             values,
             width=0.25,
             bottom=bottom,
+            align="edge",
             label=label,
             color=colour,
-            edgecolor="none",
+            linewidth=0,
         )
-        bottom += values.to_numpy()
+        bottom += values
+    discharge = central["p_ups_discharge_kw"].to_numpy()
     axis.bar(
-        x,
-        -central["p_ups_discharge_kw"],
+        hour,
+        -discharge,
         width=0.25,
+        align="edge",
         label="UPS discharge",
-        color="#56B4E9",
-        hatch="////",
-        edgecolor="white",
+        color="#EBC3DD",
+        linewidth=0,
     )
+
+    # The stack is an exact decomposition of optimised grid import; assert it
+    # so the figure cannot silently drift from the settlement accounting.
+    closure = np.abs(bottom - discharge - central["grid_import_kw"].to_numpy())
+    if closure.max() > 1e-6:
+        raise AssertionError("Dispatch stack does not close on grid import")
+
     axis.plot(
-        x,
+        baseline["hour"],
         baseline["grid_import_kw"],
-        color="black",
-        linestyle=":",
-        linewidth=2,
-        label="Baseline grid import",
+        color=DARK_GREY,
+        linestyle=(0, (3.5, 1.6)),
+        linewidth=1.0,
+        label="Benchmark import",
     )
-    axis.axhline(0, color="black", linewidth=0.8)
-    axis.set(xlabel="Local time (hour)", ylabel="Power (kW)", xlim=(0, 24))
-    axis.legend(ncol=2, fontsize=9, loc="upper left")
-    axis.set_title(f"Optimised component dispatch on {date}")
-    fig.tight_layout()
-    fig.savefig(IMAGES / "Figure_5.png", dpi=220)
-    plt.close(fig)
+    axis.axhline(0, color=DARK_GREY, linewidth=0.6)
+    axis.set_ylabel("Power (kW)")
+    axis.set_xlabel("Local time (h)")
+    hour_axis(axis, step=2.0)
+    axis.set_ylim(-1.25 * float(discharge.max()), 1450)
+    legend_above(axis, 7)
+    save(fig, IMAGES / "Figure_5.png")
 
 
 def plot_sensitivity(endpoints: pd.DataFrame) -> None:
@@ -297,7 +435,8 @@ def plot_sensitivity(endpoints: pd.DataFrame) -> None:
     definitions = [
         (
             "flex",
-            "Realised flexible-workload share (%)",
+            "Flexible-workload share (%)",
+            "(a) Flexible workload",
             [
                 _realised_flexible_share(value)
                 for value in (0.5, 0.75, 1.0, 1.25, 1.5)
@@ -307,17 +446,22 @@ def plot_sensitivity(endpoints: pd.DataFrame) -> None:
         (
             "ups",
             "UPS energy capacity (kWh)",
+            "(b) UPS capacity",
             [300, 450, 600, 750, 900],
             ["ups_min", "ups_075", "central", "ups_125", "ups_max"],
         ),
         (
             "tes",
             "TES energy capacity (kWh-th)",
+            "(c) TES capacity",
             [500, 750, 1000, 1250, 1500],
             ["tes_min", "tes_075", "central", "tes_125", "tes_max"],
         ),
     ]
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4.6))
+    use_paper_style()
+    fig, axes = plt.subplots(
+        1, 3, figsize=(TEXT_WIDTH, 2.25), layout="constrained"
+    )
     annual_scenarios = {
         "flex": ["2025_flex_0p5", CENTRAL, "2025_flex_1p5"],
         "ups": ["2025_ups_0p5", CENTRAL, "2025_ups_1p5"],
@@ -330,7 +474,9 @@ def plot_sensitivity(endpoints: pd.DataFrame) -> None:
         "ups": [300, 600, 900],
         "tes": [500, 1000, 1500],
     }
-    for axis, (parameter, xlabel, x_values, cases) in zip(axes, definitions):
+    for axis, (parameter, xlabel, title, x_values, cases) in zip(
+        axes, definitions
+    ):
         sample_values = [
             float(
                 sampled.loc[
@@ -344,10 +490,14 @@ def plot_sensitivity(endpoints: pd.DataFrame) -> None:
         axis.plot(
             x_values,
             sample_values,
-            "--",
+            linestyle=(0, (3.5, 1.6)),
             marker="o",
-            color="#777777",
-            label="Representative-week response",
+            markersize=3.0,
+            markerfacecolor="white",
+            markeredgewidth=0.8,
+            linewidth=0.9,
+            color=GREY,
+            label="Representative-week response shape",
         )
         annual_values = []
         for scenario in annual_scenarios[parameter]:
@@ -362,21 +512,30 @@ def plot_sensitivity(endpoints: pd.DataFrame) -> None:
         axis.plot(
             annual_x[parameter],
             annual_values,
-            "-",
+            linestyle="-",
             marker="s",
-            linewidth=2.2,
-            color="#0072B2",
+            markersize=3.4,
+            linewidth=1.4,
+            color=BLUE,
             label="Full-year result",
         )
-        axis.axhline(0, color="black", linewidth=0.8)
+        axis.axhline(0, color=DARK_GREY, linewidth=0.6)
+        axis.scatter(
+            [annual_x[parameter][1]],
+            [0.0],
+            s=16,
+            facecolor="white",
+            edgecolor=BLUE,
+            linewidth=0.9,
+            zorder=5,
+        )
         axis.set_xlabel(xlabel)
-        axis.grid(True, linestyle=":", alpha=0.6)
-    axes[0].set_ylabel("Change in saving from central case (percentage points)")
+        axis.set_title(title)
+        axis.margins(x=0.08)
+    axes[0].set_ylabel("Change in saving from\ncentral case (pp)")
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", ncol=2, frameon=False)
-    fig.subplots_adjust(top=0.82, bottom=0.2, wspace=0.28)
-    fig.savefig(IMAGES / "Figure_9.png", dpi=240, bbox_inches="tight")
-    plt.close(fig)
+    fig.legend(handles, labels, loc="outside upper center", ncol=2)
+    save(fig, IMAGES / "Figure_9.png")
 
 
 def write_latex_table(endpoints: pd.DataFrame) -> None:
@@ -427,14 +586,44 @@ def write_latex_table(endpoints: pd.DataFrame) -> None:
     )
 
 
+def write_cost_component_latex(table: pd.DataFrame) -> None:
+    shown = table.copy()
+    for column in ("baseline_cost_gbp", "optimised_cost_gbp", "cost_change_gbp"):
+        shown[column] = shown[column].map(lambda value: f"{value:,.0f}")
+    lines = [
+        r"\begin{table}[!t]",
+        r"\centering",
+        r"\caption{Annual signed settlement-cost composition.}",
+        r"\label{tab:annual-components}",
+        r"\begin{tabular}{lrrr}",
+        r"\toprule",
+        r"Component & Baseline & Optimised & Change \\",
+        r" & \multicolumn{3}{c}{(GBP)} \\",
+        r"\midrule",
+    ]
+    for row in shown.itertuples(index=False):
+        if row.component == "Total settlement cost":
+            lines.append(r"\midrule")
+        lines.append(
+            f"{row.component} & {row.baseline_cost_gbp} & "
+            f"{row.optimised_cost_gbp} & {row.cost_change_gbp} \\\\"
+        )
+    lines.extend([r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+    (GENERATED / "annual_cost_component_table.tex").write_text(
+        "\n".join(lines), encoding="utf-8"
+    )
+
+
 def main() -> None:
     REPORT.mkdir(parents=True, exist_ok=True)
     IMAGES.mkdir(parents=True, exist_ok=True)
     endpoints = build_endpoint_table()
+    components = build_cost_component_table()
     selected, candidates = select_representative_day()
     plot_representative_day(selected)
     plot_sensitivity(endpoints)
     write_latex_table(endpoints)
+    write_cost_component_latex(components)
     summary = {
         "representative_day": selected,
         "representative_score": float(candidates.iloc[0]["representative_score"]),

@@ -1,0 +1,124 @@
+{
+  "date": "2025-09-22",
+  "start_step": 24,
+  "magnitude_kw": -100.0,
+  "time_limit_s": 60,
+  "result": {
+    "date": "2025-09-22",
+    "start_step": 24,
+    "start_hour": 6.0,
+    "magnitude_kw": -100.0,
+    "duration_steps": 5,
+    "duration_hours": 1.25,
+    "solver_calls": 6,
+    "solver_runtime_s": 2.96669920000204,
+    "maximum_solver_relative_gap": 0.00024301447010086633,
+    "validated": true,
+    "boundary_verified": true,
+    "maximum_target_error_kw": 0.10000000000007958,
+    "maximum_recovery_energy_shortfall_kwh": 0.0,
+    "maximum_recovery_temperature_error_c": 0.05000000000000071,
+    "maximum_component_closure_error_kw": 5.542233338928781e-13,
+    "solver_quality": "optimal",
+    "solver_relative_gap": 0.00024301447010086633,
+    "solver_meets_accepted_gap": true
+  },
+  "trials": [
+    {
+      "duration_steps": 3,
+      "feasible_incumbent": true,
+      "wall_time_s": 0.7157818000014231,
+      "solver_runtime_s": 0.5314369000006991,
+      "solver_quality": "optimal",
+      "solver_relative_gap": 2.7687439205256135e-16
+    },
+    {
+      "duration_steps": 4,
+      "feasible_incumbent": true,
+      "wall_time_s": 0.6062464000006003,
+      "solver_runtime_s": 0.38725030000023253,
+      "solver_quality": "optimal",
+      "solver_relative_gap": 0.00021812237529818075
+    },
+    {
+      "duration_steps": 5,
+      "feasible_incumbent": true,
+      "wall_time_s": 0.6059146999996301,
+      "solver_runtime_s": 0.3574604999994335,
+      "solver_quality": "optimal",
+      "solver_relative_gap": 0.00024301447010086633
+    },
+    {
+      "duration_steps": 6,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.33536390000153915,
+      "solver_runtime_s": null,
+      "solver_quality": "no_feasible_incumbent",
+      "solver_relative_gap": null
+    },
+    {
+      "duration_steps": 12,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.34365040000011504,
+      "solver_runtime_s": null,
+      "solver_quality": "no_feasible_incumbent",
+      "solver_relative_gap": null
+    },
+    {
+      "duration_steps": 24,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.35974199999873235,
+      "solver_runtime_s": null,
+      "solver_quality": "no_feasible_incumbent",
+      "solver_relative_gap": null
+    }
+  ],
+  "solver": {
+    "name": "appsi_highs",
+    "termination_condition": "optimal",
+    "status": "ok",
+    "runtime_s": 0.3574604999994335,
+    "objective_gbp": 1639.6862069707659,
+    "lower_bound_gbp": 1639.287739496047,
+    "upper_bound_gbp": 1639.6862069707656,
+    "relative_gap": 0.00024301447010086633,
+    "found_feasible_incumbent": true,
+    "meets_requested_gap": true,
+    "meets_accepted_gap": true,
+    "solution_quality": "optimal",
+    "binary_variables": 432,
+    "it_power_segments": 4,
+    "it_power_representation": "DLOG"
+  },
+  "audits": {
+    "initial_state_max_residual": 0.0,
+    "workload_conservation_residual_cpu_h": 8.104628079763643e-15,
+    "opening_workload_cpu_h": 7.915375,
+    "committed_workload_cpu_h": 7.272499999999992,
+    "closing_workload_cpu_h": 0.642875,
+    "core_workload_unserved_after_lookahead_cpu_h": 6.071532165918825e-17,
+    "max_ups_charge_discharge_overlap_kw": 0.0,
+    "max_tes_charge_discharge_overlap_kw": 0.0,
+    "objective_reconciliation_gbp": 0.0,
+    "energy_objective_gbp": 1639.6862069707659,
+    "ups_throughput_cost_gbp": 0.0,
+    "tes_throughput_cost_gbp": 0.0,
+    "terminal_value_gbp": 0.0,
+    "maximum_it_power_approximation_error_kw": 6.240844634472694,
+    "mean_it_power_approximation_error_kw": 4.089006870638188,
+    "effective_grid_import_limit_kw": 1723.095,
+    "committed_settlement_cost_gbp": 1444.9388815551224,
+    "committed_grid_energy_kwh": 18657.608117947595,
+    "lookahead_settlement_cost_gbp": 194.7473254156435,
+    "lookahead_grid_energy_kwh": 2580.20582230436,
+    "core_workload_completed_in_lookahead_cpu_h": 0.6428749999999999
+  },
+  "terminal_state": {
+    "ups_energy_kwh": 378.6,
+    "tes_energy_kwh": 540.0,
+    "it_temperature_c": 37.01955769633408,
+    "rack_temperature_c": 31.15670160924377,
+    "cold_aisle_temperature_c": 23.0,
+    "hot_aisle_temperature_c": 31.1477621597592
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "date": "2025-09-22",
+  "start_step": 60,
+  "magnitude_kw": -100.0,
+  "time_limit_s": 60,
+  "result": {
+    "date": "2025-09-22",
+    "start_step": 60,
+    "start_hour": 15.0,
+    "magnitude_kw": -100.0,
+    "duration_steps": 13,
+    "duration_hours": 3.25,
+    "solver_calls": 5,
+    "solver_runtime_s": 3.175755999998728,
+    "maximum_solver_relative_gap": 0.0008136635749371556,
+    "validated": true,
+    "boundary_verified": true,
+    "maximum_target_error_kw": 0.10000000000007958,
+    "maximum_recovery_energy_shortfall_kwh": 0.0,
+    "maximum_recovery_temperature_error_c": 0.05000000000000071,
+    "maximum_component_closure_error_kw": 1.0800249583553523e-12,
+    "solver_quality": "optimal",
+    "solver_relative_gap": 0.0,
+    "solver_meets_accepted_gap": true
+  },
+  "trials": [
+    {
+      "duration_steps": 9,
+      "feasible_incumbent": true,
+      "wall_time_s": 0.6113251999995555,
+      "solver_runtime_s": 0.38636740000038117,
+      "solver_quality": "optimal",
+      "solver_relative_gap": 0.0008136635749371556
+    },
+    {
+      "duration_steps": 13,
+      "feasible_incumbent": true,
+      "wall_time_s": 1.3733797000004415,
+      "solver_runtime_s": 1.1358464999993885,
+      "solver_quality": "optimal",
+      "solver_relative_gap": 0.0
+    },
+    {
+      "duration_steps": 14,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.39849750000030326,
+      "solver_runtime_s": null,
+      "solver_quality": "no_feasible_incumbent",
+      "solver_relative_gap": null
+    },
+    {
+      "duration_steps": 15,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.3847238999987894,
+      "solver_runtime_s": null,
+      "solver_quality": "no_feasible_incumbent",
+      "solver_relative_gap": null
+    },
+    {
+      "duration_steps": 18,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.40782969999963825,
+      "solver_runtime_s": null,
+      "solver_quality": "no_feasible_incumbent",
+      "solver_relative_gap": null
+    }
+  ],
+  "solver": {
+    "name": "appsi_highs",
+    "termination_condition": "optimal",
+    "status": "ok",
+    "runtime_s": 1.1358464999993885,
+    "objective_gbp": 1650.482955391436,
+    "lower_bound_gbp": 1650.482955391436,
+    "upper_bound_gbp": 1650.482955391436,
+    "relative_gap": 0.0,
+    "found_feasible_incumbent": true,
+    "meets_requested_gap": true,
+    "meets_accepted_gap": true,
+    "solution_quality": "optimal",
+    "binary_variables": 432,
+    "it_power_segments": 4,
+    "it_power_representation": "DLOG"
+  },
+  "audits": {
+    "initial_state_max_residual": 0.0,
+    "workload_conservation_residual_cpu_h": 8.104628079763643e-15,
+    "opening_workload_cpu_h": 7.915375,
+    "committed_workload_cpu_h": 7.272499999999992,
+    "closing_workload_cpu_h": 0.642875,
+    "core_workload_unserved_after_lookahead_cpu_h": 2.0816681711721685e-17,
+    "max_ups_charge_discharge_overlap_kw": -0.0,
+    "max_tes_charge_discharge_overlap_kw": 0.0,
+    "objective_reconciliation_gbp": 0.0,
+    "energy_objective_gbp": 1650.482955391436,
+    "ups_throughput_cost_gbp": 0.0,
+    "tes_throughput_cost_gbp": 0.0,
+    "terminal_value_gbp": 0.0,
+    "maximum_it_power_approximation_error_kw": 6.240844634472694,
+    "mean_it_power_approximation_error_kw": 4.089006870638188,
+    "effective_grid_import_limit_kw": 1723.095,
+    "committed_settlement_cost_gbp": 1455.737366236736,
+    "committed_grid_energy_kwh": 18663.845107472975,
+    "lookahead_settlement_cost_gbp": 194.7455891547001,
+    "lookahead_grid_energy_kwh": 2580.201139943281,
+    "core_workload_completed_in_lookahead_cpu_h": 0.642875
+  },
+  "terminal_state": {
+    "ups_energy_kwh": 378.6,
+    "tes_energy_kwh": 540.0,
+    "it_temperature_c": 37.019497191459415,
+    "rack_temperature_c": 31.15669677579854,
+    "cold_aisle_temperature_c": 23.0,
+    "hot_aisle_temperature_c": 31.1477621597592
+  }
+}

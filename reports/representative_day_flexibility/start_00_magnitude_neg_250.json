@@ -1,0 +1,69 @@
+{
+  "date": "2025-09-22",
+  "start_step": 0,
+  "magnitude_kw": -250.0,
+  "time_limit_s": 60,
+  "result": {
+    "date": "2025-09-22",
+    "start_step": 0,
+    "start_hour": 0.0,
+    "magnitude_kw": -250.0,
+    "duration_steps": 0,
+    "duration_hours": 0.0,
+    "solver_calls": 5,
+    "solver_runtime_s": 2.2947994000005565,
+    "maximum_solver_relative_gap": null,
+    "validated": true,
+    "boundary_verified": true
+  },
+  "trials": [
+    {
+      "duration_steps": 1,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.4598587000000407,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60
+    },
+    {
+      "duration_steps": 3,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.4594894000001659,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60
+    },
+    {
+      "duration_steps": 6,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.4619631000005029,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60
+    },
+    {
+      "duration_steps": 12,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.44874739999977464,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60
+    },
+    {
+      "duration_steps": 24,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.46474080000007234,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60
+    }
+  ],
+  "solver": null,
+  "audits": null,
+  "terminal_state": null
+}

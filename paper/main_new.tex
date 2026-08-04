@@ -21,7 +21,7 @@
 \addto\captionsenglish{\renewcommand{\figurename}{Fig.}}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
 \usepackage[hidelinks]{hyperref}
 \usepackage{makecell}
 \usepackage{mathtools}
@@ -31,6 +31,26 @@
 % All text added or changed in this revision is wrapped in \rev{...} and
 % printed in blue. Remove the colour (set to black) for the clean final copy.
 \newcommand{\rev}[1]{#1}
+
+% -------- Float placement --------
+% The defaults pushed the full-width component figures onto pages of their own
+% with most of the column height left blank. These allow more floats per page
+% and a smaller minimum body-text fraction, so figures sit next to the text
+% that discusses them.
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\setcounter{dbltopnumber}{3}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\dbltopfraction}{0.92}
+\renewcommand{\bottomfraction}{0.70}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\dblfloatpagefraction}{0.75}
+\setlength{\floatsep}{9pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{11pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{9pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{11pt plus 2pt minus 2pt}
 
 % -------- Settings --------
 \setlength{\jot}{2pt}
@@ -74,8 +94,8 @@
     \HighlightItem{Linked annual optimisation preserves physical and workload continuity.}
     \HighlightItem{Integrated operation cuts annual electricity cost by 5.049\%.}
     \HighlightItem{Flexible workload has greater value than UPS or TES capacity.}
-    \HighlightItem{All year-end deferred work is completed within its deadline.}
-    \HighlightItem{Terminal-value treatment changes annual cost by at most 0.000381\%.}
+    \HighlightItem{Recovery-certified flexibility reaches 9.75 hours on a typical day.}
+    \HighlightItem{Component decomposition identifies how each grid response is delivered.}
   \end{itemize}
   \vspace{0.35em}\noindent\hrule height 0.5pt \vspace{0.6em}
   %
@@ -90,34 +110,37 @@
 }
 
 \maketitle
+\raggedbottom
 
 % The paper headers
-\markboth{Journal of \LaTeX\ Class Files,~Vol.~XX, No.~XX, October~2025}%
+\markboth{Preprint submitted for publication}%
 {Takci \MakeLowercase{\textit{et al.}}: Characterisation and Quantification of Data Centre Flexibility}
 
 % -------- Abstract & Keywords --------
 \begin{abstract}
 The rapid growth of data centres creates both a power-system challenge and an
 opportunity for demand-side flexibility. This paper develops a linked
-rolling-horizon optimisation of IT workload scheduling, uninterruptible power
-supply (UPS) dispatch, cooling dynamics and thermal energy storage (TES) for a
-1 MW data centre. Unlike independent daily studies, physical states and
-unfinished workload cohorts are carried exactly between local-day horizons
-across a complete year, including daylight-saving transitions. Against a
-workload-at-arrival, storage-disabled benchmark with cost-optimised cooling,
-integrated operation reduces 2025 electricity cost from GBP~550,503.59 to
-GBP~522,707.23, a saving of 5.049\%. Full-year one-at-a-time endpoints show that
-the flexible-workload share has the largest effect on the saving, followed by
-UPS energy capacity and then TES capacity. Representative-week intermediate
-points preserve this response ranking but overstate the absolute annual effect
-and are therefore used only as centred response-shape evidence. All continuity,
-workload, exclusivity and settlement-reconciliation audits pass. At the year
-boundary, 0.642875 CPU-hours outstanding at midnight are completed within
-deadline in the actual 1 January 2026 look-ahead, while alternative terminal
-energy values change annual cost by at most 0.000381\%. The results demonstrate
-the annual economic value of coordinating data-centre flexibility resources
-and establish an audited baseline for a subsequent duration-aware grid-service
-assessment.
+rolling-horizon mixed-integer optimisation of IT workload scheduling,
+uninterruptible power supply (UPS) dispatch, cooling dynamics and thermal
+energy storage (TES) for a 1 MW data centre. Physical states and unfinished
+workload cohorts are carried exactly between local-day horizons across a full
+year, including daylight-saving transitions. Against a workload-at-arrival,
+storage-disabled benchmark with cost-optimised cooling, coordinated operation
+reduces 2025 electricity cost from GBP~550,503.59 to GBP~522,707.23, a saving of
+5.049\%. Full-year endpoints rank flexible workload as the most influential
+tested resource, followed by UPS and TES energy capacity. An objectively
+selected representative day is then subjected to 288 grid-deviation requests.
+Each request begins from the stored annual state, follows the annual pre-event
+CPU trajectory and must recover storage and thermal states after the event.
+The resulting duration envelope is strongly time- and direction-dependent:
+increased import is sustained for up to 9.75 hours at +25 kW, whereas reduced
+import is sustained for up to 5.25 hours at -100 and -150 kW.
+An additive component decomposition identifies the contributions of IT load,
+CRAC cooling, TES charging and UPS dispatch. All continuity, workload,
+exclusivity, settlement and flexibility-response audits pass. Of 288 cells,
+283 have exact duration boundaries and five retain explicitly marked certified
+lower bounds, establishing a reproducible link between annual economic
+operation and recovery-certified grid flexibility.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -329,15 +352,16 @@ Other studies use a similar approach, but instead minimise the difference betwee
 
 \rev{While individual DC assets, including IT workloads, UPS batteries and cooling systems, have each been studied for their flexibility potential, the interplay between these assets and its impact on the overall flexibility of the DC remains largely unexplored. Most existing studies adopt a DC-centric, cost-minimisation perspective and do not quantify the magnitude and duration of grid-facing flexibility that can be delivered once coupled asset constraints and post-event recovery are accounted for. As DCs scale towards the gigawatt level, this power-system-centric perspective becomes increasingly important, because system operators require duration-certified flexibility offers and a clear understanding of which assets enable them; this perspective remains largely absent from the literature.}
 
-Addressing these gaps, this study first establishes an audited annual operating
-baseline and defines a recovery-constrained flexibility analysis that can
-determine, for a given start time and power deviation, the maximum feasible
-duration. The annual evidence is completed here. The refreshed duration grid is
-reserved for the next revision so that it can be solved from an exact annual
-checkpoint rather than reusing results from an independent-day formulation.
-This separation is important because magnitude and duration are meaningful to
-the power system only when the baseline state and post-event recovery are
-internally consistent.
+Addressing these gaps, this study makes three contributions. First, it
+establishes an audited full-year operating baseline in which physical states
+and deadline-constrained work are linked between daily horizons. Second, it
+quantifies how workload flexibility, UPS capacity and TES capacity affect the
+annual economic result using completed full-year endpoints. Third, it maps the
+maximum recovery-certified duration of grid-power deviations on an objectively
+selected day and decomposes each response into its IT, cooling, TES and UPS
+contributions. The annual and event studies use the same stored trajectory, so
+the reported service envelope is conditional on an internally consistent
+cost-optimal operating state rather than an independently reset day.
 
 \input{annual_revision_body.tex}
 \end{document}

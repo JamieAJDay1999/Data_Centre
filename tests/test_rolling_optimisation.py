@@ -288,6 +288,14 @@ def test_flexibility_request_tracks_grid_target_and_recovers(
         start_step=2,
         duration_steps=1,
         delta_kw=-10.0,
+        baseline_total_cpu=tuple(baseline.committed["total_cpu"]),
+        event_initial_state=OperationalState.from_dict(
+            {
+                key.removeprefix("state_start_"): baseline.committed.iloc[2][key]
+                for key in baseline.committed.columns
+                if key.startswith("state_start_")
+            }
+        ),
         recovery_state=baseline.terminal_state,
     )
     response = solve_horizon(
@@ -302,6 +310,13 @@ def test_flexibility_request_tracks_grid_target_and_recovers(
     assert response.committed.iloc[2]["grid_import_kw"] == pytest.approx(
         target, abs=request.tolerance_kw
     )
+    assert response.committed.iloc[:2]["total_cpu"].to_list() == pytest.approx(
+        baseline.committed.iloc[:2]["total_cpu"].to_list()
+    )
+    for key, value in request.event_initial_state.to_dict().items():
+        assert response.committed.iloc[2][f"state_start_{key}"] == pytest.approx(
+            value
+        )
     assert (
         response.terminal_state.ups_energy_kwh
         >= baseline.terminal_state.ups_energy_kwh - 1e-6
