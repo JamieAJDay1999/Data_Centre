@@ -2,5 +2,7 @@
   "representative_day": "2025-09-22",
   "representative_score": 0.13555199667665035,
   "central_annual_saving_percent": 5.04926139179019,
-  "endpoint_rows": 8
+  "endpoint_rows": 14,
+  "annual_sensitivity_rows": 14,
+  "reported_endpoint_rows": 14
 }

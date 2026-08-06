@@ -36,7 +36,6 @@ from figure_style import (
 
 ROOT = Path(__file__).resolve().parents[1]
 ANNUAL = ROOT / "static/data/rolling_year_outputs"
-SAMPLED = ROOT / "static/data/monthly_week_sensitivity/2025"
 LOAD_PROFILE = ROOT / "static/data/inputs/load_profiles.csv"
 REPORT = ROOT / "reports/final_annual_results"
 IMAGES = ROOT / "paper/images"
@@ -47,11 +46,17 @@ CENTRAL = "2025_optimised_reformulated"
 SCENARIOS = (
     ("Baseline", BASELINE, "baseline", 1.0),
     ("Flexible workload 0.5x", "2025_flex_0p5", "flex", 0.5),
+    ("Flexible workload 0.75x", "2025_flex_0p75", "flex", 0.75),
     ("Flexible workload 1.0x", CENTRAL, "flex", 1.0),
+    ("Flexible workload 1.25x", "2025_flex_1p25", "flex", 1.25),
     ("Flexible workload 1.5x", "2025_flex_1p5", "flex", 1.5),
     ("UPS capacity 0.5x", "2025_ups_0p5", "ups", 0.5),
+    ("UPS capacity 0.75x", "2025_ups_0p75", "ups", 0.75),
+    ("UPS capacity 1.25x", "2025_ups_1p25", "ups", 1.25),
     ("UPS capacity 1.5x", "2025_ups_1p5", "ups", 1.5),
     ("TES capacity 0.5x", "2025_tes_0p5", "tes", 0.5),
+    ("TES capacity 0.75x", "2025_tes_0p75", "tes", 0.75),
+    ("TES capacity 1.25x", "2025_tes_1p25", "tes", 1.25),
     ("TES capacity 1.5x", "2025_tes_1p5", "tes", 1.5),
 )
 
@@ -418,12 +423,6 @@ def _plot_day_dispatch(baseline: pd.DataFrame, central: pd.DataFrame) -> None:
 
 
 def plot_sensitivity(endpoints: pd.DataFrame) -> None:
-    sampled = pd.read_csv(SAMPLED / "sensitivity_comparison.csv")
-    central_sample = float(
-        sampled.loc[
-            sampled["case"] == "central", "estimated_annual_saving_percent"
-        ].iloc[0]
-    )
     baseline_cost = float(
         _json(ANNUAL / BASELINE / "annual_summary.json")["settlement_cost_gbp"]
     )
@@ -441,21 +440,18 @@ def plot_sensitivity(endpoints: pd.DataFrame) -> None:
                 _realised_flexible_share(value)
                 for value in (0.5, 0.75, 1.0, 1.25, 1.5)
             ],
-            ["flex_min", "flex_075", "central", "flex_125", "flex_max"],
         ),
         (
             "ups",
             "UPS energy capacity (kWh)",
             "(b) UPS capacity",
             [300, 450, 600, 750, 900],
-            ["ups_min", "ups_075", "central", "ups_125", "ups_max"],
         ),
         (
             "tes",
             "TES energy capacity (kWh-th)",
             "(c) TES capacity",
             [500, 750, 1000, 1250, 1500],
-            ["tes_min", "tes_075", "central", "tes_125", "tes_max"],
         ),
     ]
     use_paper_style()
@@ -463,42 +459,39 @@ def plot_sensitivity(endpoints: pd.DataFrame) -> None:
         1, 3, figsize=(TEXT_WIDTH, 2.25), layout="constrained"
     )
     annual_scenarios = {
-        "flex": ["2025_flex_0p5", CENTRAL, "2025_flex_1p5"],
-        "ups": ["2025_ups_0p5", CENTRAL, "2025_ups_1p5"],
-        "tes": ["2025_tes_0p5", CENTRAL, "2025_tes_1p5"],
+        "flex": [
+            "2025_flex_0p5",
+            "2025_flex_0p75",
+            CENTRAL,
+            "2025_flex_1p25",
+            "2025_flex_1p5",
+        ],
+        "ups": [
+            "2025_ups_0p5",
+            "2025_ups_0p75",
+            CENTRAL,
+            "2025_ups_1p25",
+            "2025_ups_1p5",
+        ],
+        "tes": [
+            "2025_tes_0p5",
+            "2025_tes_0p75",
+            CENTRAL,
+            "2025_tes_1p25",
+            "2025_tes_1p5",
+        ],
     }
     annual_x = {
         "flex": [
-            _realised_flexible_share(value) for value in (0.5, 1.0, 1.5)
+            _realised_flexible_share(value)
+            for value in (0.5, 0.75, 1.0, 1.25, 1.5)
         ],
-        "ups": [300, 600, 900],
-        "tes": [500, 1000, 1500],
+        "ups": [300, 450, 600, 750, 900],
+        "tes": [500, 750, 1000, 1250, 1500],
     }
-    for axis, (parameter, xlabel, title, x_values, cases) in zip(
+    for axis, (parameter, xlabel, title, x_values) in zip(
         axes, definitions
     ):
-        sample_values = [
-            float(
-                sampled.loc[
-                    sampled["case"] == case,
-                    "estimated_annual_saving_percent",
-                ].iloc[0]
-            )
-            - central_sample
-            for case in cases
-        ]
-        axis.plot(
-            x_values,
-            sample_values,
-            linestyle=(0, (3.5, 1.6)),
-            marker="o",
-            markersize=3.0,
-            markerfacecolor="white",
-            markeredgewidth=0.8,
-            linewidth=0.9,
-            color=GREY,
-            label="Representative-week response shape",
-        )
         annual_values = []
         for scenario in annual_scenarios[parameter]:
             cost = float(
@@ -521,7 +514,7 @@ def plot_sensitivity(endpoints: pd.DataFrame) -> None:
         )
         axis.axhline(0, color=DARK_GREY, linewidth=0.6)
         axis.scatter(
-            [annual_x[parameter][1]],
+            [annual_x[parameter][2]],
             [0.0],
             s=16,
             facecolor="white",
@@ -534,7 +527,7 @@ def plot_sensitivity(endpoints: pd.DataFrame) -> None:
         axis.margins(x=0.08)
     axes[0].set_ylabel("Change in saving from\ncentral case (pp)")
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="outside upper center", ncol=2)
+    fig.legend(handles, labels, loc="outside upper center", ncol=1)
     save(fig, IMAGES / "Figure_9.png")
 
 
@@ -624,6 +617,7 @@ def main() -> None:
     plot_sensitivity(endpoints)
     write_latex_table(endpoints)
     write_cost_component_latex(components)
+    reported_endpoint_rows = len(endpoints)
     summary = {
         "representative_day": selected,
         "representative_score": float(candidates.iloc[0]["representative_score"]),
@@ -632,7 +626,9 @@ def main() -> None:
                 endpoints["scenario"] == CENTRAL, "saving_percent"
             ].iloc[0]
         ),
-        "endpoint_rows": len(endpoints),
+        "endpoint_rows": reported_endpoint_rows,
+        "annual_sensitivity_rows": len(endpoints),
+        "reported_endpoint_rows": reported_endpoint_rows,
     }
     (REPORT / "summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"

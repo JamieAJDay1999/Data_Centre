@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10212c">
+  <title>Paper Review - Data Centre Flexibility</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2310212c'/%3E%3Cpath d='M10 6h8l5 5v15H10zM18 6v6h5M13 16h7M13 20h7' fill='none' stroke='%23ffd9ca' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="document-identity">
+      <div class="document-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" role="img"><path d="M6.5 2.5h7l4 4v15h-11zM13 3v5h4.5M9 12h6M9 15h6M9 18h4"/></svg>
+      </div>
+      <div class="document-heading">
+        <span class="eyebrow">Paper review</span>
+        <h1 id="documentTitle">Data Centre Flexibility</h1>
+      </div>
+    </div>
+
+    <nav class="view-controls" aria-label="Document controls">
+      <label class="page-jump" for="pageSelect">
+        <span>Page</span>
+        <select id="pageSelect" aria-label="Jump to page"></select>
+        <span id="pageTotal">of 18</span>
+      </label>
+      <div class="zoom-control" aria-label="Zoom controls">
+        <button id="zoomOutBtn" class="icon-button" type="button" aria-label="Zoom out">-</button>
+        <span id="zoomLabel" aria-live="polite">100%</span>
+        <button id="zoomInBtn" class="icon-button" type="button" aria-label="Zoom in">+</button>
+      </div>
+    </nav>
+
+    <div class="top-actions">
+      <a class="button button-quiet desktop-action" href="assets/data_centre_balanced_revision.pdf" download>PDF</a>
+      <button id="addCommentBtn" class="button button-primary" type="button">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v14M3 10h14"/></svg>
+        Add comment
+      </button>
+      <button id="toggleNotesBtn" class="button button-quiet" type="button" aria-controls="reviewSidebar" aria-expanded="true">
+        Notes <span id="headerCount" class="count-pill">0</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="modeBanner" class="mode-banner" role="status" aria-live="polite">
+    <span class="mode-dot" aria-hidden="true"></span>
+    <span id="modeMessage">Select <strong>Add comment</strong>, then click anywhere on a page to pin a note.</span>
+    <span id="saveStatus" class="save-status">Saved in this browser</span>
+  </div>
+
+  <div class="workspace" id="workspace">
+    <main class="paper-stage" id="paperStage">
+      <div id="pages" class="pages" aria-label="Paper pages"></div>
+    </main>
+
+    <aside class="review-sidebar" id="reviewSidebar" aria-label="Review comments">
+      <div class="sidebar-header">
+        <div>
+          <span class="eyebrow">Review workspace</span>
+          <h2>Comments</h2>
+        </div>
+        <button id="closeSidebarBtn" class="icon-button sidebar-close" type="button" aria-label="Close comments">×</button>
+      </div>
+
+      <div id="commentSummary" class="comment-summary">
+        <div><strong id="openCount">0</strong><span>Open</span></div>
+        <div><strong id="resolvedCount">0</strong><span>Resolved</span></div>
+      </div>
+
+      <div id="editorPanel" class="editor-panel" hidden></div>
+
+      <div id="listPanel" class="list-panel">
+        <div class="filter-row" role="group" aria-label="Filter comments">
+          <button class="filter-chip is-active" type="button" data-filter="open">Open</button>
+          <button class="filter-chip" type="button" data-filter="all">All</button>
+          <button class="filter-chip" type="button" data-filter="resolved">Resolved</button>
+        </div>
+        <div id="commentsList" class="comments-list"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button id="exportBtn" class="text-button" type="button">Export comments</button>
+        <span aria-hidden="true">·</span>
+        <button id="importBtn" class="text-button" type="button">Import</button>
+        <input id="importInput" type="file" accept="application/json,.json" hidden>
+      </div>
+    </aside>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="data/paper-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,582 @@
+\input{methodology_expanded.tex}
+\section{Case Study Design}\label{sec:case-study}
+
+The case study contains two connected experiments. The first follows economic
+operation through the full year and establishes the state from which flexibility
+would actually be offered. The second applies grid requests to one representative
+day taken from that annual result. Treating these as connected experiments avoids
+the optimistic assumption that every flexibility event begins with freshly
+reset storage and temperatures.
+
+This sequence also separates two related questions. The annual experiment asks
+how the facility would operate when its only objective is to minimise signed
+electricity cost. The event experiment then asks what additional change in grid
+import remains feasible from that operating point. Flexibility is measured
+relative to a schedule the operator could actually be following, rather
+than relative to an arbitrary or deliberately favourable initial condition.
+
+\subsection{Annual benchmark and optimised case}
+
+The annual run begins with 600 kWh in the UPS, 500 kWh in the TES and
+temperatures $(28.5,26,20,27)^{\circ}$C for the IT equipment, rack, cold aisle
+and hot aisle. No daily cyclic condition is imposed. The state at the end of one
+day becomes the state at the beginning of the next.
+
+The benchmark executes flexible work at arrival and disables UPS and TES
+dispatch. Cooling remains cost optimised under the same thermal equations and
+temperature limits used in the optimised case. This gives a fair comparison of
+the value added by workload timing and storage without conflating that value
+with a different cooling model. The optimised case enables all three resources.
+
+The benchmark is not intended to describe an unmanaged facility in every
+respect. It retains rational cooling operation because otherwise the comparison
+would attribute savings to a change in the cooling model itself. The difference
+between the two cases lies in the ability to move computational work and to
+coordinate the two stores. Both cases see the same workload arrivals, prices,
+weather assumption and physical temperature limits.
+
+\begin{table*}[!t]
+\centering
+\caption{Central case parameters used in the annual study.}
+\label{tab:central-parameters}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{@{}llllll@{}}
+\toprule
+Parameter & Value & Unit & Parameter & Value & Unit \\
+\midrule
+Time interval & 0.25 & h & Look ahead & 3 & h \\
+IT idle power & 166.7 & kW & IT rated power & 1000 & kW \\
+UPS capacity & 600 & kWh & UPS minimum charge & 50 & \% \\
+UPS charge limit & 270 & kW & UPS efficiencies & 0.82/0.92 & -- \\
+TES capacity & 1000 & kWh-th & TES power limits & 300/300 & kW-th \\
+TES efficiencies & 0.9/0.9 & -- & Chiller COP & 5 & -- \\
+Chiller input limit & 400 & kW & Auxiliary demand & 53.095 & kW \\
+Cold aisle range & 18--23 & $^{\circ}$C & Outdoor temperature & 22 & $^{\circ}$C \\
+Flexible delay classes & 0.5/1/2/3 & h & Requested MILP gap & 0.1 & \% \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Each annual scenario is solved in Pyomo using HiGHS. The requested relative gap
+is 0.1\%, the daily time limit is 300 s and a feasible incumbent is normally
+accepted only when the reported gap is at most 1\%. The runs reported here used
+Python 3.12.0, Pyomo 6.10.1 and HiGHS 1.15.1 on Windows 11 with an eight core AMD
+Ryzen 7 9800X3D processor.
+
+\subsection{Sensitivity design}
+
+The sensitivity analysis changes one resource at a time. Flexible workload
+share, UPS energy capacity and TES energy capacity are each set to 0.5, 0.75,
+1.25 and 1.5 times their central values. Every setting is evaluated over the
+complete 2025 trajectory of 365 linked days (52 weeks plus one day), with the
+central 1.0 case shared across the three sweeps. Storage power ratings are held
+fixed so the capacity tests isolate energy duration rather than simultaneously
+changing power. Initial energy is kept at the same fraction of the revised
+capacity.
+
+\subsection{Representative day flexibility assessment}\label{sec:flex-method}
+
+The representative day is chosen before the flexibility sweep. For each eligible
+normal length day, the price mean, dispersion, extremes and negative price share
+are combined with mean and peak grid import, CPU utilisation, daily cost, and
+opening UPS, TES and cold aisle states. After standardisation against the annual
+distribution, the day with the smallest root mean square distance is selected.
+This procedure identifies 22 September 2025.
+
+The exact 96 interval trajectory for that day and the following 12 intervals are
+loaded from the annual result. For an event beginning at $t_0$, the six physical
+states are fixed to their stored values. The aggregate CPU path before the event
+is also fixed. The annual export retains aggregate CPU rather than every internal
+cohort decision, so deadline level cohort allocation is reconstructed to match
+that path. No workload or state preconditioning is credited to the event.
+
+The reconstruction assigns the executed flexible work back to feasible arrival
+cohorts while preserving the aggregate CPU trajectory. Its purpose is to recover
+the remaining deadlines that are needed during the event study. A job that has
+already used most of its permitted delay cannot be treated as newly flexible,
+whereas a recently arrived job may still have several admissible execution
+intervals. Retaining this distinction prevents the flexibility calculation from
+creating a fresh set of deferrable work at the event start.
+
+For a requested signed deviation $\Delta P$, grid import during the event must
+satisfy
+\begin{equation}
+ \left|P_t^{\mathrm{grid}}-
+ (P_t^{\mathrm{grid,base}}+\Delta P)\right|\leq0.1\ \mathrm{kW}.
+ \label{eq:flex-target}
+\end{equation}
+Negative values denote reduced import and therefore upward flexibility; positive
+values denote increased import and downward flexibility. Start times are sampled
+hourly. Reduced import requests range from $-500$ to $-100$ kW in 50 kW steps,
+while increased import requests are 25, 50 and 75 kW.
+
+The search first extends a feasible event in one hour steps and then refines the
+first failed interval to 15 minute resolution. The maximum search duration is 12
+hours or the end of the local day. A flexibility result is accepted only when the
+post event horizon also recovers its storage and thermal state. If $H$ is the
+terminal boundary, storage must satisfy
+\begin{equation}
+ E_H^{\mathrm{UPS}}\geq E_H^{\mathrm{UPS,base}},\qquad
+ E_H^{\mathrm{TES}}\geq E_H^{\mathrm{TES,base}},
+ \label{eq:flex-energy-recovery}
+\end{equation}
+and each temperature must satisfy
+\begin{equation}
+ \left|T_H^j-T_H^{j,\mathrm{base}}\right|\leq0.05^{\circ}\mathrm{C},
+ \quad j\in\{\mathrm{IT,R,CA,HA}\}.
+ \label{eq:flex-temperature-recovery}
+\end{equation}
+These recovery requirements are central to the meaning of the reported duration.
+Without them, the model could claim a long response by emptying the UPS or TES,
+moving temperatures to their limits, and leaving the deferred computational work
+for a later period. That would transfer the cost of the event outside the tested
+window rather than demonstrate a repeatable service. The terminal constraints
+require the principal energy and temperature states to return to at least the
+condition of the stored annual baseline, while workload completion is checked
+separately through the cohort deadlines.
+Each trial uses a 60 s screening limit. A timeout without a feasible incumbent
+is recorded as unresolved rather than infeasible. If the next 15 minute step
+remains unresolved, the last feasible duration is retained as a certified lower
+bound and marked with a plus sign in the heat map.
+
+The realised grid response is decomposed as
+\begin{equation}
+ \begin{split}
+ \Delta P^{\mathrm{grid}}={}&\Delta P^{\mathrm{IT}}+
+ \Delta P^{\mathrm{ch,CRAC}}+\Delta P^{\mathrm{ch,TES}}\\
+ &+\Delta(P^{\mathrm{UPS}}_{\mathrm{ch}}-
+ P^{\mathrm{UPS}}_{\mathrm{dis}}).
+ \end{split}
+ \label{eq:component-decomposition}
+\end{equation}
+This identity provides a transparent account of how the same external service
+can be delivered by different combinations of workload, cooling, TES and UPS
+action. Every event is checked for target tracking, recovery, workload
+conservation, objective reconciliation, mode exclusivity and component closure.
+
+The signs in Equation~\eqref{eq:component-decomposition} refer to changes from
+the annual baseline. For a reduced import request, a fall in IT or chiller demand
+and an increase in UPS discharge all contribute in the requested direction.
+Individual components may nevertheless move the other way. For example, deferred
+work may later be executed while the UPS discharges more strongly so that the
+metered target is still met. The decomposition records these compensating
+actions instead of assigning the whole response to whichever asset first moved.
+
+\section{Results and Discussion}\label{sec:results}
+
+\subsection{Annual cost and energy use}
+
+The workload at arrival benchmark costs GBP~550,503.59 in 2025. Enabling
+workload scheduling, UPS dispatch and TES operation reduces this to
+GBP~522,707.23. The resulting saving is GBP~27,796.37, or 5.049\%. This annual
+percentage is lower than the saving obtained from the original selected day,
+which is expected: the annual run includes long periods with modest price
+variation as well as the more favourable days on which shifting has greater
+value. Table~\ref{tab:annual-endpoints} gives the completed full year endpoints.
+
+The annual comparison is more demanding than selecting a day with a pronounced
+price spread. Every local day is included, storage conditions are inherited from
+the previous day, and any unfinished work remains visible until its deadline.
+Days with a nearly flat price provide little reason to move demand and dilute the
+percentage saving achieved on more volatile days. The 5.049\% result should be
+interpreted as the outcome of operating continuously through the
+observed 2025 price series, rather than as an extrapolation from a particularly
+favourable daily example.
+
+\input{generated/annual_endpoint_table.tex}
+
+The optimised case imports 6.794 GWh compared with 6.718 GWh in the benchmark.
+The financial saving is produced by moving demand to cheaper signed
+price intervals, not by reducing annual electricity use. Peak import rises from
+974.9 to 1681.9 kW because deferred work and storage charging can coincide. This
+is an energy market result rather than a claim that the optimised profile is
+preferable under every tariff. A capacity charge or a tighter connection limit
+would penalise the higher peak and could materially alter the schedule.
+
+The increase in annual energy is about 1.13\%, while the settlement cost falls by
+more than GBP~27,000. This apparent contrast is a consequence of two effects.
+First, charging and discharging the stores introduces losses. Second, the signed
+price objective can make additional consumption worthwhile when it occurs in a
+cheap or negatively priced interval and replaces demand at a more expensive
+time. The higher peak has a similar interpretation. It is economically admissible
+under the objective used here, but it would require explicit treatment before
+the result could be applied to a site with a firm import limit or a substantial
+capacity based tariff.
+
+\input{generated/annual_cost_component_table.tex}
+
+Table~\ref{tab:annual-components} reconciles exactly to the settlement totals.
+Relative to the benchmark, the timing of IT demand reduces signed cost by
+GBP~15,239 and CRAC operation reduces it by GBP~14,085. TES charging adds
+GBP~6,905, while the net UPS grid effect reduces cost by GBP~5,377. The fixed
+auxiliary contribution is unchanged. These figures should not be read as
+standalone asset profits. Each component is part of the same jointly optimised
+schedule, and changing one resource changes the opportunities available to the
+others.
+
+The positive TES charging entry does not mean that the TES has no value. It is
+the electricity cost assigned to producing stored cooling; the benefit appears
+through lower CRAC demand at other times and through the operating choices made
+possible for the rest of the system. In the same way, the CRAC saving cannot be
+attributed only to independent cooling control, because moving IT work changes
+when heat enters the data hall. The table is best read as an exact accounting of
+one coordinated schedule, not as a set of asset business cases that can be added
+or removed without changing the other rows.
+
+\subsection{Operation on the representative day}
+
+\begin{figure*}[!t]
+ \centering
+ \subfloat[Grid import and IMRP price.]{%
+  \includegraphics[width=0.49\textwidth]{images/Figure_4a.png}}
+ \hfill
+ \subfloat[Workload execution.]{%
+  \includegraphics[width=0.49\textwidth]{images/Figure_4b.png}}
+ \caption{Annual benchmark and optimised operation on 22 September 2025. In
+ (b), the shaded areas separate inflexible and flexible computation as executed;
+ the dashed line shows the same day's workload at arrival.}
+ \label{fig:representative-day}
+\end{figure*}
+
+\begin{figure*}[!t]
+ \centering
+ \includegraphics[width=\textwidth]{images/Figure_5.png}
+ \caption{Optimised component dispatch on 22 September 2025. Bars above the
+ axis are metered demand. UPS discharge appears below the axis because it
+ supplies IT demand behind the meter. The dashed line is benchmark grid import.}
+ \label{fig:representative-dispatch}
+\end{figure*}
+
+Figure~\ref{fig:representative-day} illustrates how flexible computation is
+moved away from expensive intervals and towards periods with lower or negative
+prices. The data centre does not simply defer work to the end of the day. It
+uses the full set of permitted deadlines, so some jobs are moved by only one or
+two intervals while others use most of their available delay. The total amount
+of computational work is unchanged.
+
+The two panels also show why the power trajectory cannot be inferred from price
+alone. The strongest reductions in optimised grid import occur around the morning
+and evening price increases, including the sharp troughs near 07:30 and 18:30.
+At other times, particularly around the middle of the day, import rises above the
+benchmark as work is completed and storage is charged. Some of this demand is
+preparation for later intervals and some is the consequence of jobs approaching
+their deadlines. The optimiser is balancing the current price against
+future workload obligations and the energy already held in the UPS and TES.
+
+In Figure~\ref{fig:representative-day}(b), the dashed arrival trajectory shows
+when computation would have been executed in the benchmark. The solid boundary
+and shaded areas show when it is actually executed. Periods in which the solid
+trajectory falls below the dashed line represent net deferral; later periods in
+which it rises above the dashed line include the completion of that deferred
+work. The distinction between flexible and inflexible utilisation makes clear
+that only part of the IT demand can respond. Even within the flexible part, the
+deadline classes prevent the optimiser from moving every job to the cheapest
+single interval.
+
+Figure~\ref{fig:representative-dispatch} shows the associated facility response.
+The UPS charges during selected low price periods and later supplies IT demand
+behind the meter. TES charging and CRAC demand are scheduled around both the
+price signal and the temperature constraints. The result is not a sequence of
+independent asset decisions: changing IT execution changes the heat input, which
+changes the cooling demand and the value of stored thermal energy. Both figures
+are slices through the annual trajectory. Their opening storage, temperature
+and workload conditions are inherited from 21 September rather than reset.
+
+The component view makes these interactions more visible. In several overnight
+and midday intervals, metered demand exceeds the benchmark because IT execution,
+storage charging and cooling occur together. The UPS discharge below the axis
+near the morning and evening import troughs offsets part of the IT demand that
+remains at those times. TES charging is concentrated in selected intervals where
+chiller capacity and thermal headroom are available, rather than following price
+in isolation. CRAC electricity also changes when workload is rescheduled because
+the heat produced by the servers changes with IT power. Consequently, the same
+movement in grid import may involve a direct electrical response from the UPS,
+a delayed thermal response from the TES, and an indirect cooling response caused
+by workload timing.
+
+This representative day is not a second optimisation with convenient opening
+conditions. It is a detailed view of one point in the completed annual chain.
+That distinction explains why an asset is not always charged or empty when the
+local price alone would suggest it should be: its opening state reflects the
+operation of 21 September, and its closing state must remain feasible for the
+following day.
+
+\subsection{Sensitivity and asset ranking}
+
+Flexible workload is the most influential of the three tested resources.
+Halving its share reduces the annual saving to 3.522\%, while increasing it by
+half raises the saving to 6.257\%. UPS energy capacity ranks second, spanning
+4.565--5.501\%, and TES capacity ranks third, spanning 4.800--5.167\%. Within
+the tested range, the ordering is flexible workload, UPS capacity and
+TES capacity.
+
+The ranking is consistent with the physical role of the resources. IT demand is
+the largest variable load in the facility, and moving it also moves part of the
+cooling requirement. An increase in flexible share changes two parts
+of the grid demand trajectory and creates more opportunities throughout the
+year. UPS capacity has a smaller effect because its charge rate, efficiency and
+the IT demand available behind the meter limit how quickly additional energy can
+be used. TES capacity has the weakest endpoint response because its power rating
+is held fixed and its value depends on thermal headroom, chiller capacity and a
+later opportunity to displace direct cooling.
+
+All three five-point annual curves are monotonic. Flexible workload and TES show
+diminishing marginal value, while the UPS response remains close to linear with
+a small taper at the upper end. The one-at-a-time design supports this resource
+ranking and response shape, but not a claim about interactions among simultaneous
+parameter changes; that would require a factorial sensitivity study.
+
+\subsection{Flexibility duration and component use}
+
+\begin{figure*}[!t]
+ \centering
+ \includegraphics[width=\textwidth]{images/Figure_6.png}
+ \caption{Certified flexibility duration on 22 September 2025 for each start
+ time and requested grid deviation. Blank cells have a certified duration of
+ zero. A plus sign marks a lower bound where the next 15 minute step was
+ unresolved at the screening limit.}
+ \label{fig:flexibility-heatmap}
+\end{figure*}
+
+Figure~\ref{fig:flexibility-heatmap} reveals a strong dependence on time and
+direction. The longest response is a 25 kW increase in import beginning at
+06:00, sustained for 9.75 hours. At the same start time, requests of 50 and
+75 kW last 8.00 and 7.75 hours. Reduced import reaches 5.25 hours at 13:00 for
+requests of 100 and 150 kW, and also at 02:00 for 100 kW.
+
+Each column of the heat map begins from a different point on the stored annual
+trajectory. The upper block contains increased import requests and the lower
+block contains reduced import requests. A darker cell indicates that the target
+can be maintained for longer from that start time. Blank cells are not missing
+data: they mean that no 15 minute response was certified at the requested
+magnitude. The plus signs distinguish a proven lower bound from an exact duration
+when the next candidate interval did not resolve within the screening limit.
+
+The increased import results are strongest around the early morning. At these
+start times the facility can bring forward eligible work, increase the cooling
+associated with that work and charge storage while remaining within its later
+recovery requirements. Reduced import is more concentrated in the periods where
+the annual baseline leaves a combination of deferrable work, UPS energy and
+cooling headroom. The strong cluster around early afternoon is not a
+property of the installed capacities alone; it is a consequence of the operating
+state inherited on 22 September.
+
+Duration does not decrease monotonically with magnitude at every start time.
+The request is an exact signed grid target in a mixed integer system, so changing
+the target can change which combination of workload deadlines, storage modes
+and thermal recovery remains reachable. This is one reason that a single power
+capacity value is an incomplete description of data centre flexibility.
+
+For example, at 15:00 the certified duration for a 200 kW reduction is 3.25 hours,
+whereas the 150 kW request is certified for only 0.75 hours. This does not imply
+that a larger reduction is generally easier. The exact targets activate different
+integer storage modes and workload schedules, and those schedules reach different
+recovery paths. A market product with a tolerance band rather than an exact
+target might smooth some of this behaviour, but the result demonstrates why
+magnitude and duration must be evaluated together.
+
+\begin{figure*}[!t]
+ \centering
+ \includegraphics[width=\textwidth]{images/Figure_7.png}
+ \caption{Component decomposition for selected reduced import events. Positive
+ and negative component changes are stacked separately and sum to the dashed
+ requested deviation. The grey area begins after the certified event duration.}
+ \label{fig:upward-components}
+\end{figure*}
+
+\begin{figure*}[!t]
+ \centering
+ \includegraphics[width=\textwidth]{images/Figure_8.png}
+ \caption{Component decomposition for selected increased import events.
+ Notation is as in Fig.~\ref{fig:upward-components}.}
+ \label{fig:downward-components}
+\end{figure*}
+
+Figures~\ref{fig:upward-components} and \ref{fig:downward-components} show that
+similar grid requests can be produced by different internal actions. Reduced
+import combines IT deferral, lower CRAC or TES charging demand and UPS discharge.
+The deferred computation must still be completed, so compensating actions appear
+later in the event and recovery horizon. Increased import is produced mainly by
+advancing feasible work and increasing its associated cooling demand, with TES
+charging used when thermal headroom is available.
+
+The reduced import panels illustrate how the available combination changes with
+start time. For the 06:00 requests of 100 and 200 kW, UPS discharge supplies
+nearly all of the initial response. The grey recovery area begins after about
+1.25 hours because the battery alone cannot sustain the exact target while also
+meeting the later state requirements. At 15:00, the response is distributed more
+widely. IT demand and direct cooling fall, UPS operation changes, and TES charging
+is adjusted. The 200 kW event then follows a different feasible path from the
+150 kW heat map case described above.
+
+The increased import panels show a different form of coordination. At midnight,
+the 25 and 75 kW requests are delivered through many relatively large internal
+changes that partly cancel at the meter. At 06:00, eligible work can be executed
+earlier than in the baseline and its associated cooling demand can rise, while
+UPS and TES actions manage the storage and temperature consequences. This permits
+the 25 kW event to continue for 9.75 hours and the 75 kW event for 7.75 hours.
+The long duration is not supplied by one asset holding a constant power
+level. It is assembled from a sequence of actions whose composition changes as
+deadlines and physical states evolve.
+
+This interaction is precisely what separate asset models would miss. Deferring
+IT work changes cooling demand; TES affects when the chiller must run; and the
+UPS can support the grid while also helping the facility execute deferred work.
+The component bars close to the requested deviation to within
+$4.4\times10^{-11}$ kW. The largest event tracking error is 0.1 kW and the
+largest terminal temperature error is 0.05$^{\circ}$C.
+
+Some component bars are much larger than the requested change in grid import.
+This is not an accounting error. One resource may be restoring its state or
+executing deferred work while another moves further in the requested direction.
+Only their sum is visible to the grid. The small closure and tracking errors show
+that these opposing actions reconcile to the requested service at every interval.
+
+\subsection{Continuity and solver quality}
+
+Every annual chain passes timestamp coverage, state handoff, workload
+conservation, charge and discharge exclusivity, and settlement reconciliation.
+The small number of time limited daily solves retain feasible incumbents.
+Exact-state 900 s reruns of the intermediate cases reduce the 25 May gap below
+1\% for the 0.75 UPS and TES cases; the 0.75 and 1.25 flexible-workload cases
+retain gaps of 1.015\% and 2.032\% because their negative objectives are close to
+zero. Across these checks the committed daily cost changes by at most GBP~0.281,
+the closing workload is unchanged and the maximum physical-state difference is
+$2.2\times10^{-14}$. The most conservative 0.5 flexible-workload endpoint has
+the same behaviour: its 900 s rerun changes committed cost by about GBP~0.002
+despite a 5.652\% relative gap. These qualifications do not affect any rounded
+annual percentage or the resource ranking.
+
+At midnight after 31 December, 0.642875 CPU hours remain within deadline. They
+are completed in the actual 1 January 2026 look ahead. Calendar year reporting
+includes only 2025 committed intervals, while the extra intervals certify that
+the deferred work has not been abandoned. A continuation value test spanning
+the median to the maximum observed 1 January price changes annual cost by at
+most 0.000381\%. This supports the zero terminal value used in the central case.
+
+The flexibility grid contains 288 cells on a uniform hourly start time mesh.
+All accepted dispatches pass the physical audits and solver gap criterion.
+Exact duration boundaries are established for 283 cells. Five retain certified
+lower bounds because the next 15 minute increment did not resolve within the
+60 s screening limit. Marking these cells explicitly avoids turning a solver
+timeout into an unsupported claim of infeasibility.
+
+\subsection{Scope and limitations}
+
+This is a stylised operating study rather than a forecast for a named facility.
+Ambient temperature, chiller performance and the local clock workload shape are
+fixed. Battery degradation, storage standing losses, network tariffs and service
+revenue are omitted. These choices allow the annual value of coordination to be
+isolated, but they should be included before using the results for an investment
+case.
+
+The repeated workload profile means that the annual variation in this study is
+driven mainly by prices and by the physical state carried between days, rather
+than by seasonal or weekly changes in computing demand. Fixed ambient temperature
+and COP similarly remove the seasonal variation in cooling efficiency. Depending
+on the facility and climate, introducing these effects could either create new
+opportunities or reduce the headroom available in warm periods. Battery losses
+are represented through efficiency, but degradation cost is not, so frequent UPS
+cycling may be less attractive in a commercial deployment than it is here.
+
+The economic result also excludes network and capacity charges. This matters
+because the optimised annual case has a higher peak import. The 5.049\% saving is
+evidence of value under the signed energy price objective, not a claim
+about the complete electricity bill of a particular site. Service revenue is not
+included either; the event study measures physical capability and does not test
+whether the service would be profitable after market payments and penalties.
+
+The event study uses an exact grid target with a tolerance of 0.1 kW. This is a
+conservative representation and does not model the wider tolerance bands of a
+particular market product. The selected day gives a state consistent example of
+duration capability; it is not an annual availability distribution. Finally,
+the component contributions depend on the chosen dispatch and should not be
+interpreted as independently additive asset values.
+
+Using one representative day gives a reproducible illustration of how the annual
+trajectory can support a grid event, but it does not show how often the same
+duration would be available across the year. Repeating the event study over a
+larger sample of seasonal and operational states would be needed before quoting
+an annual availability or dependable market capacity. The component results
+should likewise be interpreted as feasible coordinated dispatches, not unique
+allocations of value among the assets.
+
+\section{Conclusion}
+
+This paper develops a linked annual optimisation for IT workload scheduling,
+UPS dispatch and cooling with thermal storage. Carrying physical states and
+unfinished workload between local days removes the artificial resets that can
+overstate both economic value and flexibility. For the 1 MW case study,
+coordinated operation reduces 2025 electricity cost from GBP~550,503.59 to
+GBP~522,707.23, a saving of 5.049\%. Flexible workload has the largest effect
+among the tested resources, followed by UPS and TES energy capacity.
+
+The annual cost decomposition shows that the largest gross reductions come from
+the timing of IT demand and CRAC operation. TES and UPS alter those opportunities
+rather than acting as isolated sources of value. On the representative day, the
+same stored annual trajectory is used to test grid service. Increased import can
+be sustained for 9.75 hours at 25 kW, while reduced import reaches 5.25 hours at
+100 and 150 kW. The component results show how workload, cooling, TES and UPS
+actions combine differently with event direction, start time and the inherited
+operating state.
+
+The main conclusion is not a single flexibility capacity. It is that
+data centre flexibility has a time dependent magnitude and duration, and that a
+credible offer must include the recovery needed to return the facility to normal
+operation. Future work should extend the annual formulation to variable weather,
+battery degradation, network constraints, market revenue and multiple
+representative days, and should examine interactions among resources with a
+factorial sensitivity design.
+
+\appendices
+\section{Additional Implementation Detail}\label{app:implementation}
+
+The DLOG representation of Equation~\eqref{eq:it-power} uses four segments with
+breakpoints
+\begin{equation}
+ b_i=(i/4)^{1.5},\qquad i=0,\ldots,4,
+ \label{eq:appendix-breakpoints}
+\end{equation}
+and evaluates the power law exactly at each breakpoint. The logarithmic
+disaggregated convex combination requires fewer binary variables than a direct
+one binary per segment formulation while preserving equality to the piecewise
+curve.
+
+State bounds are applied at every interval boundary, not only at the beginning
+and end of the daily solve. The UPS energy range is 300--600 kWh, the TES range
+is 0--1000 kWh thermal, and the IT, rack, cold aisle and hot aisle temperature
+ranges are 18--60, 18--40, 18--23 and 18--40$^{\circ}$C. The inlet air is
+bounded between 18 and 30$^{\circ}$C. The structural grid limit is the sum of
+rated IT power, maximum chiller input, auxiliary demand and maximum UPS charging,
+giving 1723.095 kW for the central case.
+
+Each checkpoint records the committed dispatch, next physical state, unfinished
+cohorts, solver status and audit values. The annual audit tolerances are
+$10^{-5}$ for state handoff, $10^{-3}$ kW for power flow and
+$10^{-7}$ CPU hours for workload conservation. These records are also used to
+reconstruct the representative day without rerunning or resetting the annual
+trajectory.
+
+% -------- Bibliography --------
+\IEEEtriggeratref{35}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\section*{Acknowledgements}
+
+This work was supported by the Engineering and Physical Sciences Research
+Council (EPSRC) and the Economic and Social Research Council (ESRC) through
+funding provided to the Energy Demand Research Centre (grant EP/Y010078/1).
+
+\section*{CRediT Authorship Contribution Statement}
+
+\noindent \textbf{James Day:} Writing -- original draft, Investigation,
+Methodology, Conceptualization.
+
+\medskip
+\noindent \textbf{Mehmet T{\"u}rker Takci:} Writing -- original draft,
+Investigation, Methodology, Conceptualization.
+
+\medskip
+\noindent \textbf{Meysam Qadrdan:} Review \& editing, Supervision,
+Conceptualization.

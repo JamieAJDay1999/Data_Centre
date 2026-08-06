@@ -1,0 +1,5 @@
+- Linked annual optimisation preserves physical and workload continuity.
+- Integrated operation cuts annual electricity cost by 5.049\%.
+- Flexible workload has greater value than UPS or TES capacity.
+- Recovery-certified flexibility reaches 9.75 hours on a typical day.
+- Component decomposition identifies how each grid response is delivered.
