@@ -1,4 +1,5 @@
 {
+  "method_schema_version": 2,
   "date": "2025-09-22",
   "start_step": 8,
   "magnitude_kw": -400.0,
@@ -10,8 +11,8 @@
     "magnitude_kw": -400.0,
     "duration_steps": 0,
     "duration_hours": 0.0,
-    "solver_calls": 5,
-    "solver_runtime_s": 2.6429648000012094,
+    "solver_calls": 3,
+    "solver_runtime_s": 0.1783199000001332,
     "maximum_solver_relative_gap": null,
     "validated": true,
     "boundary_verified": true,
@@ -21,52 +22,32 @@
     {
       "duration_steps": 1,
       "feasible_incumbent": false,
-      "wall_time_s": 0.5398048000006384,
+      "wall_time_s": 0.07537039999988338,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_feasibility"
+      "purpose": "duration_refinement"
     },
     {
-      "duration_steps": 3,
+      "duration_steps": 2,
       "feasible_incumbent": false,
-      "wall_time_s": 0.6320393000005424,
+      "wall_time_s": 0.048879599999054335,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_feasibility"
+      "purpose": "duration_refinement"
     },
     {
-      "duration_steps": 6,
+      "duration_steps": 4,
       "feasible_incumbent": false,
-      "wall_time_s": 0.5597933999997622,
+      "wall_time_s": 0.05406990000119549,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_feasibility"
-    },
-    {
-      "duration_steps": 12,
-      "feasible_incumbent": false,
-      "wall_time_s": 0.5023046999995131,
-      "solver_runtime_s": null,
-      "solver_quality": "proven_infeasible",
-      "solver_relative_gap": null,
-      "time_limit_s": 60,
-      "purpose": "duration_feasibility"
-    },
-    {
-      "duration_steps": 24,
-      "feasible_incumbent": false,
-      "wall_time_s": 0.4090226000007533,
-      "solver_runtime_s": null,
-      "solver_quality": "proven_infeasible",
-      "solver_relative_gap": null,
-      "time_limit_s": 60,
-      "purpose": "duration_feasibility"
+      "purpose": "duration_screening"
     }
   ],
   "solver": null,

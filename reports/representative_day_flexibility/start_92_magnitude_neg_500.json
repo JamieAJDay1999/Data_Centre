@@ -1,4 +1,5 @@
 {
+  "method_schema_version": 2,
   "date": "2025-09-22",
   "start_step": 92,
   "magnitude_kw": -500.0,
@@ -11,7 +12,7 @@
     "duration_steps": 0,
     "duration_hours": 0.0,
     "solver_calls": 3,
-    "solver_runtime_s": 1.2045153000035498,
+    "solver_runtime_s": 0.1830883000002359,
     "maximum_solver_relative_gap": null,
     "validated": true,
     "boundary_verified": true,
@@ -21,7 +22,7 @@
     {
       "duration_steps": 1,
       "feasible_incumbent": false,
-      "wall_time_s": 0.4657666999992216,
+      "wall_time_s": 0.04775150000023132,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
@@ -31,7 +32,7 @@
     {
       "duration_steps": 2,
       "feasible_incumbent": false,
-      "wall_time_s": 0.37832020000132616,
+      "wall_time_s": 0.050583000000187894,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
@@ -41,7 +42,7 @@
     {
       "duration_steps": 4,
       "feasible_incumbent": false,
-      "wall_time_s": 0.360428400003002,
+      "wall_time_s": 0.08475379999981669,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,

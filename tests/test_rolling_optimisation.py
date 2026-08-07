@@ -13,6 +13,11 @@ from rolling_optimisation.config import (
     model_parameters,
 )
 from rolling_optimisation.model import new_workload_cohorts, solve_horizon
+from rolling_optimisation.run_representative_day_flexibility import (
+    FIXED_RECOVERY_STEPS,
+    _state_at_boundary,
+    _workload_at_boundary,
+)
 from rolling_optimisation.timeline import (
     add_optimisation_prices,
     apply_flexible_workload_multiplier,
@@ -253,6 +258,16 @@ def test_two_linked_signed_price_horizons(timeline: pd.DataFrame) -> None:
     ).sum()
     assert first.committed["settlement_cost_gbp"].sum() == pytest.approx(direct)
     assert len(first.planned) == first_core + config.lookahead_steps
+    traced = first.workload_trace.groupby("timestamp_utc")[
+        "executed_cpu_rate"
+    ].sum()
+    for row in first.committed.itertuples(index=False):
+        assert float(traced.get(row.timestamp_utc, 0.0)) == pytest.approx(
+            row.flexible_cpu_processed
+        )
+    assert first.audits["workload_trace_max_interval_residual_cpu"] <= (
+        config.workload_tolerance_cpu_h
+    )
     assert first.terminal_state == OperationalState.from_dict(
         {
             key.removeprefix("state_end_"): first.planned.iloc[-1][key]
@@ -324,6 +339,85 @@ def test_flexibility_request_tracks_grid_target_and_recovers(
     assert (
         response.terminal_state.tes_energy_kwh
         >= baseline.terminal_state.tes_energy_kwh - 1e-6
+    )
+
+
+@pytest.mark.integration
+def test_event_boundary_cohorts_and_fixed_recovery(
+    timeline: pd.DataFrame,
+) -> None:
+    solver = _available_solver()
+    if solver is None:
+        pytest.skip("No supported MILP solver is available")
+    config = RollingConfig(
+        scenario_id="fixed_recovery_test",
+        solver_name=solver,
+        solver_time_limit_s=30,
+        mip_gap=0.01,
+    )
+    day_start = 24
+    core_steps = 16
+    full_horizon = timeline.iloc[
+        day_start : day_start + core_steps + config.lookahead_steps
+    ].copy()
+    initial_state = default_initial_state(config)
+    baseline = solve_horizon(
+        config,
+        full_horizon,
+        core_steps,
+        initial_state,
+    )
+    event_start = 2
+    duration = 1
+    recovery_boundary = event_start + duration + FIXED_RECOVERY_STEPS
+    event_horizon = full_horizon.iloc[event_start:recovery_boundary].copy()
+    opening_workload = _workload_at_boundary(
+        config,
+        full_horizon,
+        [],
+        baseline.workload_trace.assign(
+            timestamp_utc=pd.to_datetime(
+                baseline.workload_trace["timestamp_utc"], utc=True
+            )
+        ),
+        event_start,
+    )
+    recovery_workload = _workload_at_boundary(
+        config,
+        full_horizon,
+        [],
+        baseline.workload_trace.assign(
+            timestamp_utc=pd.to_datetime(
+                baseline.workload_trace["timestamp_utc"], utc=True
+            )
+        ),
+        recovery_boundary,
+    )
+    reference = baseline.planned.iloc[event_start:recovery_boundary]
+    request = FlexibilityRequest(
+        baseline_grid_import_kw=tuple(reference["grid_import_kw"]),
+        start_step=0,
+        duration_steps=duration,
+        delta_kw=-10.0,
+        recovery_state=_state_at_boundary(baseline.planned, recovery_boundary),
+        recovery_workload=tuple(recovery_workload),
+    )
+    response = solve_horizon(
+        config,
+        event_horizon,
+        duration,
+        _state_at_boundary(baseline.planned, event_start),
+        opening_workload,
+        flexibility_request=request,
+    )
+
+    assert len(response.planned) == duration + FIXED_RECOVERY_STEPS
+    assert response.committed.iloc[0]["grid_import_kw"] == pytest.approx(
+        reference.iloc[0]["grid_import_kw"] - 10.0,
+        abs=request.tolerance_kw,
+    )
+    assert response.audits["recovery_workload_max_excess_cpu_h"] <= (
+        request.recovery_workload_tolerance_cpu_h + 1e-9
     )
 
 

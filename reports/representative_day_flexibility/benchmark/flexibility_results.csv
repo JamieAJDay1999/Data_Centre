@@ -1,3 +1,3 @@
-date,start_step,start_hour,magnitude_kw,duration_steps,duration_hours,solver_calls,solver_runtime_s,maximum_solver_relative_gap,validated,boundary_verified,maximum_target_error_kw,maximum_recovery_energy_shortfall_kwh,maximum_recovery_temperature_error_c,maximum_component_closure_error_kw,solver_quality,solver_relative_gap,solver_meets_accepted_gap
-2025-09-22,0,0.0,-100.0,0,0.0,5,2.369902299997193,,True,True,,,,,,,
-2025-09-22,60,15.0,25.0,3,0.75,5,3.7674402999982703,0.0003940760558550077,True,True,0.10000000000013642,0.0,0.05000000000000071,1.0516032489249483e-12,optimal,0.000219778042693204,True
+date,start_step,start_hour,magnitude_kw,duration_steps,duration_hours,solver_calls,solver_runtime_s,maximum_solver_relative_gap,validated,boundary_verified,duration_is_lower_bound,maximum_target_error_kw,maximum_recovery_energy_shortfall_kwh,maximum_recovery_temperature_error_c,maximum_recovery_workload_excess_cpu_h,maximum_component_closure_error_kw,recovery_steps,solver_quality,solver_relative_gap,solver_meets_accepted_gap
+2025-09-22,0,0.0,-100.0,0,0.0,3,0.18531029999940074,,True,True,False,,,,,,,,,
+2025-09-22,60,15.0,25.0,36,9.0,9,5.5803261999990355,0.00045153063015675946,True,True,False,0.1000000000003638,0.0,3.471830716961222e-05,1.0000000000287557e-07,2.8421709430404007e-12,12.0,optimal,0.00014778621030312004,True

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 import pandas as pd
@@ -66,6 +66,8 @@ class HorizonResult:
     next_workload: list[WorkloadCohort]
     solver: dict[str, Any]
     audits: dict[str, float]
+    workload_trace: pd.DataFrame = field(default_factory=pd.DataFrame)
+    terminal_workload: list[WorkloadCohort] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -81,3 +83,5 @@ class FlexibilityRequest:
     tolerance_kw: float = 0.1
     recovery_state: OperationalState | None = None
     recovery_temperature_tolerance_c: float = 0.05
+    recovery_workload: tuple[WorkloadCohort, ...] | None = None
+    recovery_workload_tolerance_cpu_h: float = 1e-7

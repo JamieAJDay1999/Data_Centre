@@ -42,7 +42,7 @@ IMAGES = ROOT / "paper/images"
 GENERATED = ROOT / "paper/generated"
 
 BASELINE = "2025_baseline_reformulated"
-CENTRAL = "2025_optimised_reformulated"
+CENTRAL = "2025_optimised_cohort_trace"
 SCENARIOS = (
     ("Baseline", BASELINE, "baseline", 1.0),
     ("Flexible workload 0.5x", "2025_flex_0p5", "flex", 0.5),

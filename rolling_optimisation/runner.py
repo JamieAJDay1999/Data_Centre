@@ -13,7 +13,7 @@ from typing import Any
 import pandas as pd
 
 from .config import RollingConfig, default_initial_state
-from .model import solve_horizon
+from .model import WORKLOAD_TRACE_COLUMNS, solve_horizon
 from .timeline import (
     add_optimisation_prices,
     apply_flexible_workload_multiplier,
@@ -104,6 +104,7 @@ def _boundary_residual(previous: pd.Series, current: pd.Series) -> float:
 def _write_annual_outputs(
     run_dir: Path,
     frames: list[pd.DataFrame],
+    trace_frames: list[pd.DataFrame],
     checkpoint_rows: list[dict[str, Any]],
     config: RollingConfig,
     expected_steps: int,
@@ -132,6 +133,32 @@ def _write_annual_outputs(
 
     annual_path = run_dir / "annual_committed.csv"
     _atomic_csv(annual_path, committed)
+
+    workload_trace = (
+        pd.concat(trace_frames, ignore_index=True)
+        if trace_frames
+        else pd.DataFrame(columns=WORKLOAD_TRACE_COLUMNS)
+    )
+    workload_trace = workload_trace.reindex(columns=WORKLOAD_TRACE_COLUMNS)
+    _atomic_csv(run_dir / "annual_workload_trace.csv", workload_trace)
+    trace_residual = 0.0
+    if config.mode != "baseline":
+        executed = (
+            workload_trace.groupby("timestamp_utc")["executed_cpu_rate"].sum()
+            if not workload_trace.empty
+            else pd.Series(dtype=float)
+        )
+        for row in committed.itertuples(index=False):
+            recorded = float(executed.get(str(row.timestamp_utc), 0.0))
+            trace_residual = max(
+                trace_residual,
+                abs(recorded - float(row.flexible_cpu_processed)),
+            )
+        if trace_residual > config.workload_tolerance_cpu_h:
+            raise RuntimeError(
+                "Annual workload trace does not reconcile with committed CPU: "
+                f"{trace_residual}"
+            )
 
     daily = (
         committed.groupby("local_date", sort=False)
@@ -173,6 +200,8 @@ def _write_annual_outputs(
             abs(row["audits"]["workload_conservation_residual_cpu_h"])
             for row in checkpoint_rows
         ),
+        "workload_trace_rows": len(workload_trace),
+        "maximum_workload_trace_interval_residual_cpu": trace_residual,
         "maximum_ups_overlap_kw": max(
             row["audits"]["max_ups_charge_discharge_overlap_kw"]
             for row in checkpoint_rows
@@ -262,12 +291,14 @@ def run_rolling_scenario(
     run_dir = output_root / config.scenario_id
     day_dir = run_dir / "days"
     checkpoint_dir = run_dir / "checkpoints"
+    trace_dir = run_dir / "workload_traces"
     day_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    trace_dir.mkdir(parents=True, exist_ok=True)
 
     metadata_path = run_dir / "run_metadata.json"
     requested = {
-        "schema_version": 2,
+        "schema_version": 3,
         "fingerprint": fingerprint,
         "input_hash": input_hash,
         "code_hash": code_hash,
@@ -307,13 +338,20 @@ def run_rolling_scenario(
     workload: list[WorkloadCohort] = []
     previous_checkpoint_hash = "ROOT"
     frames: list[pd.DataFrame] = []
+    trace_frames: list[pd.DataFrame] = []
     checkpoint_rows: list[dict[str, Any]] = []
 
     for position, (date, indices) in enumerate(days, start=1):
         csv_path = day_dir / f"{date}.csv"
         checkpoint_path = checkpoint_dir / f"{date}.json"
-        if csv_path.exists() != checkpoint_path.exists():
-            raise RuntimeError(f"Incomplete checkpoint pair for {date}")
+        trace_path = trace_dir / f"{date}.csv"
+        existing_parts = (
+            csv_path.exists(),
+            checkpoint_path.exists(),
+            trace_path.exists(),
+        )
+        if any(existing_parts) and not all(existing_parts):
+            raise RuntimeError(f"Incomplete checkpoint set for {date}")
 
         if checkpoint_path.exists():
             payload = json.loads(checkpoint_path.read_text(encoding="utf-8"))
@@ -323,17 +361,21 @@ def run_rolling_scenario(
                 raise RuntimeError(f"Broken predecessor chain at {checkpoint_path}")
             if payload.get("committed_csv_sha256") != _sha256(csv_path):
                 raise RuntimeError(f"Committed CSV hash mismatch for {date}")
+            if payload.get("workload_trace_csv_sha256") != _sha256(trace_path):
+                raise RuntimeError(f"Workload trace CSV hash mismatch for {date}")
             if OperationalState.from_dict(payload["opening_state"]) != state:
                 raise RuntimeError(f"Opening physical state mismatch at {date}")
             if [WorkloadCohort.from_dict(row) for row in payload["opening_workload"]] != workload:
                 raise RuntimeError(f"Opening workload state mismatch at {date}")
             frame = pd.read_csv(csv_path)
+            trace_frame = pd.read_csv(trace_path)
             state = OperationalState.from_dict(payload["closing_state"])
             workload = [
                 WorkloadCohort.from_dict(row) for row in payload["closing_workload"]
             ]
             previous_checkpoint_hash = _sha256(checkpoint_path)
             frames.append(frame)
+            trace_frames.append(trace_frame)
             checkpoint_rows.append(payload)
             print(f"[{position}/{len(days)}] {date}: resumed")
             continue
@@ -356,8 +398,9 @@ def run_rolling_scenario(
             tee=tee,
         )
         _atomic_csv(csv_path, result.committed)
+        _atomic_csv(trace_path, result.workload_trace)
         payload = {
-            "schema_version": 2,
+            "schema_version": 3,
             "fingerprint": fingerprint,
             "date": date,
             "core_steps": core_steps,
@@ -369,12 +412,14 @@ def run_rolling_scenario(
             "solver": result.solver,
             "audits": result.audits,
             "committed_csv_sha256": _sha256(csv_path),
+            "workload_trace_csv_sha256": _sha256(trace_path),
         }
         _atomic_json(checkpoint_path, payload)
         state = result.next_state
         workload = result.next_workload
         previous_checkpoint_hash = _sha256(checkpoint_path)
         frames.append(result.committed)
+        trace_frames.append(result.workload_trace)
         checkpoint_rows.append(payload)
         quality = result.solver["solution_quality"]
         print(
@@ -387,6 +432,7 @@ def run_rolling_scenario(
     summary = _write_annual_outputs(
         run_dir,
         frames,
+        trace_frames,
         checkpoint_rows,
         config,
         expected_steps,

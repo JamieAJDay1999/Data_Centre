@@ -1,9 +1,9 @@
 \section{Methodology}\label{sec:methodology}
-This section details the mathematical framework developed to quantify the demand-side flexibility of a data centre by co-optimising its primary subsystems. The conceptual model of the data centre, illustrated in Figure~\ref{fig:dc_layout}, integrates three dynamically coupled components: the IT systems, which process both flexible and inflexible computational workloads; the power infrastructure, featuring an Uninterruptible Power Supply which operates as an Energy Storage System (UPS-ESS); and the cooling infrastructure, which includes a chiller coupled with a Thermal Energy Storage (TES) tank and the CRAC system. 
+This section details the mathematical framework developed to quantify the demand-side flexibility of a DC by co-optimising its primary subsystems. The conceptual DC model, illustrated in Figure~\ref{fig:dc_layout}, integrates three dynamically coupled components: the IT systems, which process both flexible and inflexible computational workloads; the power infrastructure, featuring an Uninterruptible Power Supply which operates as an Energy Storage System (UPS-ESS); and the cooling infrastructure, which includes a chiller coupled with a Thermal Energy Storage (TES) tank and the CRAC system.
 
-Our approach is centred on a comprehensive optimisation model that captures the operational dynamics and physical constraints of each subsystem. Flexibility is harnessed from three key sources: (1) shifting  IT workloads in time, (2) strategically charging and discharging the UPS-ESS, and (3) strategically managing the cooling system by utilising the TES and the inherent thermal inertia of the facility. By integrating these components into a unified framework, the data centre's total capacity to modulate its electricity consumption is evaluated, thereby quantifying its potential to provide valuable grid services.
+Our approach is centred on a comprehensive optimisation model that captures the operational dynamics and physical constraints of each subsystem. Flexibility is harnessed from three key sources: (1) shifting IT workloads in time, (2) strategically charging and discharging the UPS-ESS, and (3) strategically managing the cooling system by utilising the TES and the inherent thermal inertia of the facility. By integrating these components into a unified framework, the DC's total capacity to modulate its electricity consumption is evaluated, thereby quantifying its potential to provide valuable grid services.
 
-\rev{The model is intentionally aggregate rather than a server-level or device-level digital twin. The objective of this work is to quantify the flexibility potential available to the power system from a data centre, not to reproduce the detailed operational behaviour of individual servers or cooling devices \cite{barroso2018datacenter,dayarathna2015data}. The modelling therefore prioritises the state variables that determine flexibility feasibility: CPU utilisation and delay tolerance for IT work, UPS state of charge and converter limits for electrical storage, TES state of charge and facility temperatures for cooling recovery, and total grid power for service delivery. Likewise, the purpose of the cooling model is to capture the energy-flexibility interaction between thermal storage, cooling demand and electricity consumption, rather than detailed airflow dynamics within server racks. This abstraction preserves the operational couplings that matter for flexibility while keeping the repeated optimisation solves required by the flexibility assessment computationally tractable. Importantly, the required computational work of every IT job is always executed in full within its delay tolerance, so flexibility is provided without sacrificing computational throughput or service quality.}
+\rev{The model is intentionally aggregate rather than a server-level or device-level digital twin. The objective of this work is to quantify the flexibility potential available to the power system from a DC, not to reproduce the detailed operational behaviour of individual servers or cooling devices \cite{barroso2018datacenter,dayarathna2015data}. The modelling therefore prioritises the state variables that determine flexibility feasibility: CPU utilisation and delay tolerance for IT work, UPS state of charge and converter limits for electrical storage, TES state of charge and facility temperatures for cooling recovery, and total grid power for service delivery. Likewise, the purpose of the cooling model is to capture the energy-flexibility interaction between thermal storage, cooling demand and electricity consumption, rather than detailed airflow dynamics within server racks. This abstraction preserves the operational couplings that matter for flexibility while keeping the repeated optimisation solves required by the flexibility assessment computationally tractable. Importantly, the required computational work of every IT job is always executed in full within its delay tolerance, so flexibility is provided without sacrificing computational throughput or service quality.}
 
 
 The revised implementation applies this integrated model across the complete
@@ -17,9 +17,9 @@ transparent.
 
 \subsection{IT Workload Methodology}
  
-In the literature, there is no consensus on IT workload characteristics and utilisation levels, as they vary significantly depending on the data centre size, type (e.g., enterprise, colocation, hyperscale) and workload nature (e.g., banking, AI). Consequently, even publicly available real-world datasets can differ substantially across facilities. Chris Zaloumis \cite{Zaloumis2022IBM} indicates that average CPU utilisations vary between 12\% and 18\% of total capacity, while Ankur Ghia's findings indicate a daily average between 20\% and 30\%, noting that best practices can elevate this to 70\%--80\% \cite{Ghia2011McKinsey}. 
+In the literature, there is no consensus on IT workload characteristics and utilisation levels, as they vary significantly depending on DC size, type (e.g., enterprise, colocation, hyperscale) and workload nature (e.g., banking, AI). Consequently, even publicly available real-world datasets can differ substantially across facilities. Chris Zaloumis \cite{Zaloumis2022IBM} indicates that average CPU utilisations vary between 12\% and 18\% of total capacity, while Ankur Ghia's findings indicate a daily average between 20\% and 30\%, noting that best practices can elevate this to 70\%--80\% \cite{Ghia2011McKinsey}.
  
- A study by Google \cite{6779441} classified data centre workloads into four categories based on their sensitivity to delay, labelled from ``0'' (least sensitive) to ``3'' (most sensitive). If categories 2 and 3 are considered inflexible, they account for approximately 30\% of the total workloads, suggesting that up to 70\% of the workloads could be flexible. Another study by Cao et al. \cite{Cao2022ApEn}, conducted using Alibaba's cluster trace, found that inflexible workloads represent 60\% of all jobs but contribute only 30\% of total energy consumption. In contrast, flexible workloads constitute 40\% of jobs while consuming 70\% of the energy. Furthermore, studies such as \cite{Misaghian2023TIA,Xu2023SPIE,Zhou2024IJEPES,Fu2020ApEn,Liu2012PER} reveal that there is no universally accepted ratio, and the estimated shares of flexible and inflexible IT workloads differ significantly across studies for a typical 24-hour period. 
+ A study by Google \cite{6779441} classified DC workloads into four categories based on their sensitivity to delay, labelled from ``0'' (least sensitive) to ``3'' (most sensitive). If categories 2 and 3 are considered inflexible, they account for approximately 30\% of the total workloads, suggesting that up to 70\% of the workloads could be flexible. Another study by Cao et al. \cite{Cao2022ApEn}, conducted using Alibaba's cluster trace, found that inflexible workloads represent 60\% of all jobs but contribute only 30\% of total energy consumption. In contrast, flexible workloads constitute 40\% of jobs while consuming 70\% of the energy. Furthermore, studies such as \cite{Misaghian2023TIA,Xu2023SPIE,Zhou2024IJEPES,Fu2020ApEn,Liu2012PER} reveal that there is no universally accepted ratio, and the estimated shares of flexible and inflexible IT workloads differ significantly across studies for a typical 24-hour period.
 
 Based on the review of the literature, a dataset of reported workload ratios and graphs over a 24-hour time horizon was compiled. From this dataset, the minimum and maximum values were extracted, and the average ratio was computed, separately for flexible, inflexible, and total workloads relative to total CPU capacity. Drawing upon these values, the workload ratio assumptions adopted in this study were established and are presented under the ``Proposed'' category in Table~\ref{tab:workload-rates}. \rev{The evidence base used to construct these assumptions is consolidated in Table~\ref{tab:workload-source-summary}. Reported hourly workload ratios and graphical profiles were tabulated or digitised where required and grouped into flexible, inflexible and total workload categories. For each hour, the minimum, maximum and average reported values were computed, and the proposed value was selected as a representative profile within the observed range while preserving the daily shape and the aggregate balance between flexible and inflexible demand. The ``Proposed'' columns therefore constitute modelling assumptions synthesised from the literature rather than measurements from a single facility.}
 
@@ -123,7 +123,7 @@ Categorising the deferral flexibility of IT workloads, defined as the proportion
 \end{table}
 
 \rev{Table~\ref{tab:shiftable} presents the hourly distribution of flexible workloads across the four delay tranches: tranche $k=1$ contains jobs that can be deferred by up to 30 minutes, $k=2$ by up to 60 minutes, $k=3$ by up to 2 hours, and $k=4$ by up to 3 hours.} The percentages represent the relative distribution within the flexible workload. For instance, during the 12:00--13:00 interval, 45\% of the flexible workloads can be deferred up to 30 minutes, 25\% for up to 60 minutes, 15\% for up to 2 hours, and the remaining 15\% for up to 3 hours. These categorized hourly workload profiles are shown in Figure \ref{fig:workload_ratios}  
-and utilised as modelling inputs, capturing the time-dependent and duration-sensitive characteristics of data centre flexibility in this study.
+and utilised as modelling inputs, capturing the time-dependent and duration-sensitive characteristics of DC flexibility in this study.
 
 \subsubsection{IT Power Consumption Model}
 
@@ -162,7 +162,7 @@ midnight may have a deadline on the following local day. A cohort retains its
 original arrival time, delay class, absolute deadline and remaining CPU-hours
 when it is passed between daily optimisations.
 
-The model conceptualises all servers in the data centre as one aggregate
+The model conceptualises all servers in the DC as one aggregate
 computational resource. This is the same system-level simplification used in
 the smaller revision: it does not model placement on individual servers, but it
 does preserve the amount of computational work, its release time, deadline and
@@ -369,13 +369,21 @@ sustained and recovered.
 At facility level, the cooling and TES formulation is collected below so that
 the thermal balance, storage constraints, chiller conversion, node dynamics and
 operating limits can be reviewed together.
+Here $Q_t^{\mathrm{cool}}$ is the gross thermal cooling supplied by the direct
+chiller and TES paths. The calibrated effective-airflow factor $\kappa$ accounts
+in aggregate for mixing, bypass and nonuniform rack-flow effects in the
+reduced-order thermal model. The cooling term acting on the four represented
+thermal nodes is therefore defined as
+$Q_t^{\mathrm{cool,eff}}\equiv\kappa Q_t^{\mathrm{cool}}$. This effective term
+is a model calibration; it does not assert that the remaining fraction is an
+independently measured cooling loss.
 
 \begin{figure*}[!t]
 \normalsize
 \begin{flalign}
 & Q_t^{\mathrm{CA}}+Q_t^{\mathrm{HA}}+Q_t^{\mathrm{R}}+
 Q_t^{\mathrm{ITm}}
-=Q_t^{\mathrm{out}}+Q_t^{\mathrm{IT}}-Q_t^{\mathrm{cool}}
+=Q_t^{\mathrm{out}}+Q_t^{\mathrm{IT}}-Q_t^{\mathrm{cool,eff}}
 && \label{eq:thermal-balance}\\[0.3\baselineskip]
 & E^{\mathrm{TES}}_{t+1}=E^{\mathrm{TES}}_t+
 \left(\eta^{\mathrm{TES}}_{\mathrm{ch}}Q^{\mathrm{TES}}_{\mathrm{ch},t}
@@ -433,8 +441,9 @@ P_t^{\mathrm{ch,TES}}
 \vspace*{4pt}
 \end{figure*}
 
-In this block, each $Q$ is expressed in kW and
-$Q_t^{\mathrm{IT}}=P_t^{\mathrm{IT}}$.
+In this block, each $Q$ is expressed in kW,
+$Q_t^{\mathrm{IT}}=P_t^{\mathrm{IT}}$, and
+$Q_t^{\mathrm{cool,eff}}=\kappa Q_t^{\mathrm{cool}}$.
 The implemented form of this balance is given by the individual IT-equipment,
 rack, cold-aisle and hot-aisle state equations in the block. Writing the node equations
 separately preserves the thermal inertia of each component instead of replacing
@@ -502,8 +511,10 @@ equipment equation assumes that its electrical demand becomes heat. Part of this
 heat is retained in the thermal mass of the equipment and the remainder passes
 to the rack air through the conductance $G_{\mathrm{conv}}$. The rack equation
 then combines that heat transfer with the flow of conditioned air from the cold
-aisle. The factor $\kappa$ represents the effective fraction of the nominal air
-flow participating in the exchange.
+aisle. The factor $\kappa$ is a calibrated effective-airflow factor applied to
+the nominal flow participating in the reduced-order node exchange. It captures
+aggregate mixing, bypass and nonuniform rack-flow effects; it is not interpreted
+as a direct measurement of a separate cooling-loss stream.
 
 The cold aisle receives the cooled inlet air and also exchanges heat with the
 outside environment through $G_{\mathrm{cold}}$. The hot aisle receives the air
@@ -581,7 +592,8 @@ convention at the facility meter explicit.
 
 For each daily solve, the objective is given by Equation~\eqref{eq:objective},
 where $\mathcal H_d$ contains the committed day and its look ahead and $\pi_t$
-is the signed IMRP in GBP/MWh. Calendar year reporting includes only committed
+is the signed Intermittent Market Reference Price (IMRP) in GBP/MWh
+\cite{lccc_imrp_actuals}. Calendar year reporting includes only committed
 2025 intervals, so the overlapping look ahead is never counted twice. Storage
 degradation, standing losses, network charges and terminal energy credits are
 not included in the central objective.
@@ -596,7 +608,7 @@ could discourage some of the peaks observed in the optimised result.
 
 \subsection{365-Day Rolling-Horizon Formulation}\label{sec:annual-rolling}
 
-The model represents an aggregate data centre with 1 MW of rated IT power. The
+The model represents an aggregate DC with 1 MW of rated IT power. The
 purpose of the model is not to reproduce the placement of individual jobs or
 the airflow around individual racks. It is to retain the states that determine
 whether the facility can alter its grid demand without losing computational
@@ -626,7 +638,7 @@ is imposed as the opening state of day $d+1$. Unfinished workload is passed
 forward separately as a set of cohorts. Each cohort retains its original arrival
 time, its absolute deadline and its remaining CPU hours. This is important:
 resetting either the physical states or the workload at midnight would create
-energy or computing capacity that the data centre does not actually possess.
+energy or computing capacity that the DC does not actually possess.
 
 \begin{figure*}[!t]
 \centering

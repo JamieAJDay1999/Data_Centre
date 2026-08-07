@@ -18,6 +18,17 @@ from .types import (
 )
 
 
+WORKLOAD_TRACE_COLUMNS = (
+    "timestamp_utc",
+    "cohort_id",
+    "arrival_utc",
+    "latest_start_utc",
+    "tranche",
+    "executed_cpu_rate",
+    "executed_cpu_hours",
+)
+
+
 def _iso(timestamp: pd.Timestamp) -> str:
     return timestamp.isoformat()
 
@@ -518,6 +529,35 @@ def solve_horizon(
             ):
                 m.flexibility_recovery.add(variable >= value - tolerance)
                 m.flexibility_recovery.add(variable <= value + tolerance)
+        if request.recovery_workload is not None:
+            target_by_id = {
+                cohort.cohort_id: cohort
+                for cohort in request.recovery_workload
+            }
+            available_ids = {cohort.cohort_id for cohort in cohorts}
+            missing_ids = set(target_by_id) - available_ids
+            if missing_ids:
+                raise ValueError(
+                    "Recovery workload contains cohorts outside the event horizon: "
+                    + ", ".join(sorted(missing_ids)[:5])
+                )
+            if not hasattr(m, "flexibility_recovery"):
+                m.flexibility_recovery = pyo.ConstraintList()
+            for cohort in cohorts:
+                processed = sum(
+                    m.work_rate[cohort.cohort_id, step] * config.dt_hours
+                    for step in allowed[cohort.cohort_id]
+                )
+                remaining = cohort.remaining_cpu_hours - processed
+                target = target_by_id.get(cohort.cohort_id)
+                target_remaining = (
+                    0.0 if target is None else target.remaining_cpu_hours
+                )
+                m.flexibility_recovery.add(
+                    remaining
+                    <= target_remaining
+                    + request.recovery_workload_tolerance_cpu_h
+                )
 
     energy_cost = sum(
         config.dt_hours
@@ -633,6 +673,41 @@ def solve_horizon(
     committed = planned.iloc[:core_steps].copy()
     terminal_state = _state_from_model(m, n_steps)
 
+    trace_rows: list[dict] = []
+    if config.mode != "baseline":
+        for cohort in cohorts:
+            for step in allowed[cohort.cohort_id]:
+                if step >= core_steps:
+                    continue
+                rate = float(pyo.value(m.work_rate[cohort.cohort_id, step]))
+                if abs(rate) <= 1e-12:
+                    continue
+                trace_rows.append(
+                    {
+                        "timestamp_utc": _iso(timestamps[step]),
+                        "cohort_id": cohort.cohort_id,
+                        "arrival_utc": cohort.arrival_utc,
+                        "latest_start_utc": cohort.latest_start_utc,
+                        "tranche": cohort.tranche,
+                        "executed_cpu_rate": rate,
+                        "executed_cpu_hours": rate * config.dt_hours,
+                    }
+                )
+    workload_trace = pd.DataFrame(trace_rows, columns=WORKLOAD_TRACE_COLUMNS)
+    trace_by_interval = (
+        workload_trace.groupby("timestamp_utc")["executed_cpu_rate"].sum()
+        if not workload_trace.empty
+        else pd.Series(dtype=float)
+    )
+    trace_residual = 0.0
+    if config.mode != "baseline":
+        for step in range(core_steps):
+            recorded = float(trace_by_interval.get(_iso(timestamps[step]), 0.0))
+            trace_residual = max(
+                trace_residual,
+                abs(recorded - float(committed.iloc[step]["flexible_cpu_processed"])),
+            )
+
     next_workload: list[WorkloadCohort] = []
     core_generated = [cohort for cohort in generated if cohort.arrival < core_boundary]
     opening_work = sum(cohort.remaining_cpu_hours for cohort in carried + core_generated)
@@ -657,6 +732,7 @@ def solve_horizon(
     closing_work = sum(cohort.remaining_cpu_hours for cohort in next_workload)
     workload_residual = opening_work - committed_work - closing_work
     unserved_after_lookahead = 0.0
+    terminal_workload: list[WorkloadCohort] = []
     for cohort in carried + core_generated:
         processed_over_horizon = sum(
             pyo.value(m.work_rate[cohort.cohort_id, step]) * config.dt_hours
@@ -664,6 +740,35 @@ def solve_horizon(
         )
         unserved_after_lookahead += max(
             0.0, cohort.remaining_cpu_hours - processed_over_horizon
+        )
+    for cohort in cohorts:
+        processed_over_horizon = sum(
+            pyo.value(m.work_rate[cohort.cohort_id, step]) * config.dt_hours
+            for step in allowed[cohort.cohort_id]
+        )
+        remaining = max(0.0, cohort.remaining_cpu_hours - processed_over_horizon)
+        if remaining > config.workload_tolerance_cpu_h:
+            terminal_workload.append(
+                replace(cohort, remaining_cpu_hours=remaining)
+            )
+
+    recovery_workload_excess = 0.0
+    if flexibility_request is not None and flexibility_request.recovery_workload is not None:
+        response_by_id = {
+            cohort.cohort_id: cohort.remaining_cpu_hours
+            for cohort in terminal_workload
+        }
+        target_by_id = {
+            cohort.cohort_id: cohort.remaining_cpu_hours
+            for cohort in flexibility_request.recovery_workload
+        }
+        recovery_workload_excess = max(
+            (
+                response_by_id.get(cohort_id, 0.0)
+                - target_by_id.get(cohort_id, 0.0)
+                for cohort_id in set(response_by_id) | set(target_by_id)
+            ),
+            default=0.0,
         )
 
     max_ups_overlap = max(
@@ -726,6 +831,8 @@ def solve_horizon(
         "committed_workload_cpu_h": committed_work,
         "closing_workload_cpu_h": closing_work,
         "core_workload_unserved_after_lookahead_cpu_h": unserved_after_lookahead,
+        "workload_trace_max_interval_residual_cpu": trace_residual,
+        "recovery_workload_max_excess_cpu_h": max(0.0, recovery_workload_excess),
         "max_ups_charge_discharge_overlap_kw": max_ups_overlap,
         "max_tes_charge_discharge_overlap_kw": max_tes_overlap_kw,
         "objective_reconciliation_gbp": pyo.value(m.objective)
@@ -760,6 +867,20 @@ def solve_horizon(
         raise RuntimeError(
             "Core workload remains unserved after the full look-ahead: "
             f"{unserved_after_lookahead} CPU-h"
+        )
+    if trace_residual > config.workload_tolerance_cpu_h:
+        raise RuntimeError(
+            f"Workload trace residual {trace_residual} exceeds tolerance"
+        )
+    if (
+        flexibility_request is not None
+        and flexibility_request.recovery_workload is not None
+        and recovery_workload_excess
+        > flexibility_request.recovery_workload_tolerance_cpu_h + 1e-9
+    ):
+        raise RuntimeError(
+            "Recovery workload exceeds the annual baseline by "
+            f"{recovery_workload_excess} CPU-h"
         )
     if max_ups_overlap > config.flow_tolerance_kw:
         raise RuntimeError("UPS charged and discharged simultaneously")
@@ -817,4 +938,6 @@ def solve_horizon(
         next_workload=next_workload,
         solver=solver_metadata,
         audits=audits,
+        workload_trace=workload_trace,
+        terminal_workload=terminal_workload,
     )

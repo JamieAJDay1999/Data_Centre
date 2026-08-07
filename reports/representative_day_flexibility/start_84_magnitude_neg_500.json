@@ -1,4 +1,5 @@
 {
+  "method_schema_version": 2,
   "date": "2025-09-22",
   "start_step": 84,
   "magnitude_kw": -500.0,
@@ -11,35 +12,42 @@
     "duration_steps": 0,
     "duration_hours": 0.0,
     "solver_calls": 3,
-    "solver_runtime_s": 1.092546100000618,
+    "solver_runtime_s": 0.15107779999925697,
     "maximum_solver_relative_gap": null,
     "validated": true,
-    "boundary_verified": true
+    "boundary_verified": true,
+    "duration_is_lower_bound": false
   },
   "trials": [
     {
       "duration_steps": 1,
       "feasible_incumbent": false,
-      "wall_time_s": 0.3587256000009802,
+      "wall_time_s": 0.04663739999887184,
       "solver_runtime_s": null,
-      "solver_quality": "no_feasible_incumbent",
-      "solver_relative_gap": null
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_refinement"
     },
     {
-      "duration_steps": 3,
+      "duration_steps": 2,
       "feasible_incumbent": false,
-      "wall_time_s": 0.36225700000068173,
+      "wall_time_s": 0.04842330000064976,
       "solver_runtime_s": null,
-      "solver_quality": "no_feasible_incumbent",
-      "solver_relative_gap": null
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_refinement"
     },
     {
-      "duration_steps": 6,
+      "duration_steps": 4,
       "feasible_incumbent": false,
-      "wall_time_s": 0.3715634999989561,
+      "wall_time_s": 0.056017099999735365,
       "solver_runtime_s": null,
-      "solver_quality": "no_feasible_incumbent",
-      "solver_relative_gap": null
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_screening"
     }
   ],
   "solver": null,

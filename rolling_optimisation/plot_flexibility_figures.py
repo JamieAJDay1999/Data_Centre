@@ -207,7 +207,7 @@ def plot_components(
             duration = int(planned.attrs["flexibility_duration_steps"])
             stop = start + duration
             components = component_deltas(
-                planned.iloc[start:stop], reference.iloc[start:stop]
+                planned.iloc[:duration], reference.iloc[start:stop]
             )
             panels[(row, column)] = (duration / 4.0, components)
             longest = max(longest, duration / 4.0)
@@ -306,6 +306,7 @@ def _load_detailed(
             planned.attrs["flexibility_duration_steps"] = int(
                 match.iloc[0]["duration_steps"]
             )
+            planned.attrs["baseline_start_step"] = start
             detailed[(start, magnitude)] = planned
     return detailed
 

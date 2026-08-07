@@ -19,7 +19,7 @@ from rolling_optimisation.plot_flexibility_figures import (
     plot_components,
     plot_duration_grid,
 )
-from rolling_optimisation.model import solve_horizon
+from rolling_optimisation.model import new_workload_cohorts, solve_horizon
 from rolling_optimisation.timeline import (
     add_optimisation_prices,
     apply_flexible_workload_multiplier,
@@ -39,7 +39,7 @@ PRICE = ROOT / "static/data/imrp_actuals.csv"
 LOAD = ROOT / "static/data/inputs/load_profiles.csv"
 SHIFT = ROOT / "static/data/inputs/shiftability_profile.csv"
 ANNUAL = ROOT / "static/data/rolling_year_outputs"
-SOURCE = "2025_optimised_reformulated"
+SOURCE = "2025_optimised_cohort_trace"
 REPRESENTATIVE_DAY_FILE = ROOT / "reports/final_annual_results/representative_day.txt"
 OUTPUT = ROOT / "static/data/representative_day_flexibility"
 REPORT = ROOT / "reports/representative_day_flexibility"
@@ -63,6 +63,8 @@ MAGNITUDES_KW = (
     75,
 )
 MAX_DURATION_STEPS = 48
+METHOD_SCHEMA_VERSION = 2
+FIXED_RECOVERY_STEPS = 12
 DETAIL_CELLS = {
     (24, -100.0),
     (60, -100.0),
@@ -88,6 +90,73 @@ def _cell_id(start_step: int, magnitude_kw: float) -> str:
     return f"start_{start_step:02d}_magnitude_{sign}_{abs(magnitude_kw):.0f}"
 
 
+def _state_at_boundary(frame: pd.DataFrame, boundary_step: int) -> OperationalState:
+    if boundary_step < 0 or boundary_step > len(frame):
+        raise IndexError(f"Boundary {boundary_step} is outside the baseline horizon")
+    if boundary_step == len(frame):
+        row = frame.iloc[-1]
+        prefix = "state_end"
+    else:
+        row = frame.iloc[boundary_step]
+        prefix = "state_start"
+    return OperationalState(
+        ups_energy_kwh=float(row[f"{prefix}_ups_energy_kwh"]),
+        tes_energy_kwh=float(row[f"{prefix}_tes_energy_kwh"]),
+        it_temperature_c=float(row[f"{prefix}_it_temperature_c"]),
+        rack_temperature_c=float(row[f"{prefix}_rack_temperature_c"]),
+        cold_aisle_temperature_c=float(row[f"{prefix}_cold_aisle_temperature_c"]),
+        hot_aisle_temperature_c=float(row[f"{prefix}_hot_aisle_temperature_c"]),
+    )
+
+
+def _workload_at_boundary(
+    config: RollingConfig,
+    horizon: pd.DataFrame,
+    opening_workload: list[WorkloadCohort],
+    workload_trace: pd.DataFrame,
+    boundary_step: int,
+) -> list[WorkloadCohort]:
+    """Return the exact annual cohort ledger before arrivals at the boundary."""
+
+    if boundary_step < 0 or boundary_step > len(horizon):
+        raise IndexError(f"Boundary {boundary_step} is outside the baseline horizon")
+    if boundary_step == len(horizon):
+        boundary = pd.Timestamp(horizon.iloc[-1]["timestamp_utc"]) + pd.Timedelta(
+            seconds=config.dt_seconds
+        )
+    else:
+        boundary = pd.Timestamp(horizon.iloc[boundary_step]["timestamp_utc"])
+
+    candidates = opening_workload + new_workload_cohorts(horizon, config)
+    eligible = [cohort for cohort in candidates if cohort.arrival < boundary]
+    if workload_trace.empty:
+        executed: dict[str, float] = {}
+    else:
+        before = workload_trace[workload_trace["timestamp_utc"] < boundary]
+        executed = (
+            before.groupby("cohort_id")["executed_cpu_hours"].sum().to_dict()
+        )
+
+    result: list[WorkloadCohort] = []
+    for cohort in eligible:
+        remaining = cohort.remaining_cpu_hours - float(executed.get(cohort.cohort_id, 0.0))
+        if remaining < -config.workload_tolerance_cpu_h:
+            raise RuntimeError(
+                f"Annual trace over-executes {cohort.cohort_id} by {-remaining} CPU-h"
+            )
+        if remaining > config.workload_tolerance_cpu_h:
+            result.append(
+                WorkloadCohort(
+                    cohort_id=cohort.cohort_id,
+                    arrival_utc=cohort.arrival_utc,
+                    latest_start_utc=cohort.latest_start_utc,
+                    remaining_cpu_hours=max(0.0, remaining),
+                    tranche=cohort.tranche,
+                )
+            )
+    return result
+
+
 def _validate_flexibility_result(
     result: HorizonResult,
     baseline: HorizonResult,
@@ -98,14 +167,15 @@ def _validate_flexibility_result(
     recovery_temperature_tolerance_c: float = 0.05,
 ) -> dict[str, float | bool | str | None]:
     stop_step = start_step + duration_steps
-    current = result.committed.iloc[start_step:stop_step]
+    recovery_boundary = stop_step + FIXED_RECOVERY_STEPS
+    current = result.committed.iloc[:duration_steps]
     reference = baseline.committed.iloc[start_step:stop_step]
     realised = (
         current["grid_import_kw"].to_numpy()
         - reference["grid_import_kw"].to_numpy()
     )
     target_error = float(np.max(np.abs(realised - magnitude_kw)))
-    recovery = baseline.terminal_state
+    recovery = _state_at_boundary(baseline.planned, recovery_boundary)
     response = result.terminal_state
     energy_shortfall = max(
         0.0,
@@ -121,11 +191,15 @@ def _validate_flexibility_result(
     components = _component_deltas(current, reference)
     reconstructed = np.sum(np.vstack(tuple(components.values())), axis=0)
     closure_error = float(np.max(np.abs(reconstructed - realised)))
+    workload_excess = float(
+        result.audits.get("recovery_workload_max_excess_cpu_h", float("inf"))
+    )
     valid = (
         target_error <= tolerance_kw + 1e-5
         and energy_shortfall <= 1e-5
         and temperature_error <= recovery_temperature_tolerance_c + 1e-5
         and closure_error <= 1e-5
+        and workload_excess <= 1e-7 + 1e-9
         and abs(result.audits["objective_reconciliation_gbp"]) <= 1e-6
         and result.audits["core_workload_unserved_after_lookahead_cpu_h"] <= 1e-7
     )
@@ -133,14 +207,17 @@ def _validate_flexibility_result(
         raise RuntimeError(
             "Scenario 3 validation failed: "
             f"target={target_error}, energy={energy_shortfall}, "
-            f"temperature={temperature_error}, closure={closure_error}"
+            f"temperature={temperature_error}, workload={workload_excess}, "
+            f"closure={closure_error}"
         )
     return {
         "validated": True,
         "maximum_target_error_kw": target_error,
         "maximum_recovery_energy_shortfall_kwh": energy_shortfall,
         "maximum_recovery_temperature_error_c": temperature_error,
+        "maximum_recovery_workload_excess_cpu_h": workload_excess,
         "maximum_component_closure_error_kw": closure_error,
+        "recovery_steps": FIXED_RECOVERY_STEPS,
         "solver_quality": str(result.solver["solution_quality"]),
         "solver_relative_gap": result.solver["relative_gap"],
         "solver_meets_accepted_gap": bool(result.solver["meets_accepted_gap"]),
@@ -161,6 +238,11 @@ def _prepare(
     metadata = _json(source / "run_metadata.json")
     checkpoint = _json(source / "checkpoints" / f"{date}.json")
     config = RollingConfig(**metadata["config"])
+    if config.lookahead_steps != FIXED_RECOVERY_STEPS:
+        raise ValueError(
+            "Representative-day recovery requires exactly "
+            f"{FIXED_RECOVERY_STEPS} look-ahead intervals"
+        )
     config = replace(
         config,
         scenario_id=f"representative_flex_{date}",
@@ -192,6 +274,28 @@ def _prepare(
     )
     if len(baseline_planned) != core_steps + config.lookahead_steps:
         raise RuntimeError("Stored annual trajectory does not cover the full horizon")
+    workload_trace = pd.read_csv(source / "annual_workload_trace.csv")
+    workload_trace["timestamp_utc"] = pd.to_datetime(
+        workload_trace["timestamp_utc"], utc=True
+    )
+    workload_trace = workload_trace[
+        workload_trace["timestamp_utc"].isin(required_timestamps)
+    ].copy()
+    traced_rate = workload_trace.groupby("timestamp_utc")[
+        "executed_cpu_rate"
+    ].sum()
+    maximum_trace_residual = max(
+        abs(
+            float(traced_rate.get(timestamp, 0.0))
+            - float(baseline_planned.iloc[position]["flexible_cpu_processed"])
+        )
+        for position, timestamp in enumerate(required_timestamps)
+    )
+    if maximum_trace_residual > config.workload_tolerance_cpu_h:
+        raise RuntimeError(
+            "Representative-day workload trace does not match the annual CPU path: "
+            f"{maximum_trace_residual}"
+        )
 
     def state_from_row(row: pd.Series, prefix: str) -> OperationalState:
         return OperationalState(
@@ -232,6 +336,14 @@ def _prepare(
         ],
         solver=checkpoint["solver"],
         audits=checkpoint["audits"],
+        workload_trace=workload_trace,
+        terminal_workload=_workload_at_boundary(
+            config,
+            horizon,
+            opening_workload,
+            workload_trace,
+            len(horizon),
+        ),
     )
     return (
         config,
@@ -254,62 +366,51 @@ def _solve_attempt(
     duration_steps: int,
     magnitude_kw: float,
 ) -> tuple[HorizonResult | None, str]:
+    del opening_state
+    stop_step = start_step + duration_steps
+    recovery_boundary = stop_step + FIXED_RECOVERY_STEPS
+    if stop_step > core_steps or recovery_boundary > len(horizon):
+        raise ValueError("Event plus fixed recovery lies outside the baseline horizon")
+    event_horizon = horizon.iloc[start_step:recovery_boundary].copy()
+    event_reference = baseline.planned.iloc[start_step:recovery_boundary].copy()
+    event_initial_state = _state_at_boundary(baseline.planned, start_step)
+    recovery_state = _state_at_boundary(baseline.planned, recovery_boundary)
+    event_initial_workload = _workload_at_boundary(
+        config,
+        horizon,
+        opening_workload,
+        baseline.workload_trace,
+        start_step,
+    )
+    recovery_workload = _workload_at_boundary(
+        config,
+        horizon,
+        opening_workload,
+        baseline.workload_trace,
+        recovery_boundary,
+    )
     request = FlexibilityRequest(
         baseline_grid_import_kw=tuple(
-            baseline.committed["grid_import_kw"].astype(float)
+            event_reference["grid_import_kw"].astype(float)
         ),
-        start_step=start_step,
+        start_step=0,
         duration_steps=duration_steps,
         delta_kw=magnitude_kw,
-        baseline_total_cpu=tuple(
-            baseline.committed["total_cpu"].astype(float)
-        ),
-        event_initial_state=OperationalState(
-            ups_energy_kwh=float(
-                baseline.committed.iloc[start_step][
-                    "state_start_ups_energy_kwh"
-                ]
-            ),
-            tes_energy_kwh=float(
-                baseline.committed.iloc[start_step][
-                    "state_start_tes_energy_kwh"
-                ]
-            ),
-            it_temperature_c=float(
-                baseline.committed.iloc[start_step][
-                    "state_start_it_temperature_c"
-                ]
-            ),
-            rack_temperature_c=float(
-                baseline.committed.iloc[start_step][
-                    "state_start_rack_temperature_c"
-                ]
-            ),
-            cold_aisle_temperature_c=float(
-                baseline.committed.iloc[start_step][
-                    "state_start_cold_aisle_temperature_c"
-                ]
-            ),
-            hot_aisle_temperature_c=float(
-                baseline.committed.iloc[start_step][
-                    "state_start_hot_aisle_temperature_c"
-                ]
-            ),
-        ),
-        recovery_state=baseline.terminal_state,
+        recovery_state=recovery_state,
+        recovery_workload=tuple(recovery_workload),
     )
     try:
-        return (
-            solve_horizon(
-                config,
-                horizon,
-                core_steps,
-                opening_state,
-                opening_workload,
-                flexibility_request=request,
-            ),
-            "feasible_incumbent",
+        result = solve_horizon(
+            config,
+            event_horizon,
+            duration_steps,
+            event_initial_state,
+            event_initial_workload,
+            flexibility_request=request,
         )
+        result.planned.attrs["baseline_start_step"] = start_step
+        result.planned.attrs["recovery_boundary_step"] = recovery_boundary
+        return result, "feasible_incumbent"
     except RuntimeError as error:
         if "did not return a feasible accepted solution" in str(error):
             termination = str(error).rsplit(":", maxsplit=1)[-1].strip()
@@ -418,24 +519,21 @@ def _maximum_duration(
         )
         return result, quality
 
-    # Build upward in one-hour increments before refining to 15 minutes.  This
-    # establishes a useful certified duration without beginning with several
-    # long requests that are difficult to prove near the recovery boundary.
-    first_failed_duration: int | None = None
-    while best_steps < maximum_candidate:
-        duration = min(best_steps + 4, maximum_candidate)
-        result, _ = attempt(duration, "duration_screening")
-        if result is None:
-            first_failed_duration = duration
-            break
-        best_steps = duration
-        best_result = result
-    if first_failed_duration is not None and first_failed_duration > best_steps + 1:
-        low = best_steps + 1
-        high = first_failed_duration - 1
+    # Test the complete admissible duration first, then use a logarithmic search.
+    # This avoids solving every adjacent hour for long, feasible events.  A
+    # timeout without an incumbent still narrows only the certified lower bound;
+    # it is never labelled as a proof of infeasibility.
+    upper_result, _ = attempt(maximum_candidate, "maximum_duration_screening")
+    if upper_result is not None:
+        best_steps = maximum_candidate
+        best_result = upper_result
+        boundary_verified = True
+    else:
+        low = 1
+        high = maximum_candidate - 1
         while low <= high:
             duration = (low + high) // 2
-            result, _ = attempt(duration, "duration_refinement")
+            result, _ = attempt(duration, "duration_binary_search")
             if result is None:
                 high = duration - 1
             else:
@@ -443,8 +541,6 @@ def _maximum_duration(
                 best_result = result
                 low = duration + 1
 
-    boundary_verified = best_steps == maximum_candidate
-    while best_steps < maximum_candidate:
         boundary = best_steps + 1
         prior_boundary_attempt = next(
             (
@@ -459,46 +555,38 @@ def _maximum_duration(
             and prior_boundary_attempt["solver_quality"] == "proven_infeasible"
         ):
             boundary_verified = True
-            break
-        extended_boundary = (start_step, magnitude_kw) in EXTENDED_BOUNDARY_CELLS
-        if prior_boundary_attempt is not None and not extended_boundary:
-            boundary_verified = False
-            break
-        boundary_config = replace(
-            config,
-            solver_time_limit_s=(
-                max(300, config.solver_time_limit_s)
-                if extended_boundary and prior_boundary_attempt is not None
-                else config.solver_time_limit_s
-            ),
-        )
-        boundary_result, boundary_quality = attempt(
-            boundary,
-            "boundary_feasibility",
-            boundary_config,
-        )
-        if (
-            boundary_result is None
-            and boundary_quality == "maxTimeLimit_no_incumbent"
-            and extended_boundary
-            and boundary_config.solver_time_limit_s < 300
-        ):
-            boundary_config = replace(config, solver_time_limit_s=300)
-            boundary_result, boundary_quality = attempt(
-                boundary,
-                "extended_boundary_feasibility",
-                boundary_config,
+        else:
+            boundary_result: HorizonResult | None = None
+            boundary_quality = (
+                "unresolved"
+                if prior_boundary_attempt is None
+                else str(prior_boundary_attempt["solver_quality"])
             )
-        if boundary_result is not None:
-            best_steps = boundary
-            best_result = boundary_result
-            boundary_verified = best_steps == maximum_candidate
-            continue
-        boundary_verified = boundary_quality == "proven_infeasible"
-        break
+            if prior_boundary_attempt is None:
+                boundary_result, boundary_quality = attempt(
+                    boundary,
+                    "boundary_feasibility",
+                )
+            extended_boundary = (start_step, magnitude_kw) in EXTENDED_BOUNDARY_CELLS
+            if (
+                boundary_result is None
+                and boundary_quality != "proven_infeasible"
+                and extended_boundary
+            ):
+                boundary_result, boundary_quality = attempt(
+                    boundary,
+                    "extended_boundary_feasibility",
+                    replace(config, solver_time_limit_s=300),
+                )
+            if boundary_result is not None:
+                best_steps = boundary
+                best_result = boundary_result
+                boundary_verified = best_steps == maximum_candidate
+            else:
+                boundary_verified = boundary_quality == "proven_infeasible"
     if best_steps and (
         best_result is None
-        or len(best_result.committed) < start_step + best_steps
+        or len(best_result.committed) < best_steps
     ):
         raise AssertionError("Missing best flexibility dispatch")
     validation: dict[str, float | bool | str | None] = {
@@ -595,7 +683,9 @@ def main() -> None:
             saved_limit = int(payload.get("time_limit_s", -1))
             saved_exact = bool(saved_result.get("boundary_verified", False))
             compatible = (
-                payload.get("date") == date
+                int(payload.get("method_schema_version", -1))
+                == METHOD_SCHEMA_VERSION
+                and payload.get("date") == date
                 and int(payload.get("start_step", -1)) == start
                 and float(payload.get("magnitude_kw", float("nan"))) == magnitude
                 and (
@@ -615,6 +705,7 @@ def main() -> None:
                     planned.attrs["flexibility_duration_steps"] = int(
                         row["duration_steps"]
                     )
+                    planned.attrs["baseline_start_step"] = start
                     detailed[(start, magnitude)] = planned
                 print(
                     f"[{position}/{len(cells)}] resumed start={start / 4:.2f}h, "
@@ -656,6 +747,7 @@ def main() -> None:
         }
         rows.append(row)
         cell_payload = {
+            "method_schema_version": METHOD_SCHEMA_VERSION,
             "date": date,
             "start_step": start,
             "magnitude_kw": magnitude,
@@ -706,6 +798,9 @@ def main() -> None:
         "maximum_recovery_temperature_error_c": float(
             results["maximum_recovery_temperature_error_c"].fillna(0).max()
         ),
+        "maximum_recovery_workload_excess_cpu_h": float(
+            results["maximum_recovery_workload_excess_cpu_h"].fillna(0).max()
+        ),
         "maximum_component_closure_error_kw": float(
             results["maximum_component_closure_error_kw"].fillna(0).max()
         ),
@@ -713,8 +808,10 @@ def main() -> None:
             (results["maximum_solver_relative_gap"].fillna(0) > 0.01).sum()
         ),
         "recovery_rule": (
-            "UPS/TES no worse than baseline horizon terminal energy; "
-            "thermal terminal states within 0.05 C of baseline"
+            "exact annual event-boundary cohort ledger; fixed three-hour "
+            "post-event recovery; UPS/TES no worse than the annual baseline; "
+            "thermal states within 0.05 C; per-cohort remaining work no greater "
+            "than the annual baseline at the same boundary"
         ),
     }
     (report_root / "summary.json").write_text(
