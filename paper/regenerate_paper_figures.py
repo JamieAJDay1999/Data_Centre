@@ -13,8 +13,13 @@ improved:
       annotations, and clock-time axis labels (R2-C019/C020/C021).
   * Figures 7 & 8 — (a)-(f) panel labels and larger fonts (R2-2, R2-C018).
 
-Outputs overwrite paper/images/Figure_5.png, Figure_6.png, Figure_7.png,
-Figure_8.png.
+Outputs go to paper/images/legacy_Figure_5.png, legacy_Figure_6.png,
+legacy_Figure_7.png, legacy_Figure_8.png.
+
+These belong to the earlier single-day revision (main_small_revisions.tex),
+not the current linked-annual paper. The legacy_ prefix keeps them from
+overwriting the annual Figure_5-8 written by generate_annual_results.py.
+To rebuild the earlier paper, repoint its \includegraphics at these files.
 
 Usage (from the repo root):
     python paper/regenerate_paper_figures.py
@@ -104,9 +109,9 @@ def figure5():
     ax.grid(True, linestyle="--", linewidth=0.5)
 
     fig.tight_layout()
-    fig.savefig(OUT / "Figure_5.png", dpi=200)
+    fig.savefig(OUT / "legacy_Figure_5.png", dpi=200)
     plt.close(fig)
-    print("  -> Figure_5.png")
+    print("  -> legacy_Figure_5.png")
 
 
 # --------------------------------------------------------------------------- #
@@ -141,9 +146,9 @@ def figure6():
     ax.figure.axes[-1].yaxis.label.set_size(16)  # colourbar label
 
     fig.tight_layout()
-    fig.savefig(OUT / "Figure_6.png", dpi=180, bbox_inches="tight")
+    fig.savefig(OUT / "legacy_Figure_6.png", dpi=180, bbox_inches="tight")
     plt.close(fig)
-    print("  -> Figure_6.png")
+    print("  -> legacy_Figure_6.png")
 
 
 # --------------------------------------------------------------------------- #
@@ -258,6 +263,6 @@ if __name__ == "__main__":
     print("Regenerating paper figures (formatting only)...")
     figure5()
     figure6()
-    flex_grid([15, 65], [-100, -150, -200], "Figure_7.png")
-    flex_grid([15, 65], [75, 50, 25], "Figure_8.png")
+    flex_grid([15, 65], [-100, -150, -200], "legacy_Figure_7.png")
+    flex_grid([15, 65], [75, 50, 25], "legacy_Figure_8.png")
     print("Done.")
