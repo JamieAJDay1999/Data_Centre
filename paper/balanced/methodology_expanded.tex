@@ -496,9 +496,12 @@ cooling, and the optimiser must retain enough capacity to keep the data hall
 within its temperature limits.
 
 The thermal model is adapted from the four node formulation of Cupelli
-\emph{et al.}~\cite{cupelli2018data}. It describes the IT equipment, rack air,
+\emph{et al.}~\cite{cupelli2018data}, with its parameters scaled to 1 MW of IT
+capacity. It describes the IT equipment, rack air,
 cold aisle and hot aisle, while the chiller and TES determine the inlet air
-temperature. The equations use consistent kW and kJ units. The inlet
+temperature. The equations use consistent kW and kJ units. The heat capacities,
+conductances, air mass flow, specific heat and effective-airflow factor used
+below are listed in Table~\ref{tab:central-parameters}. The inlet
 temperature is defined by Equation~\eqref{eq:inlet-temperature}.
 The hot aisle air is cooled before it re-enters the cold aisle. The temperature
 drop is determined by the cooling supplied and by the heat capacity rate of the

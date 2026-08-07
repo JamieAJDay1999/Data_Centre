@@ -59,20 +59,38 @@ Parameter & Value & Unit & Parameter & Value & Unit \\
 Time interval & 0.25 & h & Look ahead & 3 & h \\
 IT idle power & 166.7 & kW & IT rated power & 1000 & kW \\
 UPS capacity & 600 & kWh & UPS minimum charge & 50 & \% \\
-UPS charge limit & 270 & kW & UPS efficiencies & 0.82/0.92 & -- \\
+UPS charge limit & 270 & kW & UPS discharge limit$^{\mathrm{a}}$ & 1000 & kW \\
+UPS efficiencies & 0.82/0.92 & -- & Chiller COP & 5 & -- \\
 TES capacity & 1000 & kWh-th & TES power limits & 300/300 & kW-th \\
-TES efficiencies & 0.9/0.9 & -- & Chiller COP & 5 & -- \\
-Chiller input limit & 400 & kW & Auxiliary demand & 53.095 & kW \\
-Cold aisle range & 18--23 & $^{\circ}$C & Outdoor temperature & 22 & $^{\circ}$C \\
+TES efficiencies & 0.9/0.9 & -- & Chiller input limit & 400 & kW \\
+Auxiliary demand & 53.095 & kW & Outdoor temperature & 22 & $^{\circ}$C \\
+Cold aisle range & 18--23 & $^{\circ}$C & Inlet air range & 18--30 & $^{\circ}$C \\
 Flexible delay classes & 0.5/1/2/3 & h & Requested MILP gap & 0.1 & \% \\
+\midrule
+Air mass flow $\dot m$ & 100 & kg/s & Air specific heat $c_p$ & 1.005 & kJ/(kg\,K) \\
+Effective-airflow factor $\kappa$ & 0.766 & -- & IT--rack conductance $G_{\mathrm{conv}}$ & 109 & kW/K \\
+IT heat capacity $C_{\mathrm{IT}}$ & $1.788\times10^{4}$ & kJ/K & Rack heat capacity $C_{\mathrm{R}}$ & $1.802\times10^{4}$ & kJ/K \\
+Cold aisle capacity $C_{\mathrm{CA}}$ & $2.33\times10^{3}$ & kJ/K & Hot aisle capacity $C_{\mathrm{HA}}$ & $1.17\times10^{3}$ & kJ/K \\
+Cold aisle loss $G_{\mathrm{cold}}$ & 4.484 & kW/K & IT power exponent & 1.32 & -- \\
 \bottomrule
 \end{tabular}
+
+\vspace{3pt}
+\parbox{\textwidth}{\footnotesize $^{\mathrm{a}}$The battery nameplate discharge
+rating is larger; 1000 kW is the effective limit, because useful discharge cannot
+exceed the IT demand it supplies. The thermal parameters in the lower block are
+the four-node values of Cupelli \emph{et al.}~\cite{cupelli2018data} scaled to
+1 MW of IT capacity.}
 \end{table*}
 
 The 53.095 kW auxiliary demand is a fixed modelling assumption rather than a
-measured profile or an optimisation decision. It is set to 7\% of the average
-benchmark IT-plus-cooling demand (758.5 kW), giving
-$0.07\times758.5=53.095$ kW. This modest constant overhead represents lighting,
+measured profile or an optimisation decision. It was originally calibrated as
+7\% of the average IT-plus-cooling demand of a single 24-hour benchmark day
+(758.5 kW), giving $0.07\times758.5=53.095$ kW, and the same constant is
+retained here so that the annual results remain directly comparable with that
+calibration. Measured against the annual benchmark, whose mean IT-plus-cooling
+demand is 713.8 kW, the constant corresponds to 7.4\% rather than exactly 7\%.
+This modest constant overhead represents lighting,
 networking, controls and other facility loads omitted from the explicit IT and
 chiller models. Holding it constant isolates the flexibility of the modelled
 resources; a site application should replace it with measured auxiliary demand.
@@ -286,8 +304,11 @@ or removed without changing the other rows.
 \end{figure*}
 
 Figure~\ref{fig:representative-day} illustrates how flexible computation is
-moved away from expensive intervals and towards periods with lower or negative
-prices. The DC does not simply defer work to the end of the day. It
+moved away from expensive intervals and towards periods with lower prices. This
+day contains no negatively priced intervals; across the full year, 672 of the
+35,040 settlement intervals are negative, so the representative day exercises
+price arbitrage without the additional incentive that negative prices provide.
+The DC does not simply defer work to the end of the day. It
 uses the full set of permitted deadlines, so some jobs are moved by only one or
 two intervals while others use most of their available delay. The total amount
 of computational work is unchanged.
@@ -378,8 +399,8 @@ parameter changes; that would require a factorial sensitivity study.
 
 Figure~\ref{fig:flexibility-heatmap} reveals a strong dependence on time and
 direction. A 25 kW increase in import reaches the 12 hour assessment cap at
-several start times, including 03:00, 08:00 and 12:00. At 06:00, the 25 and
-50 kW results are certified lower bounds of 10.00 and 8.75 hours, while 75 kW
+four start times: 03:00, and each hour from 10:00 to 12:00. At 06:00, the 25 and
+50 kW results are certified lower bounds of 11.25 and 8.75 hours, while 75 kW
 has an exact adjacent boundary at 7.75 hours. Reduced import reaches 6.00 hours
 at 12:00 for requests of 100 and 150 kW.
 
@@ -434,20 +455,26 @@ advancing feasible work and increasing its associated cooling demand, with TES
 charging used when thermal headroom is available.
 
 The reduced import panels illustrate how the available combination changes with
-start time. For the 06:00 requests of 100 and 200 kW, UPS discharge supplies
-nearly all of the initial response. The grey recovery area begins after about
-1.25 hours because the battery alone cannot sustain the exact target while also
-meeting the later state requirements. At 15:00, the response is distributed more
-widely. IT demand and direct cooling fall, UPS operation changes, and TES charging
-is adjusted. Both the 100 and 200 kW examples have a 3.00 hour certified duration,
-but use different internal dispatch combinations to meet their exact targets.
+start time. For the 06:00 requests of 100 and 200 kW, UPS discharge supplies the
+entire response; IT, CRAC and TES are unchanged from the annual baseline. The
+grey recovery area begins after 1.25 hours because the battery alone cannot
+sustain the exact target while also meeting the later state requirements. At
+15:00 the same 3.00 hour duration is certified for both magnitudes, but it is
+delivered by an almost disjoint set of resources: deferred IT execution and
+reduced direct CRAC cooling carry the response. The TES is already full and idle
+in the annual baseline at this time, so there is no TES charging to curtail and
+the store contributes nothing to either event. The UPS is also full, and its only
+action is a single 37 kW discharge interval in the 100 kW case, while the 200 kW
+case is met by IT and cooling alone. The contrast between the two start times is
+therefore not that more assets participate later in the day, but that a different
+pair of them does.
 
 The increased import panels show a different form of coordination. At midnight,
 the 25 and 75 kW requests are delivered through many relatively large internal
 changes that partly cancel at the meter. At 06:00, eligible work can be executed
 earlier than in the baseline and its associated cooling demand can rise, while
 UPS and TES actions manage the storage and temperature consequences. This permits
-the 25 kW event to continue for at least 10.00 hours and the 75 kW event for
+the 25 kW event to continue for at least 11.25 hours and the 75 kW event for
 7.75 hours.
 The long duration is not supplied by one asset holding a constant power
 level. It is assembled from a sequence of actions whose composition changes as
@@ -457,7 +484,7 @@ This interaction is precisely what separate asset models would miss. Deferring
 IT work changes cooling demand; TES affects when the chiller must run; and the
 UPS can support the grid while also helping the facility execute deferred work.
 The component bars close to the requested deviation to within
-$1.14\times10^{-10}$ kW. The largest event tracking error is 0.1 kW and the
+$4.18\times10^{-12}$ kW. The largest event tracking error is 0.1 kW and the
 largest terminal temperature error is 0.05$^{\circ}$C.
 
 Some component bars are much larger than the requested change in grid import.
@@ -478,7 +505,7 @@ Exact-state 900 s reruns of the intermediate cases reduce the 25 May gap below
 retain gaps of 1.015\% and 2.032\% because their negative objectives are close to
 zero. Across these checks the committed daily cost changes by at most GBP~0.281,
 the closing workload is unchanged and the maximum physical-state difference is
-$2.2\times10^{-14}$. The most conservative 0.5 flexible-workload endpoint has
+$2.1\times10^{-14}$. The most conservative 0.5 flexible-workload endpoint has
 the same behaviour: its 900 s rerun changes committed cost by about GBP~0.002
 despite a 5.652\% relative gap. These qualifications do not affect any rounded
 annual percentage or the resource ranking.
