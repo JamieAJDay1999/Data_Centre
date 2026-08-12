@@ -77,7 +77,7 @@
 % -------- Title/Author --------
 \title{Characterisation and Quantification of Data Centre Flexibility for Power System Support}
 
-\providecommand{\PaperAuthors}{James Day\textsuperscript{1}, Mehmet Turker Takci\textsuperscript{1}, and Meysam Qadrdan\textsuperscript{1}}
+\providecommand{\PaperAuthors}{Mehmet Turker Takci\textsuperscript{1}, James Day\textsuperscript{1}, and Meysam Qadrdan\textsuperscript{1}}
 \author{\PaperAuthors}
 
 % Affiliations + Highlights directly under the title
@@ -120,26 +120,27 @@
 
 % -------- Abstract & Keywords --------
 \begin{abstract}
-The rapid growth of the data centre (DC) sector creates both a power system challenge and an
-opportunity for demand side flexibility. This paper develops a linked
-rolling-horizon mixed integer optimisation of IT workload scheduling,
+The rapid growth of the data centre (DC) sector creates both a power-system challenge and an
+opportunity for demand-side flexibility. This paper develops a linked
+rolling-horizon mixed-integer optimisation of IT workload scheduling,
 uninterruptible power supply (UPS) dispatch, cooling dynamics and thermal
 energy storage (TES) for a 1 MW DC. Physical states and unfinished
 workload cohorts are carried exactly between local-day horizons across a full
-year. Against a workload at arrival,
-storage disabled benchmark with cost optimised cooling, coordinated operation
+year, including daylight-saving transitions. Against a workload-at-arrival,
+storage-disabled benchmark with cost-optimised cooling, coordinated operation
 reduces 2025 electricity cost from GBP~550,503.59 to GBP~522,702.95, a saving of
 5.050\%. Full-year endpoints rank flexible workload as the most influential
 tested resource, followed by UPS and TES energy capacity. An objectively
-selected representative day is then subjected to 288 grid deviation requests.
-Each request begins from the exact stored physical state, and must recover storage, thermal states and per-cohort unfinished work
+selected representative day is then subjected to 288 grid-deviation requests.
+Each request begins from the exact stored physical state and outstanding cohort
+ledger, and must recover storage, thermal states and per-cohort unfinished work
 against the annual trajectory exactly three hours after the event.
-The resulting duration envelope is strongly time- and direction dependent:
+The resulting duration envelope is strongly time- and direction-dependent:
 increased import reaches the 12 hour assessment cap at +25 kW, whereas reduced
 import reaches 6 hours at -100 and -150 kW.
 An additive component decomposition identifies the contributions of IT load,
 CRAC cooling, TES charging and UPS dispatch. All continuity, workload,
-exclusivity, settlement and flexibility response audits pass. Of 288 cells,
+exclusivity, settlement and flexibility-response audits pass. Of 288 cells,
 275 have exact adjacent duration boundaries and 13 retain explicitly marked certified
 lower bounds, establishing a reproducible link between annual economic
 operation and recovery-certified grid flexibility.

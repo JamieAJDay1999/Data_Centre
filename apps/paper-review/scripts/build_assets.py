@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import subprocess
@@ -49,7 +50,29 @@ def render_pages(source: Path, output_dir: Path, executable: str, dpi: int) -> l
     return sorted(output_dir.glob("page-*.png"))
 
 
-def build_page_data(source: Path, rendered_pages: list[Path]) -> dict:
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def load_existing_paper_data(path: Path) -> dict | None:
+    if not path.is_file():
+        return None
+    prefix = "window.PAPER_DATA = "
+    source = path.read_text(encoding="utf-8")
+    if not source.startswith(prefix):
+        return None
+    payload = source[len(prefix):].strip()
+    if payload.endswith(";"):
+        payload = payload[:-1]
+    parsed = json.loads(payload)
+    return parsed if isinstance(parsed, dict) and isinstance(parsed.get("pages"), list) else None
+
+
+def build_page_data(source: Path, rendered_pages: list[Path], fingerprint: str) -> dict:
     pages = []
     with pdfplumber.open(source) as document:
         if len(document.pages) != len(rendered_pages):
@@ -88,6 +111,7 @@ def build_page_data(source: Path, rendered_pages: list[Path]) -> dict:
         "title": "Characterisation and Quantification of Data Centre Flexibility for Power System Support",
         "shortTitle": "Data Centre Flexibility",
         "sourceFile": source.name,
+        "fingerprint": fingerprint,
         "pageCount": len(pages),
         "pages": pages,
     }
@@ -106,11 +130,30 @@ def main() -> None:
     assets_dir.mkdir(parents=True, exist_ok=True)
 
     packaged_pdf = assets_dir / "data_centre_balanced_revision.pdf"
+    paper_data_path = data_dir / "paper-data.js"
+    previous_data = load_existing_paper_data(paper_data_path)
+    previous_fingerprint = sha256_file(packaged_pdf) if packaged_pdf.is_file() else None
+    new_fingerprint = sha256_file(source)
+
     shutil.copy2(source, packaged_pdf)
     rendered_pages = render_pages(source, pages_dir, find_pdftoppm(args.pdftoppm), args.dpi)
-    paper_data = build_page_data(source, rendered_pages)
+    paper_data = build_page_data(source, rendered_pages, new_fingerprint)
+
+    migration = {
+        "version": 1,
+        "fromFingerprint": previous_fingerprint,
+        "toFingerprint": new_fingerprint,
+        "pages": previous_data.get("pages", []) if previous_data else [],
+    }
+    migration_output = "window.PAPER_COMMENT_MIGRATION = " + json.dumps(
+        migration, ensure_ascii=False, separators=(",", ":")
+    ) + ";\n"
+    migration_path = data_dir / "comment-migration.js"
+    if previous_fingerprint != new_fingerprint or not migration_path.is_file():
+        migration_path.write_text(migration_output, encoding="utf-8")
+
     output = "window.PAPER_DATA = " + json.dumps(paper_data, ensure_ascii=False, separators=(",", ":")) + ";\n"
-    (data_dir / "paper-data.js").write_text(output, encoding="utf-8")
+    paper_data_path.write_text(output, encoding="utf-8")
     print(f"Packaged {source.name}: {len(rendered_pages)} pages, {sum(len(p['words']) for p in paper_data['pages'])} words")
 
 

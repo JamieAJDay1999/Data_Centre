@@ -8,11 +8,14 @@
   }
 
   const STORAGE_KEY = 'data-centre-paper-review-comments-v1';
+  const migration = window.PAPER_COMMENT_MIGRATION;
   const ZOOM_LEVELS = [0.72, 0.85, 1, 1.15, 1.35, 1.55];
   const BASE_PAGE_WIDTH = 820;
+  const loadedComments = loadComments();
 
   const state = {
-    comments: loadComments(),
+    comments: loadedComments.comments,
+    migrationSummary: loadedComments.summary,
     filter: 'open',
     commentMode: false,
     selectedId: null,
@@ -61,6 +64,10 @@
     observePages();
     updateZoom();
     syncSidebarMode();
+    if (state.migrationSummary.checked) {
+      const { kept, removed } = state.migrationSummary;
+      window.setTimeout(() => showToast(`Paper updated: ${kept} comment${kept === 1 ? '' : 's'} kept, ${removed} removed`), 0);
+    }
   }
 
   function buildPageSelector() {
@@ -202,6 +209,8 @@
       y: round(y),
       body: '',
       resolved: false,
+      anchor: createTextAnchor(paper.pages, page, x, y),
+      documentFingerprint: paper.fingerprint,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       isDraft: true,
@@ -393,17 +402,152 @@
   function loadComments() {
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      return Array.isArray(stored) ? stored.filter(isValidComment) : [];
+      if (!Array.isArray(stored)) return { comments: [], summary: emptyMigrationSummary() };
+      const prepared = prepareComments(stored);
+      if (prepared.summary.checked) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(prepared.comments)); } catch { /* Keep the migrated in-memory copy. */ }
+      }
+      return prepared;
     } catch {
-      return [];
+      return { comments: [], summary: emptyMigrationSummary() };
     }
+  }
+
+  function emptyMigrationSummary() {
+    return { checked: 0, kept: 0, removed: 0 };
+  }
+
+  function prepareComments(comments) {
+    const prepared = [];
+    const summary = emptyMigrationSummary();
+    comments.forEach((comment) => {
+      if (!isCommentShape(comment)) {
+        summary.checked += 1;
+        summary.removed += 1;
+        return;
+      }
+      if (comment.documentFingerprint === paper.fingerprint) {
+        if (isValidComment(comment)) prepared.push(comment);
+        else {
+          summary.checked += 1;
+          summary.removed += 1;
+        }
+        return;
+      }
+
+      summary.checked += 1;
+      const migrated = migrateComment(comment);
+      if (migrated) {
+        prepared.push(migrated);
+        summary.kept += 1;
+      } else {
+        summary.removed += 1;
+      }
+    });
+    return { comments: prepared, summary };
+  }
+
+  function migrateComment(comment) {
+    if (!migration
+      || migration.toFingerprint !== paper.fingerprint
+      || !Array.isArray(migration.pages)) return null;
+    const anchor = comment.anchor?.candidates?.length
+      ? comment.anchor
+      : createTextAnchor(migration.pages, Number(comment.page), Number(comment.x), Number(comment.y));
+    if (!anchor) return null;
+    const location = locateTextAnchor(anchor);
+    if (!location) return null;
+    return {
+      ...comment,
+      page: location.page,
+      x: round(location.x),
+      y: round(location.y),
+      anchor: createTextAnchor(paper.pages, location.page, location.x, location.y),
+      documentFingerprint: paper.fingerprint,
+    };
+  }
+
+  function createTextAnchor(pages, pageNumber, x, y) {
+    const page = pages.find((candidate) => Number(candidate.number) === Number(pageNumber));
+    if (!page?.words?.length) return null;
+    const words = page.words
+      .map((word, index) => ({ ...word, index, normalised: normaliseToken(word.text) }))
+      .filter((word) => word.normalised);
+    if (!words.length) return null;
+
+    let nearest = null;
+    words.forEach((word) => {
+      const right = Number(word.x) + Number(word.w || 0);
+      const bottom = Number(word.y) + Number(word.h || 0);
+      const dx = Number(x) < Number(word.x) ? Number(word.x) - Number(x) : Number(x) > right ? Number(x) - right : 0;
+      const dy = Number(y) < Number(word.y) ? Number(word.y) - Number(y) : Number(y) > bottom ? Number(y) - bottom : 0;
+      const score = (dx * dx) + (dy * dy);
+      if (!nearest || score < nearest.score) nearest = { word, score };
+    });
+    if (!nearest || nearest.score > 144) return null;
+
+    const focusIndex = words.findIndex((word) => word.index === nearest.word.index);
+    const candidates = [];
+    [4, 3, 2, 1].forEach((radius) => {
+      const start = Math.max(0, focusIndex - radius);
+      const end = Math.min(words.length, focusIndex + radius + 1);
+      const selected = words.slice(start, end);
+      const text = selected.map((word) => word.normalised).join('');
+      if (text.length < 10 || candidates.some((candidate) => candidate.text === text)) return;
+      const focusOffset = selected
+        .slice(0, focusIndex - start)
+        .reduce((total, word) => total + word.normalised.length, 0)
+        + Math.floor(nearest.word.normalised.length / 2);
+      candidates.push({ text, focusOffset });
+    });
+    return candidates.length ? { candidates, page: Number(pageNumber), x: Number(x), y: Number(y) } : null;
+  }
+
+  function locateTextAnchor(anchor) {
+    for (const candidate of anchor.candidates) {
+      const matches = [];
+      paper.pages.forEach((page) => {
+        let joined = '';
+        const ranges = [];
+        page.words.forEach((word) => {
+          const normalised = normaliseToken(word.text);
+          if (!normalised) return;
+          const start = joined.length;
+          joined += normalised;
+          ranges.push({ start, end: joined.length, word });
+        });
+        let matchStart = joined.indexOf(candidate.text);
+        while (matchStart !== -1) {
+          const focusCharacter = matchStart + candidate.focusOffset;
+          const target = ranges.find((range) => focusCharacter >= range.start && focusCharacter < range.end);
+          if (target) {
+            const targetX = Number(target.word.x) + (Number(target.word.w || 0) / 2);
+            const targetY = Number(target.word.y) + (Number(target.word.h || 0) / 2);
+            const score = (Math.abs(Number(page.number) - Number(anchor.page)) * 100)
+              + Math.abs(targetY - Number(anchor.y || 0));
+            matches.push({ page: Number(page.number), x: targetX, y: targetY, score });
+          }
+          matchStart = joined.indexOf(candidate.text, matchStart + 1);
+        }
+      });
+      if (matches.length) return matches.sort((a, b) => a.score - b.score)[0];
+    }
+    return null;
+  }
+
+  function normaliseToken(value) {
+    return String(value || '')
+      .normalize('NFKC')
+      .toLocaleLowerCase('en')
+      .replace(/[^\p{L}\p{N}]+/gu, '');
   }
 
   function exportComments() {
     const payload = {
       format: 'paper-review-comments',
-      version: 1,
+      version: 2,
       document: paper.sourceFile,
+      documentFingerprint: paper.fingerprint,
       exportedAt: new Date().toISOString(),
       comments: state.comments,
     };
@@ -426,25 +570,31 @@
     try {
       const parsed = JSON.parse(await file.text());
       const imported = Array.isArray(parsed) ? parsed : parsed.comments;
-      if (!Array.isArray(imported) || !imported.every(isValidComment)) throw new Error('Invalid comment file');
+      if (!Array.isArray(imported) || !imported.every(isCommentShape)) throw new Error('Invalid comment file');
+      const prepared = prepareComments(imported);
       const existing = new Map(state.comments.map((comment) => [comment.id, comment]));
-      imported.forEach((comment) => existing.set(comment.id, comment));
+      prepared.comments.forEach((comment) => existing.set(comment.id, comment));
       state.comments = [...existing.values()];
       persistComments();
       showList();
       renderAllComments();
-      showToast(`Imported ${imported.length} comment${imported.length === 1 ? '' : 's'}`);
+      const removed = prepared.summary.removed ? `; ${prepared.summary.removed} obsolete removed` : '';
+      showToast(`Imported ${prepared.comments.length} comment${prepared.comments.length === 1 ? '' : 's'}${removed}`);
     } catch {
       showToast('That file is not a valid paper review export');
     }
   }
 
   function isValidComment(comment) {
+    return isCommentShape(comment)
+      && Number(comment.page) >= 1
+      && Number(comment.page) <= paper.pageCount;
+  }
+
+  function isCommentShape(comment) {
     return comment
       && typeof comment.id === 'string'
       && Number.isInteger(Number(comment.page))
-      && Number(comment.page) >= 1
-      && Number(comment.page) <= paper.pageCount
       && Number.isFinite(Number(comment.x))
       && Number.isFinite(Number(comment.y))
       && typeof comment.body === 'string';
