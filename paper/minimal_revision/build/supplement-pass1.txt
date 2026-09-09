@@ -1,0 +1,125 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(supplement.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\size11.clo))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty))
+ (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\longtable.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/natbib\natbib.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
+)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefine
+keys.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.s
+ty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds
+.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.s
+ty)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettit
+lestring.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
+)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.s
+ty) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
+) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
+) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc
+.sty)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
+echeck.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquec
+ounter.sty)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+tex.def) (C:\GitHub\Data_Centre\paper\minimal_revision\build\supplement.aux)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.c
+fg)) (C:\GitHub\Data_Centre\paper\minimal_revision\build\supplement.out)
+(C:\GitHub\Data_Centre\paper\minimal_revision\build\supplement.out)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
+(supplement/inputs.tex (tables/workload_inputs.tex [1{C:/Users/jamie/AppData/Lo
+cal/MiKTeX/fonts/map/pdftex/pdftex.map}]
+tables/workload_inputs.tex:102: ignored error: Infinite glue shrinkage found in
+ box being split [2]
+tables/workload_inputs.tex:102: ignored error: Infinite glue shrinkage found in
+ box being split [3])) (supplement/procedures.tex [4] [5])
+(supplement/evidence.tex (tables/annual_endpoints.tex) [6]
+(tables/solver_quality.tex) [7]
+Underfull \hbox (badness 1552) in paragraph at lines 25--26
+\T1/cmr/m/n/10.95 Let the ad-di-tional an-nual electricity-cost sav-ing for en-
+ergy ca-pac-ity $\OML/cmm/m/it/10.95 E$ \T1/cmr/m/n/10.95 be $\OT1/cmr/m/n/10.9
+5 ^^A\OML/cmm/m/it/10.95 S\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 E\OT1/cmr/m/n
+/10.95 ) =
+(tables/financial_range.tex) [8])
+(C:\GitHub\Data_Centre\paper\minimal_revision\build\supplement.bbl) [9]
+(C:\GitHub\Data_Centre\paper\minimal_revision\build\supplement.aux) )
+(see the transcript file for additional information) <C:\Users\jamie\AppData\Lo
+cal\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1095.pk> <C:\Users\jamie\AppD
+ata\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1000.pk> <C:\Users\jami
+e\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.pk> <C:\User
+s\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C
+:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1440.
+pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecr
+m1095.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi6
+00\ecrm1200.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/e
+c/dpi600\ecrm1728.pk><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/
+public/amsfonts/cm/cmex10.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fon
+ts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/jamie/AppData/Local/Programs/M
+iKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/jamie/AppData/Local/Pr
+ograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmmib10.pfb><C:/Users/jamie/AppDat
+a/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/jami
+e/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Use
+rs/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pf
+b><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
+cmsy8.pfb>
+Output written on C:\GitHub\Data_Centre\paper\minimal_revision\build\supplement
+.pdf (9 pages, 250507 bytes).
+Transcript written on C:\GitHub\Data_Centre\paper\minimal_revision\build\supple
+ment.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.

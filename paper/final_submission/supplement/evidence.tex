@@ -1,0 +1,45 @@
+\section{Extended annual and component results}
+All sensitivity points in Table~\ref{tab:annual-endpoints} are completed annual chains. They supersede earlier representative-week intermediate comparisons. The common reference has the same total workload arrivals as every flexible-share case; storage is disabled in that reference. Percentage-point changes are relative to the central coordinated saving, while saving percentages use the common reference cost as denominator. More decimals are retained in the accompanying CSV files for calculation.
+\input{tables/annual_endpoints.tex}
+
+Figure~\ref{fig:dispatch-extra} shows the full representative-day component schedule. It complements the event plots by showing the undisturbed electricity demands and behind-the-meter UPS discharge. The annual sensitivity values and event grid are also supplied in \path{data/annual_endpoints.csv} and \path{data/flexibility_results.csv}; those files retain the numerical values without requiring digitisation of a plot.
+\begin{figure}[htbp]
+\centering\includegraphics[width=\textwidth]{Figure_5.png}
+\caption{Undisturbed coordinated component dispatch on 22 September 2025. Positive bars are metered demands and UPS discharge offsets IT supply. The dashed line denotes workload-at-arrival reference import.}
+\label{fig:dispatch-extra}
+\end{figure}
+
+The annual component-cost differences are accounting terms within the same coordinated solution. In particular, electricity used to charge TES is positive in the charging-chiller row, while avoided direct cooling appears elsewhere. The UPS row is charging minus discharging evaluated at interval prices, not a storage-revenue settlement. The accounting identity remains valid under negative prices. Summed displayed values can differ from displayed totals by rounding; unrounded terms reconcile in the accompanying data.
+
+\section{Numerical checks and solution quality}
+The retained manuscript run record identifies Python 3.12.0, Pyomo 6.10.1 and HiGHS 1.15.1, on Windows 11 with an eight-core AMD Ryzen 7 9800X3D. Annual scenarios request a relative MILP gap of 0.1\%, with a standard daily time limit of 300 s and a normal acceptance threshold of 1\%. Feasible exceptions in sensitivity cases are disclosed below rather than treating every solve as proven optimal. The main paper's 5.050\% is computed from the retained annual settlements, not by summing daily objective bounds.
+
+All fourteen annual summaries contain 365 local dates and 35,040 committed intervals. Their stored checks cover timestamp continuity, physical state handoff, workload conservation, storage mode exclusivity and signed-price settlement reconciliation. The stated audit tolerances are $10^{-5}$ in the native state units, $10^{-3}$ kW for power flows and $10^{-7}$ CPU-hours for work. Central operation also stores a cohort execution trace. The two central time-limited daily solutions, on 25 May and 4 October, have reported relative gaps of approximately 0.605\% and 0.385\%, within the normal threshold.
+
+\input{tables/solver_quality.tex}
+
+Table~\ref{tab:solver-quality} records the maximum original reported gap for each retained annual chain, including values above the normal threshold. Existing 900 s exact-state reruns of selected 25 May horizons provide additional evidence: the 0.75 UPS and TES cases achieve gaps of 0.627\% and 0.959\%; the 0.75 and 1.25 workload cases retain gaps of 1.015\% and 2.032\%. Across these intermediate checks, the largest committed-day cost change is GBP~0.281, with unchanged closing workload and physical-state differences no greater than $2.14\times10^{-14}$. The 0.5 workload case retains a 5.652\% gap in its existing 900 s check, but its reported absolute primal-bound width is GBP~0.102 and committed cost changes by approximately GBP~0.002. Near-zero negative objectives can produce large relative gaps despite small absolute bounds.
+
+These reruns are diagnostics of particular horizons, not new full-year scenarios substituted into the table. Their limited effects support the displayed result precision in those checks; they do not prove a full-year global optimum or retrospectively certify every recorded exception. Original and diagnostic gap values must not be mixed into a single claim that all annual solves meet 1\%.
+
+The existing year-end assessment confirms service of the 0.642875 CPU-hours outstanding at midnight. Its complete final look-ahead contains 2,313.104 kWh and GBP~89.542, including ordinary January demand. Existing terminal-value tests, using median-to-maximum observed 1 January prices with conversion adjustments, change annual cost by at most 0.000381\% in the tested earlier central chain. That report predates the cohort-trace central result and quotes a 5.049\% saving. It is supporting evidence for the terminal convention, not a replacement for the current 5.050\% result or a separate terminal-sensitivity proof for every capacity case.
+
+For the event study, the retained summary records 288 cells, of which 275 carry the boundary/cap flag and thirteen an unresolved-next-step flag. Positive accepted dispatches meet the event solver-gap criterion of 1\% and the physical audits. Maximum target error is 0.1 kW, terminal-temperature error 0.05$^{\circ}$C, excess cohort residual $10^{-7}$ CPU-hours and component-sum residual approximately $4.18\times10^{-12}$ kW. These checks establish consistency with the formulated constraints. They do not eliminate the search qualifications in S5, model approximation or uncertainty in the adopted facility parameters.
+
+\section{UPS investment-screen calculations}
+Let the additional annual electricity-cost saving for energy capacity $E$ be $\Delta S(E)=C^{\op}(600)-C^{\op}(E)$. The retained results give GBP~1,292.2794/year for $E=750$ kWh and GBP~2,481.4101/year for $E=900$ kWh. Relative to the central capacity, the additional nameplate energies are 150 and 300 kWh, but the additional energy between operational bounds is 75 and 150 kWh because the 50\% reserve fraction remains fixed.
+
+For constant real annual benefits, additional investment $I$ and additional annual non-electricity costs $O$, the screen is
+\begin{equation}
+\Delta S-O-I\,\mathrm{CRF}(r,n)\geq0,\qquad
+\mathrm{CRF}(r,n)=\frac{r(1+r)^n}{(1+r)^n-1}.
+\end{equation}
+At $r=0$, CRF is $1/n$. The capital recovery factor converts initial expenditure into an equivalent annual amount~\cite{sam_crf}. Setting $O=0$ gives $I_{\mathrm{BE}}=\Delta S/\mathrm{CRF}$. Dividing by added \emph{nameplate} kWh gives a threshold directly comparable with a cost expressed on that same basis. The ten-year, 8\% case has CRF 0.14902949. Table~\ref{tab:financial-range} shows additional illustrative rate/life combinations; these are assumptions for interpreting the result, not empirical estimates of project finance or battery life.
+
+\input{tables/financial_range.tex}
+
+No battery market price is assumed, so the calculation establishes a maximum supported expenditure rather than a positive investment recommendation. Comparing a vendor quotation would require its currency, price year, chemistry, installed scope, integration work, reserve policy and usable/nameplate capacity convention. Existing power electronics are held fixed in the dispatch sensitivity; an upgrade requiring additional converter capacity cannot be evaluated by changing only a battery price per kWh.
+
+Losses already enter the dispatch costs through efficiency and must not be charged twice. Degradation, additional O\&M, replacements and financing/tax detail are omitted. Introducing additional costs reduces supported investment under the same annual-benefit assumption. A more complete lifetime treatment could also change the benefit itself. In particular, initial UPS energy is proportional to capacity and terminal energy has no credit. The retained annual cases finish with 300, 375 and 450 kWh for 600, 750 and 900 kWh capacity, respectively. The resulting single-year differences are not independently established steady-state annual benefits. The earlier central terminal check in S7 does not resolve this for all enlarged-capacity cases.
+
+Accordingly, repeating the 2025 incremental saving over $n$ years is an explicit conditional assumption. The thresholds are gross screens before omitted costs, not forecasts of a site's investment return. They exclude the possible value of greater backup provision and any revenues from grid services. Neither the event heatmap nor the annual component accounting supplies those revenues. If credible installed incremental costs exceed the stated threshold, the assumed energy-arbitrage saving alone is insufficient; if they are lower, the screen is favourable only within the stated operational and financial assumptions.

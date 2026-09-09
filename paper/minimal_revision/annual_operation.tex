@@ -1,0 +1,18 @@
+\subsubsection{Annual operation and cost accounting}\label{sec:annual-operation}
+Scenarios 1 and 2 are evaluated over all 365 local days of 2025. Each solve contains the local-day core $T_d$ and twelve look-ahead intervals, with full workload arrivals, cooling and storage operation throughout. Only core decisions are committed. The next day inherits UPS and TES energy, all four temperatures and each unfinished arrival/tranche pair with its original execution window. Look-ahead controls are reoptimised; their trial execution is not counted as completed work.
+
+For a cohort available in day $d$, its committed residual is
+\begin{equation}
+A_{t,k,d+1}=A_{t,k,d}-\sum_{s\in T_d\cap W_{t,k}}u(t,k,s)\Delta t,
+\label{eq:cohort-handoff}
+\end{equation}
+provided it has arrived before the next core boundary. New look-ahead arrivals are generated afresh when their arrival day is processed. Physical time follows a continuous UTC timeline; local-day and workload labels use Europe/London. Normal days have 96 committed intervals, with 92 and 100 on daylight-saving transitions. The resulting year contains 35,040 quarter-hours.
+
+Annual settlement counts each committed interval once:
+\begin{equation}
+C^{(i)}_{\mathrm{year}}=\sum_{d=1}^{365}\sum_{t\in T_d}P^{\mathrm{Grid},(i)}(t)\pi(t)\Delta t/1000,
+\label{eq:annual-cost}
+\end{equation}
+where $i=1,2$. The percentage saving is $100(C^{(1)}_{\mathrm{year}}-C^{(2)}_{\mathrm{year}})/C^{(1)}_{\mathrm{year}}$. Overlapping look-ahead costs are excluded until their intervals become committed. Actual prices for the first three hours of 1 January 2026 supply the final continuation; these intervals are outside 2025 settlement. No terminal storage credit is imposed. Supplementary Section~S2 details the procedure and year-end workload treatment, and Section~S5 records existing terminal and solver checks.
+
+This retrospective annual assessment uses known inputs within each daily horizon. It avoids extrapolating a single day's savings, while leaving forecast uncertainty, network tariffs, battery degradation and flexibility-service revenues outside the objective. The event assessment uses the resulting operating trajectory; the rolling procedure provides temporal coverage and continuity rather than the paper's principal methodological contribution.

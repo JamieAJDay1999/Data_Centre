@@ -1,0 +1,86 @@
+\section{Complete integrated formulation}
+\subsection{Cohorts within a finite horizon}
+For horizon $\mathcal H_d$ beginning at $s_d$, combine unfinished cohorts arriving before $s_d$ with new cohorts arriving within the horizon. A carried cohort contributes its remaining work, while a new cohort contributes $a_c$; denote either amount by $A_{c,d}$. Define
+\begin{equation}
+\mathcal W_{c,d}=\{t\in\mathcal H_d:r_c\leq t\leq\ell_c\}.
+\end{equation}
+Variables $u_{c,t}\geq0$ exist only on this set. If $L_d$ is the last interval start in $\mathcal H_d$, the processing constraints are
+\begin{align}
+\sum_{t\in\mathcal W_{c,d}}u_{c,t}\Delta t&=A_{c,d},&&\ell_c\leq L_d,\\
+\sum_{t\in\mathcal W_{c,d}}u_{c,t}\Delta t&\leq A_{c,d},&&\ell_c>L_d,\\
+u_t&=u_t^{\mathrm{inflex}}+\sum_{c:t\in\mathcal W_{c,d}}u_{c,t},&0\leq u_t&\leq1.
+\end{align}
+Individual processing variables also have upper bound one. For cohorts arriving before the next core boundary, committed residual work is
+\begin{equation}
+R_{c,s_{d+1}}=A_{c,d}-\sum_{t\in\mathcal C_d\cap\mathcal W_{c,d}}u_{c,t}\Delta t.
+\end{equation}
+Positive residuals above tolerance are carried with unchanged identifiers, arrival times and final eligible execution intervals. Cohorts arriving only in advisory look-ahead intervals are generated afresh on the subsequent solve; their uncommitted trial execution is not carried forward. This prevents look-ahead decisions from being mistaken for completed work.
+
+In reference operation, all arriving work executes immediately: $u_t=u_t^{\mathrm{inflex}}+u_t^{\mathrm{flex,arr}}$. The same utilisation-to-power approximation and cooling equations apply. Storage actions are zero. Changing the flexible share therefore does not change total reference arrivals.
+
+\subsection{Piecewise-linear IT power}
+Let $f(u)=166.7+(1000-166.7)u^{1.32}$ kW. The five breakpoints are $b_i=(i/4)^{1.5}$, $i=0,\ldots,4$. For $b_i\leq u\leq b_{i+1}$, the implemented curve is
+\begin{equation}
+\widehat f(u)=f(b_i)+\frac{f(b_{i+1})-f(b_i)}{b_{i+1}-b_i}(u-b_i),
+\qquad P_t^{\mathrm{IT}}=\widehat f(u_t).
+\end{equation}
+The coordinated formulation imposes equality to this piecewise curve using Pyomo's DLOG representation. Equivalently, exactly one segment is active and power/utilisation are interpolated on its two endpoints; the logarithmic encoding reduces the binary representation of that selection. Reference utilisation is fixed, so its power is evaluated directly on the identical interpolation. The analytic convex curve lies at or below the chords. The retained approximation check gives a maximum error of 6.241 kW, or 0.624\% of rated IT power. This is an approximation to an aggregate power relation, not a measurement-error estimate.
+
+\subsection{UPS, meter balance and operating domains}
+With $z_t^{\mathrm U}\in\{0,1\}$ and all charge/discharge powers non-negative,
+\begin{align}
+E_{t+1}^{\mathrm U}&=E_t^{\mathrm U}+
+\left(\eta_{\mathrm{U,ch}}P_t^{\mathrm{U,ch}}-P_t^{\mathrm{U,dis}}/\eta_{\mathrm{U,dis}}\right)\Delta t,\\
+0.5E_{\mathrm{nom}}^{\mathrm U}&\leq E_t^{\mathrm U}\leq E_{\mathrm{nom}}^{\mathrm U},\\
+0\leq P_t^{\mathrm{U,ch}}&\leq270z_t^{\mathrm U},\\
+0\leq P_t^{\mathrm{U,dis}}&\leq1000(1-z_t^{\mathrm U}),\qquad P_t^{\mathrm{U,dis}}\leq P_t^{\mathrm{IT}},\\
+P_t^{\mathrm{grid,IT}}&=P_t^{\mathrm{IT}}-P_t^{\mathrm{U,dis}}\geq0,\\
+P_t^{\mathrm{grid}}&=P_t^{\mathrm{grid,IT}}+P_t^{\mathrm{U,ch}}+P_t^{\mathrm C}+P_t^{\mathrm{T,ch}}+53.095,\\
+0\leq P_t^{\mathrm{grid}}&\leq1723.095.
+\end{align}
+The underlying IT-supplied grid variable also has upper bound 1,000 kW. There are no positive minimum charging/discharging powers. The battery does not export separately or supply cooling in this topology. For energy-capacity sensitivities $E_{\mathrm{nom}}^{\mathrm U}=600m$ kWh, initial energy equals $E_{\mathrm{nom}}^{\mathrm U}$ and the reserve scales with it; power limits are unchanged. The initial central battery has 600 kWh stored but only 300 kWh between its operational bounds.
+
+\subsection{TES and chiller}
+Let $z_t^{\mathrm T}\in\{0,1\}$. Chiller electrical powers are non-negative and TES thermal powers obey
+\begin{align}
+E_{t+1}^{\mathrm T}&=E_t^{\mathrm T}+\left(\eta_{\mathrm{T,ch}}Q_t^{\mathrm{T,ch}}-
+Q_t^{\mathrm{T,dis}}/\eta_{\mathrm{T,dis}}\right)\Delta t,\\
+0&\leq E_t^{\mathrm T}\leq E_{\max}^{\mathrm T},\\
+0&\leq Q_t^{\mathrm{T,ch}}\leq300z_t^{\mathrm T},\qquad
+0\leq Q_t^{\mathrm{T,dis}}\leq300(1-z_t^{\mathrm T}),\\
+Q_t^{\mathrm{T,ch}}&=\mathrm{COP}\,P_t^{\mathrm{T,ch}},\\
+Q_t^{\mathrm{cool}}&=\mathrm{COP}\,P_t^{\mathrm C}+Q_t^{\mathrm{T,dis}},\\
+P_t^{\mathrm C}+P_t^{\mathrm{T,ch}}&\leq400.
+\end{align}
+Central $E_{\max}^{\mathrm T}=1000$ kWh-th and $E_0^{\mathrm T}=500$ kWh-th. In sensitivities capacity is $1000m$ and initial energy $500m$, with fixed power limits. UPS and TES standing losses, throughput penalties and terminal-value terms are zero in the retained central objective.
+
+\subsection{Four-node thermal dynamics}
+The equations adapt the four-node representation of Cupelli et al.~\cite{cupelli2018data} to the modelled facility and TES. With $\Delta t_s=900$ s and kW/kJ units, they are
+\begin{align}
+T_t^{\mathrm{in}}&=T_{t+1}^{\mathrm{HA}}-Q_t^{\mathrm{cool}}/(\dot m c_p),\\
+T_{t+1}^{\mathrm{IT}}&=T_t^{\mathrm{IT}}+\frac{\Delta t_s}{C_{\mathrm{IT}}}
+\left[P_t^{\mathrm{IT}}-G_{\mathrm{conv}}(T_{t+1}^{\mathrm{IT}}-T_{t+1}^{\mathrm R})\right],\\
+T_{t+1}^{\mathrm R}&=T_t^{\mathrm R}+\frac{\Delta t_s}{C_{\mathrm R}}
+\left[\dot m\kappa c_p(T_{t+1}^{\mathrm{CA}}-T_{t+1}^{\mathrm R})+
+G_{\mathrm{conv}}(T_{t+1}^{\mathrm{IT}}-T_{t+1}^{\mathrm R})\right],\\
+T_{t+1}^{\mathrm{CA}}&=T_t^{\mathrm{CA}}+\frac{\Delta t_s}{C_{\mathrm{CA}}}
+\left[\dot m\kappa c_p(T_t^{\mathrm{in}}-T_{t+1}^{\mathrm{CA}})
+-G_{\mathrm{cold}}(T_{t+1}^{\mathrm{CA}}-T^{\mathrm{out}})\right],\\
+T_{t+1}^{\mathrm{HA}}&=T_t^{\mathrm{HA}}+\frac{\Delta t_s}{C_{\mathrm{HA}}}
+\left[\dot m\kappa c_p(T_{t+1}^{\mathrm R}-T_{t+1}^{\mathrm{HA}})\right].
+\end{align}
+These are implicit, linear updates. Thermal boundary values are constrained variables, with opening values imposed rather than chosen freely. The hot aisle has no separate external heat-transfer term. Summing the four state equations gives the node heat balance with gross cooling multiplied by the calibrated factor $\kappa$:
+\begin{equation}
+\sum_j C_j\frac{T_{t+1}^j-T_t^j}{\Delta t_s}
+=P_t^{\mathrm{IT}}-\kappa Q_t^{\mathrm{cool}}
+-G_{\mathrm{cold}}(T_{t+1}^{\mathrm{CA}}-T^{\mathrm{out}}).
+\end{equation}
+This identity explains why gross cooling and effective cooling in the represented nodes must not be interchanged. The factor describes an aggregate calibration of flow/mixing effects; the remaining fraction is not a separately measured loss stream. The model additionally imposes
+\begin{equation}
+P_t^{\mathrm{IT}}\leq Q_t^{\mathrm{cool}}\leq
+\dot m c_p(T_{t+1}^{\mathrm{HA}}-18),
+\end{equation}
+together with every temperature bound in S1. The lower inequality is an adopted restriction on using thermal accumulation for flexibility. These equations and bounds define the assessed model; validation of the original source model does not constitute validation of every adaptation here.
+
+\subsection{Objective and event additions}
+Every annual horizon minimises $\sum_{t\in\mathcal H_d}\pi_tP_t^{\mathrm{grid}}\Delta t/1000$. Reference operation fixes storage powers to zero and workload to arrival, while retaining the cooling optimisation. Event trials use the same objective on their event-plus-recovery intervals and add the signed target and recovery inequalities given in the main paper. For every cohort present by recovery boundary $H$, residual work is its original requirement less actual pre-event and trial execution. Cohorts whose final eligible interval is within the trial must be completed; later cohorts may remain unfinished only up to their undisturbed residual plus tolerance. No aggregation of residuals across different deadlines substitutes for this per-cohort check.

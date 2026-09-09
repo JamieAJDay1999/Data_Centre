@@ -1,0 +1,22 @@
+{
+  "committed_intervals": 35040,
+  "cost_reconciliation_gbp": 0.0,
+  "final_outstanding_workload_cpu_h": 0.642875,
+  "final_workload_unserved_after_planned_lookahead_cpu_h": 0.0,
+  "gap_exceeded_dates": [],
+  "gap_exceeded_horizons": 0,
+  "grid_energy_kwh": 6799048.031325387,
+  "local_dates": 365,
+  "maximum_daily_boundary_residual": 0.0,
+  "maximum_initial_state_residual": 0.0,
+  "maximum_recorded_solver_gap": 0.00996386713381122,
+  "maximum_tes_overlap_kw": -0.0,
+  "maximum_ups_overlap_kw": -0.0,
+  "maximum_workload_conservation_residual_cpu_h": 1.1823875212257917e-14,
+  "mode": "optimised",
+  "non_optimal_horizons": 2,
+  "peak_grid_import_kw": 1681.9371564066312,
+  "scenario_id": "2025_tes_1p5",
+  "settlement_cost_gbp": 522057.40680599224,
+  "total_solver_runtime_s": 1314.8827680000068
+}

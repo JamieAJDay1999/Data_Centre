@@ -1,0 +1,5 @@
+Integrated IT, UPS and cooling models characterise data-centre flexibility.
+Component contributions change with event timing and operating state.
+Import reductions of 100 and 150 kW are sustained for six hours in the case study.
+Coordinated operation reduces annual reference-price electricity cost by 5.05%.
+UPS enlargement is assessed using the investment its added savings can support.

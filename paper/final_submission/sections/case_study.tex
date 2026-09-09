@@ -1,0 +1,54 @@
+\section{Case Study}
+\label{sec:case-study}
+\subsection{Facility and operating inputs}
+The case study represents a stylised facility with 1 MW of rated IT power. This rating identifies the computational equipment scale; it is not a 1 MW grid-connection limit. Cooling, auxiliaries and UPS charging contribute additional import. Table~\ref{tab:parameters} lists the principal settings, and \supp{1} provides the complete parameter set.
+\begin{table}[t]
+\centering\caption{Principal case-study parameters.}
+\label{tab:parameters}
+\begin{tabular}{@{}lr@{}}\toprule
+Parameter & Value\\\midrule
+IT rated / idle power & 1,000 / 166.7 kW\\
+UPS nameplate energy & 600 kWh\\
+UPS operational energy range & 300--600 kWh\\
+UPS charge / effective discharge limit & 270 / 1,000 kW\\
+UPS charge / discharge efficiency & 0.82 / 0.92\\
+TES energy / charge and discharge limits & 1,000 kWh-th / 300 kW-th\\
+TES charge / discharge efficiency & 0.9 / 0.9\\
+Chiller electrical limit / COP & 400 kW / 5\\
+Fixed auxiliary demand & 53.095 kW\\
+Structural grid-import limit & 1,723.095 kW\\
+Outdoor temperature & $22^{\circ}$C\\
+Cold-aisle / inlet-air bounds & 18--23 / 18--30$^{\circ}$C\\
+Workload deferral classes & 0.5, 1, 2, 3 h\\\bottomrule
+\end{tabular}
+\end{table}
+
+The daily workload profile is a modelling assumption informed by published workload and flexibility studies~\cite{Cao2022ApEn,6779441,Misaghian2023TIA,Liu2012PER}. It is not a measured trace of a particular facility. The adopted quarter-hour profiles specify flexible and inflexible utilisation and the allocation of flexible work among the four deferral classes. They repeat by local clock time throughout the year. \supp{2} provides all 96 input rows and explains the source interpretation, allowing reproduction without inferring values from a figure. Workload composition is an assumption tested by sensitivity, not a general estimate of the fraction of all data-centre work that is shiftable.
+
+The annual price signal is the 2025 Intermittent Market Reference Price (IMRP) published by the Low Carbon Contracts Company~\cite{lccc_imrp_actuals}. Each hourly Great Britain day-ahead reference price is assigned unchanged to four quarter-hour intervals. Negative observations retain their sign. IMRP is used as a wholesale reference signal; the objective does not contain network charges, capacity charges, levies or supplier margins. Fixed ambient temperature and COP isolate the scheduling interactions from seasonal changes in cooling efficiency. The auxiliary demand is also fixed and identical between cases. Its 53.095 kW value originates from a 7\% calibration against an earlier daily IT-plus-cooling load; it is not recalculated as a percentage of annual demand.
+
+\subsection{Reference, coordinated and event cases}
+Table~\ref{tab:cases} distinguishes the annual comparator from the operating trajectory used for event assessment. Both annual cases begin with 600 kWh in the UPS, 500 kWh in TES, and IT, rack, cold-aisle and hot-aisle temperatures of $(28.5,26,20,27)^{\circ}$C. Subsequent days inherit states rather than resetting them. Reference cooling is cost optimised within the same temperature limits as coordinated cooling; savings are therefore not attributed to introducing a different cooling-control benchmark.
+\begin{table*}[t]
+\centering\caption{Cases and their roles in the analysis.}
+\label{tab:cases}
+\begin{tabularx}{\textwidth}{@{}lXXX@{}}\toprule
+Case & Workload and storage & Cooling and operating state & Output\\\midrule
+Reference operation ($\refcase$) & All work executes at arrival; UPS and TES dispatch disabled & Cooling cost optimised; temperatures continuous between days & Annual cost comparator\\
+Coordinated operation ($\op$) & Eligible work rescheduled; UPS and TES dispatch enabled & Same thermal model and bounds; all states and unfinished work carried forward & Annual cost and undisturbed event reference\\
+Flexibility event & Same eligibility and equipment limits; an additional grid target is imposed & Begins from coordinated state; comparative recovery after the event & Feasible duration and component response\\\bottomrule
+\end{tabularx}
+\end{table*}
+
+The event day is selected using the smallest standardised distance to annual daily price, demand, utilisation, cost and opening-state characteristics. Eligible days contain 96 intervals and precede the final three days of the year. The selected day is 22 September 2025. Its actual physical states and per-cohort execution record initialise each request; the full selection rule is in \supp{5}. Event starts are sampled hourly. Reduced-import requests range from 100 to 500 kW in 50 kW steps; increased-import requests are 25, 50 and 75 kW, giving 288 start-time/request pairs. These are the evaluated request ranges, not a claim that both directions have been explored over equal power ranges.
+
+\subsection{Sensitivity and UPS investment screen}
+The annual sensitivity changes flexible workload share, UPS energy capacity and TES energy capacity one at a time to 0.5, 0.75, 1.25 and 1.5 times the central setting. The shared central case completes each five-point curve. All settings use the full 365-day trajectory. Workload scaling transfers processing requirements between the flexible and inflexible pools while preserving total arrivals; flexible utilisation is capped by total available workload. Storage sensitivities hold power ratings fixed and preserve initial state-of-charge fractions. UPS reserve remains 50\% of the changed capacity. These are energy-capacity tests, not joint power-and-energy sizing studies.
+
+For UPS enlargement, the relevant benefit is the additional saving relative to the 600 kWh coordinated case. A conditional investment screen converts that annual benefit into a break-even capital amount using the capital recovery factor~\cite{sam_crf}:
+\begin{equation}
+I_{\mathrm{BE}}(E)=\frac{C^{\op}(600)-C^{\op}(E)-O_{\mathrm{add}}}
+{r(1+r)^n/[(1+r)^n-1]},
+\label{eq:investment}
+\end{equation}
+where $r$ is the real discount rate, $n$ the assessment life and $O_{\mathrm{add}}$ additional annual non-electricity costs. The illustrative main comparison uses 8\% and ten years, with constant real benefits and no additional O\&M, ageing, replacement cost or residual value. These are transparent screening assumptions, not a forecast or a vendor price estimate. \supp{8} gives alternative rates and lives and explains the limitations of repeating a single-year saving.

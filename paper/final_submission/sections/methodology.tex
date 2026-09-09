@@ -1,0 +1,135 @@
+\section{Methodology}
+\label{sec:methodology}
+\subsection{System boundary and modelling approach}
+The model represents the facility at its electricity meter, with IT demand, UPS power exchange, direct cooling, TES charging and a fixed auxiliary load inside the boundary. Its purpose is to retain the variables that determine flexibility: unfinished computational work, storage energy and facility temperatures. Aggregate modelling permits these variables to be coordinated without representing the placement of each task on a server or the airflow around each rack~\cite{barroso2018datacenter,dayarathna2015data}. The resulting feasible response is conditional on this level of abstraction and the adopted operating limits.
+
+Let $t$ index intervals of length $\Delta t=0.25$ h. Powers and processing rates apply during an interval; stored energies and temperatures are defined at its boundaries. Electrical and thermal powers are expressed in kW and kW-th, respectively, and stored energy in kWh or kWh-th. With UPS discharge supplying IT behind the meter, grid import is
+\begin{equation}
+\begin{split}
+P_t^{\mathrm{grid}}={}&P_t^{\mathrm{IT}}+P_t^{\mathrm{U,ch}}-P_t^{\mathrm{U,dis}}\\
+&+P_t^{\mathrm{C}}+P_t^{\mathrm{T,ch}}+P^{\mathrm{aux}},
+\end{split}
+\label{eq:grid}
+\end{equation}
+where $P^{\mathrm{C}}$ is chiller electricity for direct CRAC cooling and $P^{\mathrm{T,ch}}$ is chiller electricity for charging TES. UPS discharge cannot exceed contemporaneous IT demand; the facility does not export electricity. This balance also provides the basis for attributing a grid response to its internal components.
+
+Figure~\ref{fig:workflow} sets out the assessment. Reference operation provides the annual cost comparator. Coordinated operation enables workload shifting and storage, yielding both annual electricity costs and the operating trajectory from which grid events are tested. The computational sequence establishes this trajectory first, even though the results foreground flexibility characterisation.
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[node distance=7mm and 9mm,box/.style={draw,rounded corners,align=center,font=\footnotesize,text width=35mm,minimum height=11mm},arr/.style={-{Latex[length=2mm]},thick}]
+\node[box] (in) {Workload, prices and\\facility parameters};
+\node[box,right=of in] (model) {Integrated IT, UPS\\and cooling/TES model};
+\node[box,right=of model] (annual) {Reference and coordinated\\annual operation};
+\node[box,right=of annual] (cost) {Annual cost comparison\\and resource sensitivities};
+\node[box,below=of annual] (event) {Selected operating state\\and grid-deviation requests};
+\node[box,right=of event] (flex) {Feasible durations, recovery\\and component responses};
+\draw[arr] (in)--(model);\draw[arr] (model)--(annual);\draw[arr] (annual)--(cost);
+\draw[arr] (annual)--(event);\draw[arr] (event)--(flex);
+\end{tikzpicture}
+\caption{Whole-study workflow. Annual operation supplies both economic results and the state used to characterise additional grid-facing flexibility.}
+\label{fig:workflow}
+\end{figure*}
+
+\subsection{Workload scheduling and IT power}
+Workload arrivals comprise an inflexible processing requirement and flexible cohorts. A cohort $c$ has arrival time $r_c$, CPU-hour requirement $a_c$, and a final eligible execution interval beginning at $\ell_c$. Its permitted set is $\mathcal W_c=\{t:r_c\leq t\leq\ell_c\}$. Assigning processing rate $u_{c,t}$ to that cohort gives the full-trajectory relations
+\begin{equation}
+\begin{gathered}
+\sum_{t\in\mathcal W_c}u_{c,t}\Delta t=a_c,\qquad u_{c,t}\geq0,\\
+u_t=u_t^{\mathrm{inflex}}+\sum_{c:t\in\mathcal W_c}u_{c,t}\leq1.
+\end{gathered}
+\label{eq:work}
+\end{equation}
+Only eligible work can be shifted, and it cannot execute before arrival. The classes permit final execution-interval starts 0.5, 1, 2 or 3 h after arrival. This is an interval-based deferral convention: processing in the final permitted interval finishes at its closing boundary. The exact indexing and the treatment of cohorts extending beyond an individual optimisation horizon are given in \supp{3}.
+
+CPU-hours measure aggregate processor occupancy. They allow eligible computation to be distributed over different execution intervals while preserving the amount of work. This abstraction does not assume that all applications can be divided or accelerated arbitrarily; those properties are represented by the workload eligibility and timing assumptions. In particular, preserving computational work does not require electrical energy to be identical between schedules.
+
+The analytic IT power relation is
+\begin{equation}
+f(u)=P^{\mathrm{IT}}_{\mathrm{idle}}+
+(P^{\mathrm{IT}}_{\max}-P^{\mathrm{IT}}_{\mathrm{idle}})u^{1.32}.
+\label{eq:power}
+\end{equation}
+It captures the increase in server power with utilisation~\cite{dayarathna2015data,v2015analysis}. Both reference and coordinated operation use the same four-segment piecewise-linear approximation $P_t^{\mathrm{IT}}=\widehat f(u_t)$. The optimisation is consequently a mixed-integer linear programme (MILP), rather than a direct nonlinear optimisation of Equation~\eqref{eq:power}. Breakpoints, approximation error and the logarithmic formulation are documented in \supp{3}.
+
+\subsection{Electrical and thermal flexibility}
+The UPS and TES shift electrical and cooling energy, respectively. Their boundary-state equations are
+\begin{equation}
+\begin{aligned}
+E^{\mathrm{U}}_{t+1}&=E^{\mathrm{U}}_t+
+\left(\eta_{\mathrm{U,ch}}P_t^{\mathrm{U,ch}}-
+\frac{P_t^{\mathrm{U,dis}}}{\eta_{\mathrm{U,dis}}}\right)\Delta t,\\
+E^{\mathrm{T}}_{t+1}&=E^{\mathrm{T}}_t+
+\left(\eta_{\mathrm{T,ch}}Q_t^{\mathrm{T,ch}}-
+\frac{Q_t^{\mathrm{T,dis}}}{\eta_{\mathrm{T,dis}}}\right)\Delta t.
+\end{aligned}
+\label{eq:stores}
+\end{equation}
+Each store has energy and charge/discharge power limits, with one binary mode variable preventing simultaneous charging and discharging. The UPS retains a reserve of 50\% of its modelled nameplate energy. Its available operational energy window is therefore half that capacity. No daily cyclic restoration is imposed: subsequent operation inherits the resulting state. Standing losses and ageing costs are excluded, while conversion losses are included through the efficiencies.
+
+The chiller couples the two cooling paths:
+\begin{equation}
+\begin{gathered}
+Q_t^{\mathrm{cool}}=\mathrm{COP}\,P_t^{\mathrm{C}}+Q_t^{\mathrm{T,dis}},\qquad
+Q_t^{\mathrm{T,ch}}=\mathrm{COP}\,P_t^{\mathrm{T,ch}},\\
+P_t^{\mathrm{C}}+P_t^{\mathrm{T,ch}}\leq P_{\max}^{\mathrm{chiller}}.
+\end{gathered}
+\label{eq:cooling}
+\end{equation}
+Charging TES uses capacity that could otherwise produce immediate cooling. Discharging TES supplies cooling without the corresponding contemporaneous chiller electricity. Its contribution at the meter is consequently mediated by the chiller loads, rather than appearing as an independent electrical injection.
+
+IT electricity becomes heat in a four-node thermal model adapted from Cupelli et al.~\cite{cupelli2018data}. The states represent IT equipment, rack air, cold-aisle air and hot-aisle air. Backward-Euler updates retain their dynamics at the quarter-hour resolution. The full recursions, inlet-temperature relation and calibrated effective-airflow factor are in \supp{3}. Temperature limits apply throughout each horizon, including the recovery period.
+
+The adopted model also constrains gross cooling provision by
+\begin{equation}
+P_t^{\mathrm{IT}}\leq Q_t^{\mathrm{cool}}\leq
+\dot m c_p\bigl(T_{t+1}^{\mathrm{HA}}-T_{\min}^{\mathrm{CA}}\bigr).
+\label{eq:coolbound}
+\end{equation}
+The lower bound is a conservative operating rule limiting reliance on heat accumulation; it is not asserted to be a universal requirement of thermal physics. The upper bound limits inlet cooling. These restrictions matter to the interpretation of thermal flexibility: the model allows temperature dynamics and TES operation, but does not credit unrestricted undercooling as an additional resource. Thus the thermal model describes an adopted operating envelope, rather than an unconstrained thermodynamic maximum.
+
+\subsection{Power-deviation, duration and recovery assessment}
+Let $P_t^{\op}$ denote grid import under coordinated operation. For an event starting at $t_0$ with duration $\tau$ and signed deviation $\Delta P$, the event schedule must satisfy
+\begin{equation}
+\left|P_t^{\mathrm{grid}}-(P_t^{\op}+\Delta P)\right|
+\leq\epsilon_P,\quad t_0\leq t<t_0+\tau,
+\label{eq:target}
+\end{equation}
+where $\epsilon_P=0.1$ kW. Each trial begins from the physical state and unfinished cohort ledger recorded at $t_0$. There is no pre-event optimisation to charge a store or accumulate work in anticipation of the request.
+
+Recovery is assessed at $H=t_0+\tau+3$ h relative to the undisturbed coordinated trajectory. With $R_{c,H}$ denoting remaining work for cohort $c$, the requirements are
+\begin{equation}
+\begin{gathered}
+E_H^{\mathrm{U}}\geq E_H^{\mathrm{U},\op},\qquad
+E_H^{\mathrm{T}}\geq E_H^{\mathrm{T},\op},\\
+|T_H^j-T_H^{j,\op}|\leq0.05^{\circ}\mathrm C,
+\quad j\in\{\mathrm{IT,R,CA,HA}\},\\
+R_{c,H}\leq R_{c,H}^{\op}+10^{-7}\ \mathrm{CPU\,h}.
+\end{gathered}
+\label{eq:recovery}
+\end{equation}
+Original workload execution windows remain in force. The grid target is released during recovery, allowing compensating consumption, but the event cannot leave less stored energy or additional unfinished work relative to the reference beyond the specified tolerances. Recovery therefore means satisfying these comparative conditions, not returning every state exactly to its pre-event value.
+
+Candidate durations are multiples of 15 minutes, bounded by twelve hours and the end of the selected local day. The search first tests the assessment cap, then uses a logarithmic search and an adjacent-duration check. All reported positive durations have an accepted, audited feasible dispatch. An unresolved trial is not evidence of infeasibility. Because the recovery reference changes with $\tau$, adjacent checks alone do not establish global monotonicity of duration feasibility. Results are accordingly reported as \emph{certified feasible durations}, distinguishing cap-reaching cases and unresolved next steps; they are not asserted to be globally maximal durations in every cell. \supp{5} gives the search and status conventions.
+
+Every event trial minimises signed electricity cost over its event and recovery window subject to the request. The component plots represent the accepted feasible solution to that objective; alternative allocations may exist. Subtracting the undisturbed schedule from Equation~\eqref{eq:grid} gives
+\begin{equation}
+\begin{split}
+\Delta P_t^{\mathrm{grid}}={}&\Delta P_t^{\mathrm{IT}}+
+\Delta P_t^{\mathrm{C}}+\Delta P_t^{\mathrm{T,ch}}\\
+&+\Delta(P_t^{\mathrm{U,ch}}-P_t^{\mathrm{U,dis}}).
+\end{split}
+\label{eq:decomposition}
+\end{equation}
+The fixed auxiliary load cancels. Components may act in opposite directions, but their sum must track the request. This is a decomposition of dispatch, not an allocation of independent asset values.
+
+\subsection{Annual economic evaluation}
+For each local day $d$, the MILP minimises
+\begin{equation}
+\min\sum_{t\in\mathcal H_d}\pi_tP_t^{\mathrm{grid}}\Delta t/1000,
+\label{eq:objective}
+\end{equation}
+where $\pi_t$ is the signed electricity reference price in GBP/MWh and $\mathcal H_d$ contains the local day and twelve look-ahead intervals. Only the local-day decisions are committed. UPS/TES energy, all four temperatures and unfinished cohorts pass to the next day, with each cohort retaining its original arrival and final eligible execution interval. Normal days contain 96 committed intervals; daylight-saving transitions contain 92 or 100. An absolute UTC timeline preserves continuous physical time.
+
+Annual cost is the sum over committed 2025 intervals, with overlapping look-ahead intervals counted only when they become committed. Actual prices for the first three hours of 1 January 2026 provide the final continuation, which is excluded from 2025 settlement. No terminal energy credit is imposed. The annual saving is $C^{\refcase}-C^{\op}$, and its percentage is $100(C^{\refcase}-C^{\op})/C^{\refcase}$. Reference operation already optimises cooling; the comparison measures the further value of workload scheduling and storage coordination.
+
+This retrospective calculation uses known inputs within each daily horizon. It evaluates operation through a full year, rather than extrapolating one selected day's saving, but it neither models forecast error nor solves one globally optimal year-long programme. Pyomo and HiGHS are used with a requested 0.1\% relative gap and a 300 s daily limit. Feasibility and accounting checks accompany the accepted solutions. The detailed handoff algorithm, terminal treatment and solver exceptions are in \supp{4} and \supp{7}.

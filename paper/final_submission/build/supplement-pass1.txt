@@ -1,0 +1,888 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(supplement.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\size11.clo))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty))
+ (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\longtable.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/natbib\natbib.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
+)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefine
+keys.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.s
+ty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds
+.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.s
+ty)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettit
+lestring.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
+)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.s
+ty) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
+) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
+) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc
+.sty)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
+echeck.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquec
+ounter.sty)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+tex.def) (C:\GitHub\Data_Centre\paper\final_submission\build\supplement.aux)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.c
+fg)) (C:\GitHub\Data_Centre\paper\final_submission\build\supplement.out)
+(C:\GitHub\Data_Centre\paper\final_submission\build\supplement.out)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
+(supplement/inputs.tex
+supplement/inputs.tex:24: ignored error: Infinite glue shrinkage found in box b
+eing split [1{C:/Users/jamie/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+ (tables/thermal_parameters.tex)
+Overfull \hbox (5.02701pt too wide) in paragraph at lines 30--31
+[]\T1/cmr/m/n/10.95 Initial tem-per-a-tures $\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/
+10.95 T[]; T[]; T[]; T[]\OT1/cmr/m/n/10.95 )$ \T1/cmr/m/n/10.95 are $\OT1/cmr/m
+/n/10.95 (28\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 5\OML/cmm/m/it/10.95 ; \OT1
+/cmr/m/n/10.95 26\OML/cmm/m/it/10.95 ; \OT1/cmr/m/n/10.95 20\OML/cmm/m/it/10.95
+ ; \OT1/cmr/m/n/10.95 27)[]$\T1/cmr/m/n/10.95 C. Bounds at ev-ery state bound-
+
+Overfull \hbox (60.4943pt too wide) in paragraph at lines 30--31
+\T1/cmr/m/n/10.95 cases use the same ther-mal bounds. A his-tor-i-cal con-fig-u
+-ra-tion field named \T1/cmtt/m/n/10.95 baseline_cold_aisle_setpoint_c
+
+Package natbib Warning: Citation `Cao2022ApEn' on page 2 undefined on input lin
+e 36.
+
+
+Package natbib Warning: Citation `6779441' on page 2 undefined on input line 36
+.
+
+
+Package natbib Warning: Citation `Misaghian2023TIA' on page 2 undefined on inpu
+t line 36.
+
+
+Package natbib Warning: Citation `Liu2012PER' on page 2 undefined on input line
+ 36.
+
+
+LaTeX Warning: Reference `tab:workload-inputs' on page 2 undefined on input lin
+e 38.
+
+
+Overfull \hbox (58.80032pt too wide) in paragraph at lines 38--39
+[]\T1/cmr/m/n/10.95 The au-thor-i-ta-tive nu-mer-i-cal in-puts are \T1/cmtt/m/n
+/10.95 data/load_profiles.csv \T1/cmr/m/n/10.95 and \T1/cmtt/m/n/10.95 data/shi
+ftability_profile.csv\T1/cmr/m/n/10.95 ,
+[2] (tables/workload_inputs.tex
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table S3 on input line 102.
+
+tables/workload_inputs.tex:102: ignored error: Infinite glue shrinkage found in
+ box being split [3]
+tables/workload_inputs.tex:102: ignored error: Infinite glue shrinkage found in
+ box being split [4])
+
+Package natbib Warning: Citation `lccc_imrp_actuals' on page 5 undefined on inp
+ut line 58.
+
+) (supplement/model.tex [5] [6]
+
+Package natbib Warning: Citation `cupelli2018data' on page 7 undefined on input
+ line 58.
+
+[7]) (supplement/procedures.tex [8] [9]) (supplement/evidence.tex
+
+LaTeX Warning: Reference `tab:annual-endpoints' on page 10 undefined on input l
+ine 2.
+
+(tables/annual_endpoints.tex)
+Overfull \hbox (13.93896pt too wide) in paragraph at lines 2--4
+\T1/cmr/m/n/10.95 All sen-si-tiv-ity points in Ta-ble [] are com-pleted an-nual
+ chains. They su-per-sede ear-lier representative-
+
+LaTeX Warning: Reference `fig:dispatch-extra' on page 10 undefined on input lin
+e 5.
+
+[10] (tables/solver_quality.tex)
+
+LaTeX Warning: Reference `tab:solver-quality' on page 11 undefined on input lin
+e 21.
+
+[11 <./figures/Figure_5.png>]
+Overfull \hbox (11.05571pt too wide) in paragraph at lines 30--31
+\OML/cmm/m/it/10.95 C[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 E\OT1/cmr/m/n/10
+.95 )$\T1/cmr/m/n/10.95 . The re-tained re-sults give GBP 1,292.2794/year for $
+\OML/cmm/m/it/10.95 E \OT1/cmr/m/n/10.95 = 750$ \T1/cmr/m/n/10.95 kWh and GBP 2
+,481.4101/year
+
+Overfull \hbox (3.57263pt too wide) in paragraph at lines 32--33
+[]\T1/cmr/m/n/10.95 For con-stant real an-nual ben-e-fits, ad-di-tional in-vest
+-ment $\OML/cmm/m/it/10.95 I$ \T1/cmr/m/n/10.95 and ad-di-tional an-nual non-el
+ectricity
+
+Package natbib Warning: Citation `sam_crf' on page 12 undefined on input line 3
+7.
+
+
+LaTeX Warning: Reference `tab:financial-range' on page 12 undefined on input li
+ne 37.
+
+(tables/financial_range.tex) [12])
+No file supplement.bbl.
+
+Package natbib Warning: There were undefined citations.
+
+
+Package longtable Warning: Table widths have changed. Rerun LaTeX.
+
+[13] (C:\GitHub\Data_Centre\paper\final_submission\build\supplement.aux)Trying to make PK font ecti1095 at 600 DPI...
+The METAFONT mode is: ljfour
+Creating ecti1095.pk...
+This is METAFONT, Version 2.71828182 (MiKTeX 25.12)
+
+Running miktex-mf.exe...
+
+
+
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecti1095
+
+.mf
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbase.m
+
+f)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecti.mf
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\extextit
+
+.mf
+
+ Ok
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccess
+
+.mf
+
+ Ok)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expseudo
+
+.mf
+
+ Ok)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exileast
+
+.mf
+
+ Ok [158] [160] [161] [162] [163] [164] [165] [166] [167] [168] [169] [170]
+
+[171] [172] [173] [174] [175] [176] [177] [178] [179] [180] [181] [182]
+
+[183] [184] [185] [186] [187] [188])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exilwest
+
+.mf
+
+ Ok [224] [225] [226] [227] [228] [229] [230] [231] [232] [233] [234] [235]
+
+[236] [237] [238] [239] [240] [241] [242] [243] [244] [245] [246] [247]
+
+[248] [249] [250] [251] [252] [253] [254] [255])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exruwest
+
+.mf
+
+ Ok [192] [193] [194] [195] [196] [197] [198] [199] [200] [201] [202] [203]
+
+[204] [205] [206] [207] [208] [209] [210] [211] [212] [213] [214] [215]
+
+[216] [217] [218] [219] [220] [221] [222] [223])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrueast
+
+.mf
+
+ Ok [128] [129] [130] [131] [132] [133] [134] [135] [136] [137] [138] [139]
+
+[140] [141] [142] [143] [144] [145] [146] [147] [148] [149] [150] [151]
+
+[152] [153] [154] [155] [156] [157])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbraces
+
+.mf
+
+ Ok [94] [126] [23] [40] [41] [60] [124] [62] [91] [93] [92] [123] [125]
+
+[95] [127] [32])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expunct.
+
+mf
+
+ Ok [14] [15] [19] [20] [13] [18] [33] [39] [42] [43] [44] [46] [47] [58]
+
+[59] [61] [96] [189] [17] [45] [16] [21] [22])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccent
+
+.mf
+
+ Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exsign.m
+
+f
+
+ Ok [24] [34] [35] [36] [37] [64] [191] [159])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exilig.m
+
+f
+
+ Ok [25] [26] [27] [28] [29] [30] [31])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exitalp.
+
+mf
+
+ Ok [38] [63] [190])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrulett
+
+.mf
+
+ Ok [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78]
+
+[79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exillett
+
+.mf
+
+ Ok [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]
+
+[109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120]
+
+[121] [122])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exidigit
+
+.mf
+
+ Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exiligtb
+
+.mf
+
+ Ok) ) ) )
+
+(some charht values had to be adjusted by as much as 0.06808pt)
+
+Font metrics written on ecti1095.tfm.
+
+Output written on ecti1095.600gf (256 characters, 57920 bytes).
+
+Transcript written on ecti1095.log.
+
+Running miktex-gftopk.exe...
+This is GFtoPK, Version 2.4 (MiKTeX 25.12)
+
+'METAFONT output 2026.09.08:1151'
+
+57920 bytes packed to 35204 bytes.
+
+Installing C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1095.pk...
+miktex-makepk: major issue: So far, you have not checked for MiKTeX updates.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `supplement.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+ )
+(see the transcript file for additional information) <C:\Users\jamie\AppData\Lo
+cal\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1095.pk> <C:\Users\jamie\AppD
+ata\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1095.pk> <C:\Users\jami
+e\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk>Trying to make PK font ectt1095 at 600 DPI...
+This is METAFONT, Version 2.71828182 (MiKTeX 25.12)
+The METAFONT mode is: ljfour
+Creating ectt1095.pk...
+Running miktex-mf.exe...
+
+
+
+
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ectt1095
+
+.mf
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbase.m
+
+f)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ectt.mf
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exroman.
+
+mf
+
+ Ok
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccess
+
+.mf
+
+ Ok)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expseudo
+
+.mf
+
+ Ok)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exruwest
+
+.mf
+
+ Ok [192] [193] [194] [195] [196] [197] [198] [199] [200] [201] [202] [203]
+
+[204] [205] [206] [207] [208] [209] [210] [211] [212] [213] [214] [215]
+
+[216] [217] [218] [219] [220] [221] [222] [223])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlwest
+
+.mf
+
+ Ok [224] [225] [226] [227] [228] [229] [230] [231] [232] [233] [234] [235]
+
+[236] [237] [238] [239] [240] [241] [242] [243] [244] [245] [246] [247]
+
+[248] [249] [250] [251] [252] [253] [254] [255])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrueast
+
+.mf
+
+ Ok [128] [129] [130] [131] [132] [133] [134] [135] [136] [137] [138] [139]
+
+[140] [141] [142] [143] [144] [145] [146] [147] [148] [149] [150] [151]
+
+[152] [153] [154] [155] [156] [157])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrleast
+
+.mf
+
+ Ok [158] [160] [161] [162] [163] [164] [165] [166] [167] [168] [169] [170]
+
+[171] [172] [173] [174] [175] [176] [177] [178] [179] [180] [181] [182]
+
+[183] [184] [185] [186] [187] [188])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbraces
+
+.mf
+
+ Ok [94] [126] [23] [40] [41] [60] [124] [62] [91] [93] [92] [123] [125]
+
+[95] [127] [32])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expunct.
+
+mf
+
+ Ok [14] [15] [19] [20] [13] [18] [33] [39] [42] [43] [44] [46] [47] [58]
+
+[59] [61] [96] [189] [17] [45] [16] [21] [22])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccent
+
+.mf
+
+ Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exsign.m
+
+f
+
+ Ok [24] [34] [35] [36] [37] [64] [191] [159])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlig.m
+
+f
+
+ Ok [25] [26] [28] [27] [29] [30] [31])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exromp.m
+
+f
+
+ Ok [38] [63] [190])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrulett
+
+.mf
+
+ Ok [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78]
+
+[79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrllett
+
+.mf
+
+ Ok [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]
+
+[109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120]
+
+[121] [122])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrdigit
+
+.mf
+
+ Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exmligtb
+
+.mf
+
+ Ok) ) ) )
+
+Font metrics written on ectt1095.tfm.
+
+Output written on ectt1095.600gf (256 characters, 47796 bytes).
+
+Transcript written on ectt1095.log.
+
+Running miktex-gftopk.exe...
+This is GFtoPK, Version 2.4 (MiKTeX 25.12)
+
+'METAFONT output 2026.09.08:1151'
+
+47796 bytes packed to 21972 bytes.
+
+Installing C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.pk...
+miktex-makepk: major issue: So far, you have not checked for MiKTeX updates.
+ <C:\User
+s\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.pk> <C
+:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1000.
+pk>Trying to make PK font ecbx1440 at 600 DPI...
+The METAFONT mode is: ljfour
+Creating ecbx1440.pk...
+Running miktex-mf.exe...
+This is METAFONT, Version 2.71828182 (MiKTeX 25.12)
+
+
+
+
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecbx1440
+
+.mf
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbase.m
+
+f)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecbx.mf
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exroman.
+
+mf
+
+ Ok
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccess
+
+.mf
+
+ Ok)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expseudo
+
+.mf
+
+ Ok)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exruwest
+
+.mf
+
+ Ok [192] [193] [194] [195] [196] [197] [198] [199] [200] [201] [202] [203]
+
+[204] [205] [206] [207] [208] [209] [210] [211] [212] [213] [214] [215]
+
+[216] [217] [218] [219] [220] [221] [222] [223])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlwest
+
+.mf
+
+ Ok [224] [225] [226] [227] [228] [229] [230] [231] [232] [233] [234] [235]
+
+[236] [237] [238] [239] [240] [241] [242] [243] [244] [245] [246] [247]
+
+[248] [249] [250] [251] [252] [253] [254] [255])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrueast
+
+.mf
+
+ Ok [128] [129] [130] [131] [132] [133] [134] [135] [136] [137] [138] [139]
+
+[140] [141] [142] [143] [144] [145] [146] [147] [148] [149] [150] [151]
+
+[152] [153] [154] [155] [156] [157])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrleast
+
+.mf
+
+ Ok [158] [160] [161] [162] [163] [164] [165] [166] [167] [168] [169] [170]
+
+[171] [172] [173] [174] [175] [176] [177] [178] [179] [180] [181] [182]
+
+[183] [184] [185] [186] [187] [188])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbraces
+
+.mf
+
+ Ok [94] [126] [23] [40] [41] [60] [124] [62] [91] [93] [92] [123] [125]
+
+[95] [127] [32])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expunct.
+
+mf
+
+ Ok [14] [15] [19] [20] [13] [18] [33] [39] [42] [43] [44] [46] [47] [58]
+
+[59] [61] [96] [189] [17] [45] [16] [21] [22])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccent
+
+.mf
+
+ Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exsign.m
+
+f
+
+ Ok [24] [34] [35] [36] [37] [64] [191] [159])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlig.m
+
+f
+
+ Ok [25] [26] [28] [27] [29] [30] [31])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exromp.m
+
+f
+
+ Ok [38] [63] [190])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrulett
+
+.mf
+
+ Ok [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78]
+
+[79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrllett
+
+.mf
+
+ Ok [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]
+
+[109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120]
+
+[121] [122])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrdigit
+
+.mf
+
+ Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrligtb
+
+.mf
+
+ Ok) ) ) )
+
+(some charht values had to be adjusted by as much as 0.10997pt)
+
+Font metrics written on ecbx1440.tfm.
+
+Output written on ecbx1440.600gf (256 characters, 70764 bytes).
+
+Transcript written on ecbx1440.log.
+
+Running miktex-gftopk.exe...
+This is GFtoPK, Version 2.4 (MiKTeX 25.12)
+
+'METAFONT output 2026.09.08:1151'
+
+70764 bytes packed to 40136 bytes.
+
+Installing C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1440.pk...
+miktex-makepk: major issue: So far, you have not checked for MiKTeX updates.
+ <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecb
+x1440.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi6
+00\ecrm1095.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/e
+c/dpi600\ecrm1200.pk>Trying to make PK font ecrm1728 at 600 DPI...
+This is METAFONT, Version 2.71828182 (MiKTeX 25.12)
+The METAFONT mode is: ljfour
+Creating ecrm1728.pk...
+Running miktex-mf.exe...
+
+
+
+
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecrm1728
+
+.mf
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbase.m
+
+f)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecrm.mf
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exroman.
+
+mf
+
+ Ok
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccess
+
+.mf
+
+ Ok)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expseudo
+
+.mf
+
+ Ok)
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exruwest
+
+.mf
+
+ Ok [192] [193] [194] [195] [196] [197] [198] [199] [200] [201] [202] [203]
+
+[204] [205] [206] [207] [208] [209] [210] [211] [212] [213] [214] [215]
+
+[216] [217] [218] [219] [220] [221] [222] [223])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlwest
+
+.mf
+
+ Ok [224] [225] [226] [227] [228] [229] [230] [231] [232] [233] [234] [235]
+
+[236] [237] [238] [239] [240] [241] [242] [243] [244] [245] [246] [247]
+
+[248] [249] [250] [251] [252] [253] [254] [255])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrueast
+
+.mf
+
+ Ok [128] [129] [130] [131] [132] [133] [134] [135] [136] [137] [138] [139]
+
+[140] [141] [142] [143] [144] [145] [146] [147] [148] [149] [150] [151]
+
+[152] [153] [154] [155] [156] [157])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrleast
+
+.mf
+
+ Ok [158] [160] [161] [162] [163] [164] [165] [166] [167] [168] [169] [170]
+
+[171] [172] [173] [174] [175] [176] [177] [178] [179] [180] [181] [182]
+
+[183] [184] [185] [186] [187] [188])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbraces
+
+.mf
+
+ Ok [94] [126] [23] [40] [41] [60] [124] [62] [91] [93] [92] [123] [125]
+
+[95] [127] [32])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expunct.
+
+mf
+
+ Ok [14] [15] [19] [20] [13] [18] [33] [39] [42] [43] [44] [46] [47] [58]
+
+[59] [61] [96] [189] [17] [45] [16] [21] [22])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccent
+
+.mf
+
+ Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exsign.m
+
+f
+
+ Ok [24] [34] [35] [36] [37] [64] [191] [159])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlig.m
+
+f
+
+ Ok [25] [26] [28] [27] [29] [30] [31])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exromp.m
+
+f
+
+ Ok [38] [63] [190])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrulett
+
+.mf
+
+ Ok [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78]
+
+[79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrllett
+
+.mf
+
+ Ok [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]
+
+[109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120]
+
+[121] [122])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrdigit
+
+.mf
+
+ Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrligtb
+
+.mf
+
+ Ok) ) ) )
+
+(some charht values had to be adjusted by as much as 0.0972pt)
+
+Font metrics written on ecrm1728.tfm.
+
+Output written on ecrm1728.600gf (256 characters, 84608 bytes).
+
+Transcript written on ecrm1728.log.
+
+Running miktex-gftopk.exe...
+This is GFtoPK, Version 2.4 (MiKTeX 25.12)
+
+'METAFONT output 2026.09.08:1151'
+
+84608 bytes packed to 42516 bytes.
+
+Installing C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1728.pk...
+miktex-makepk: major issue: So far, you have not checked for MiKTeX updates.
+ <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jkna
+ppen/ec/dpi600\ecrm1728.pk><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/
+type1/public/amsfonts/cm/cmex10.pfb><C:/Users/jamie/AppData/Local/Programs/MiKT
+eX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/jamie/AppData/Local/Prog
+rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/jamie/AppData/Lo
+cal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/jamie/Ap
+pData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/
+jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmib10.pfb>
+<C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
+r10.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
+ts/cm/cmr6.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmr7.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1
+/public/amsfonts/cm/cmr8.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/font
+s/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/jamie/AppData/Local/Programs/Mi
+KTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/jamie/AppData/Local/Pro
+grams/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on C:\GitHub\Data_Centre\paper\final_submission\build\supplement
+.pdf (13 pages, 420280 bytes).
+Transcript written on C:\GitHub\Data_Centre\paper\final_submission\build\supple
+ment.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.

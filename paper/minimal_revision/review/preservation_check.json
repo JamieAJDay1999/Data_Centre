@@ -1,0 +1,14 @@
+{
+  "Introduction prose": {
+    "original_tokens": 1247,
+    "new_tokens": 1275,
+    "original_tokens_retained_percent": 97.2
+  },
+  "Literature Review": {
+    "original_tokens": 1065,
+    "new_tokens": 1066,
+    "original_tokens_retained_percent": 99.3
+  },
+  "all_original_labels_retained": true,
+  "first_edit_sha256": "ce51d521b4f9a1974d36461762f16046e36b324fefc5885dd7f261d58941bdb4"
+}

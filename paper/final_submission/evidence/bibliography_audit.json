@@ -1,0 +1,1445 @@
+[
+  {
+    "key": "6779441",
+    "doi": "10.1109/IAdCC.2014.6779441",
+    "status": "verified record",
+    "title": [
+      "Task shape classification and workload characterization of google cluster trace"
+    ],
+    "authors": [
+      {
+        "given": "Md.",
+        "family": "Rasheduzzaman",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering and Computer Science, North South University, Plot-15, Block-B, Bashundhara, Dhaka 1229, Bangladesh"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Md. Amirul",
+        "family": "Islam",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering and Computer Science, North South University, Plot-15, Block-B, Bashundhara, Dhaka 1229, Bangladesh"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Tasvirul",
+        "family": "Islam",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering and Computer Science, North South University, Plot-15, Block-B, Bashundhara, Dhaka 1229, Bangladesh"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Tahmid",
+        "family": "Hossain",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering and Computer Science, North South University, Plot-15, Block-B, Bashundhara, Dhaka 1229, Bangladesh"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Rashedur M",
+        "family": "Rahman",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering and Computer Science, North South University, Plot-15, Block-B, Bashundhara, Dhaka 1229, Bangladesh"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2014,
+          2
+        ]
+      ]
+    },
+    "container": [
+      "2014 IEEE International Advance Computing Conference (IACC)"
+    ],
+    "volume": null,
+    "issue": null,
+    "pages": "893-898",
+    "article_number": null
+  },
+  {
+    "key": "Cao2022ApEn",
+    "doi": "10.1016/j.apenergy.2022.119665",
+    "status": "verified record",
+    "title": [
+      "Data-driven flexibility assessment for internet data center towards periodic batch workloads"
+    ],
+    "authors": [
+      {
+        "given": "Yujie",
+        "family": "Cao",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ming",
+        "family": "Cheng",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Sufang",
+        "family": "Zhang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Hongju",
+        "family": "Mao",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Peng",
+        "family": "Wang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Chao",
+        "family": "Li",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yihui",
+        "family": "Feng",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Zhaohao",
+        "family": "Ding",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2022,
+          10
+        ]
+      ]
+    },
+    "container": [
+      "Applied Energy"
+    ],
+    "volume": "324",
+    "issue": null,
+    "pages": "119665",
+    "article_number": "119665"
+  },
+  {
+    "key": "Fu2020ApEn",
+    "doi": "10.1016/j.apenergy.2020.115621",
+    "status": "verified record",
+    "title": [
+      "Assessments of data centers for provision of frequency regulation"
+    ],
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-9507-1420",
+        "authenticated-orcid": false,
+        "given": "Yangyang",
+        "family": "Fu",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Xu",
+        "family": "Han",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Kyri",
+        "family": "Baker",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Wangda",
+        "family": "Zuo",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2020,
+          11
+        ]
+      ]
+    },
+    "container": [
+      "Applied Energy"
+    ],
+    "volume": "277",
+    "issue": null,
+    "pages": "115621",
+    "article_number": "115621"
+  },
+  {
+    "key": "Liu2012PER",
+    "doi": "10.1145/2318857.2254779",
+    "status": "verified record",
+    "title": [
+      "Renewable and cooling aware workload management for sustainable data centers"
+    ],
+    "authors": [
+      {
+        "given": "Zhenhua",
+        "family": "Liu",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "California Institute of Technology, Pasadena, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yuan",
+        "family": "Chen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "HP Labs, Palo Alto, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Cullen",
+        "family": "Bash",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "HP Labs, Palo Alto, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Adam",
+        "family": "Wierman",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "California Institute of Technology, Pasadena, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Daniel",
+        "family": "Gmach",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "HP Labs, Palo Alto, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Zhikui",
+        "family": "Wang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "HP Labs, Palo Alto, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Manish",
+        "family": "Marwah",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "HP Labs, Palo Alto, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Chris",
+        "family": "Hyser",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "HP Labs, Palo Alto, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2012,
+          6,
+          7
+        ]
+      ]
+    },
+    "container": [
+      "ACM SIGMETRICS Performance Evaluation Review"
+    ],
+    "volume": "40",
+    "issue": "1",
+    "pages": "175-186",
+    "article_number": null
+  },
+  {
+    "key": "Liu2024Access",
+    "doi": "10.1109/ACCESS.2024.3432120",
+    "status": "verified record",
+    "title": [
+      "Optimal Energy Management of Data Center Micro-Grid Considering Computing Workloads Shift"
+    ],
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0001-5311-7788",
+        "authenticated-orcid": false,
+        "given": "Luyao",
+        "family": "Liu",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "China Energy Engineering Group Guangdong Electric Power Design Institute Company Ltd., Guangzhou, Guangdong, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-1636-5712",
+        "authenticated-orcid": false,
+        "given": "Xinwei",
+        "family": "Shen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Shenzhen International Graduate School, Tsinghua University, Shenzhen, Guangdong, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Zhigang",
+        "family": "Chen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "China Energy Engineering Group Guangdong Electric Power Design Institute Company Ltd., Guangzhou, Guangdong, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Qie",
+        "family": "Sun",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Institute of Thermal Science and Technology, Shandong University, Jinan, Shandong, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ronald",
+        "family": "Wennersten",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Institute for Advanced Science and Technology, Shandong University, Jinan, Shandong, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2024
+        ]
+      ]
+    },
+    "container": [
+      "IEEE Access"
+    ],
+    "volume": "12",
+    "issue": null,
+    "pages": "102061-102075",
+    "article_number": null
+  },
+  {
+    "key": "Misaghian2023TIA",
+    "doi": "10.1109/TIA.2022.3213637",
+    "status": "verified record",
+    "title": [
+      "Assessment of Carbon-Aware Flexibility Measures From Data Centres Using Machine Learning"
+    ],
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-8833-9732",
+        "authenticated-orcid": false,
+        "given": "M. Saeed",
+        "family": "Misaghian",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "School of Electrical &amp; Electronic Engineering, University College Dublin, 4 Dublin, Ireland"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-1590-4654",
+        "authenticated-orcid": false,
+        "given": "Giovanni",
+        "family": "Tardioli",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Integrated Environmental Solutions Limited (IES), Glasgow, U.K."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Adalberto Guerra",
+        "family": "Cabrera",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Integrated Environmental Solutions Limited (IES), Glasgow, U.K."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-4971-6849",
+        "authenticated-orcid": false,
+        "given": "Ilaria",
+        "family": "Salerno",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "School of Mathematics, University of Edinburgh, Edinburgh, U.K."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-4638-9333",
+        "authenticated-orcid": false,
+        "given": "Damian",
+        "family": "Flynn",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "School of Electrical &amp; Electronic Engineering, University College Dublin, 4 Dublin, Ireland"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ruth",
+        "family": "Kerrigan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Integrated Environmental Solutions Limited (IES), Glasgow, U.K."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2023,
+          1
+        ]
+      ]
+    },
+    "container": [
+      "IEEE Transactions on Industry Applications"
+    ],
+    "volume": "59",
+    "issue": "1",
+    "pages": "70-80",
+    "article_number": null
+  },
+  {
+    "key": "Xu2023SPIE",
+    "doi": "10.1117/12.3009383",
+    "status": "verified record",
+    "title": [
+      "Data center demand response potential assessment considering multiple types of flexible resources"
+    ],
+    "authors": [
+      {
+        "given": "Hui",
+        "family": "Xu",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Yong",
+        "family": "Li",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Hui",
+        "family": "Zhu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Ji",
+        "family": "Wang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Chenghao",
+        "family": "Hou",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2023,
+          10,
+          11
+        ]
+      ]
+    },
+    "container": [
+      "Fourth International Conference on Computer Science and Communication Technology (ICCSCT 2023)"
+    ],
+    "volume": null,
+    "issue": null,
+    "pages": "56",
+    "article_number": null
+  },
+  {
+    "key": "alapera2018data",
+    "status": "no DOI; existing source citation"
+  },
+  {
+    "key": "alapera2019fast",
+    "doi": "10.1109/EEM.2019.8916344",
+    "status": "verified record",
+    "title": [
+      "Fast frequency response from a UPS system of a data center, background, and pilot results"
+    ],
+    "authors": [
+      {
+        "given": "Ilari",
+        "family": "Alapera",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Janne",
+        "family": "Paananen",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Kari",
+        "family": "Dalen",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Samuli",
+        "family": "Honkapuro",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2019,
+          9
+        ]
+      ]
+    },
+    "container": [
+      "2019 16th International Conference on the European Energy Market (EEM)"
+    ],
+    "volume": null,
+    "issue": null,
+    "pages": "1-5",
+    "article_number": null
+  },
+  {
+    "key": "barroso2018datacenter",
+    "doi": "10.2200/S00874ED3V01Y201809CAC046",
+    "status": "verified record",
+    "title": [
+      "The Datacenter as a Computer"
+    ],
+    "authors": [
+      {
+        "given": "Luiz Andr\u00e9",
+        "family": "Barroso",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Urs",
+        "family": "H\u00f6lzle",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Parthasarathy",
+        "family": "Ranganathan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2019
+        ]
+      ]
+    },
+    "container": [
+      "Synthesis Lectures on Computer Architecture"
+    ],
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "article_number": null
+  },
+  {
+    "key": "cioara2018optimized",
+    "doi": "10.1016/j.future.2016.05.010",
+    "status": "verified record",
+    "title": [
+      "Optimized flexibility management enacting Data Centres participation in Smart Demand Response programs"
+    ],
+    "authors": [
+      {
+        "given": "Tudor",
+        "family": "Cioara",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ionut",
+        "family": "Anghel",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Massimo",
+        "family": "Bertoncini",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ioan",
+        "family": "Salomie",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Diego",
+        "family": "Arnone",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Marzia",
+        "family": "Mammina",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-0362-4607",
+        "authenticated-orcid": false,
+        "given": "Terpsichori-Helen",
+        "family": "Velivassaki",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-2998-4176",
+        "authenticated-orcid": false,
+        "given": "Marcel",
+        "family": "Antal",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2018,
+          1
+        ]
+      ]
+    },
+    "container": [
+      "Future Generation Computer Systems"
+    ],
+    "volume": "78",
+    "issue": null,
+    "pages": "330-342",
+    "article_number": null
+  },
+  {
+    "key": "cupelli2018data",
+    "doi": "10.1109/TII.2018.2806889",
+    "status": "verified record",
+    "title": [
+      "Data Center Control Strategy for Participation in Demand Response Programs"
+    ],
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-6968-6915",
+        "authenticated-orcid": false,
+        "given": "Lisette",
+        "family": "Cupelli",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-8490-305X",
+        "authenticated-orcid": false,
+        "given": "Thomas",
+        "family": "Schutz",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Pooyan",
+        "family": "Jahangiri",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-2715-0917",
+        "authenticated-orcid": false,
+        "given": "Marcus",
+        "family": "Fuchs",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-1914-9801",
+        "authenticated-orcid": false,
+        "given": "Antonello",
+        "family": "Monti",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Dirk",
+        "family": "Muller",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2018,
+          11
+        ]
+      ]
+    },
+    "container": [
+      "IEEE Transactions on Industrial Informatics"
+    ],
+    "volume": "14",
+    "issue": "11",
+    "pages": "5087-5099",
+    "article_number": null
+  },
+  {
+    "key": "dayarathna2015data",
+    "status": "no DOI; existing source citation"
+  },
+  {
+    "key": "du2025new",
+    "doi": "10.1016/j.energy.2024.134934",
+    "status": "HTTP Error 404: Not Found"
+  },
+  {
+    "key": "iea_energy_ai",
+    "status": "no DOI; existing source citation"
+  },
+  {
+    "key": "lccc_imrp_actuals",
+    "status": "no DOI; existing source citation"
+  },
+  {
+    "key": "radovanovic2022carbon",
+    "doi": "10.1109/TPWRS.2022.3173250",
+    "status": "verified record",
+    "title": [
+      "Carbon-Aware Computing for Datacenters"
+    ],
+    "authors": [
+      {
+        "given": "Ana",
+        "family": "Radovanovi\u0107",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-6598-4368",
+        "authenticated-orcid": false,
+        "given": "Ross",
+        "family": "Koningstein",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ian",
+        "family": "Schneider",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-0467-7265",
+        "authenticated-orcid": false,
+        "given": "Bokan",
+        "family": "Chen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-9354-1193",
+        "authenticated-orcid": false,
+        "given": "Alexandre",
+        "family": "Duarte",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Binz",
+        "family": "Roy",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Diyue",
+        "family": "Xiao",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Maya",
+        "family": "Haridasan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Patrick",
+        "family": "Hung",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Nick",
+        "family": "Care",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Saurav",
+        "family": "Talukdar",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Eric",
+        "family": "Mullen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Kendal",
+        "family": "Smith",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-5024-4271",
+        "authenticated-orcid": false,
+        "given": "MariEllen",
+        "family": "Cottman",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Walfredo",
+        "family": "Cirne",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Google Inc., Mountain View, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2023,
+          3
+        ]
+      ]
+    },
+    "container": [
+      "IEEE Transactions on Power Systems"
+    ],
+    "volume": "38",
+    "issue": "2",
+    "pages": "1270-1280",
+    "article_number": null
+  },
+  {
+    "key": "sam_crf",
+    "status": "no DOI; existing source citation"
+  },
+  {
+    "key": "v2015analysis",
+    "status": "no DOI; existing source citation"
+  }
+]

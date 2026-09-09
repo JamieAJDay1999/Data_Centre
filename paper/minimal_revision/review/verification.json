@@ -1,0 +1,21 @@
+{
+  "annual_scenarios_verified": 14,
+  "annual_days_per_case": 365,
+  "annual_intervals_per_case": 35040,
+  "event_cells": 288,
+  "quoted_event_durations_checked": 13,
+  "unresolved_next_step_cells": 13,
+  "new_optimisation_runs": 0,
+  "pdfs": {
+    "main": {
+      "pages": 19,
+      "unresolved_references": false,
+      "overfull_box_warnings": 12
+    },
+    "supplement": {
+      "pages": 9,
+      "unresolved_references": false,
+      "overfull_box_warnings": 0
+    }
+  }
+}

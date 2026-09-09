@@ -1,0 +1,1915 @@
+DATA CENTRE FLEXIBILITY 1
+Characterisation and Quantification of Data Centre
+Flexibility for Power System Support
+James Day 1, Mehmet Turker Takci 1, and Meysam Qadrdan 1
+1Cardiff University, Queen’s Buildings, The Parade, Cardiff CF24 3AA, United Kingdom
+Highlights
+•Integrated IT/UPS/cooling model developed for a data centre.
+•Cost-optimised operation cuts annual electricity costs by 5.05%.
+•Flexibility characterised and quantified by a duration-aware flexibility assessment.
+•100 kW of upward flexibility sustained for six hours by a 1 MW IT-rated DC.
+•Additional UPS capacity is assessed using annual savings and investment thresholds.
+Corresponding author:
+James Day
+E-mail address:DayJa1@cardiff.ac.uk
+Abstract—The rapid growth of data centres poses an evolving
+challenge for power systems striving toward high variable renew-
+able energy resources and new demands. Traditionally operated
+as passive electrical loads, data centres, as large loads now,
+have the potential to become active participants that provide
+flexibility to the grid. However, quantifying and utilising this
+flexibility have not yet been fully explored. This paper presents
+an integrated, whole facility optimisation model to investigate the
+least cost operating schedule of data centres and characterise
+the aggregate flexibility available from data centres to the power
+system. The model accounts for IT workload shifting, UPS energy
+storage, and cooling system. Motivated by the need to alleviate
+the increasing strain on power systems while leveraging their
+untapped flexibility potential to support decarbonisation goals,
+this study makes two primary contributions: (i) an operational
+optimisation model that integrates IT scheduling, UPS operation,
+and cooling dynamics to establish a cost optimal baseline oper-
+ation, and (ii) a duration-aware flexibility assessment that, for
+any given start time and requested power deviation, identifies
+a certified feasible duration from this baseline while respecting
+all operational, thermal, and recovery constraints. This second
+contribution is the main grid-facing advance of the paper: it
+converts a data centre’s latent flexibility into a time-certified
+envelope of feasible magnitude–duration offers. Results reveal a
+clear temporal structure and a notable asymmetry in flexibility
+provision: upward flexibility (electricity load reduction) is driven
+by deferring IT workload, which allows for a secondary reduction
+in cooling power. In contrast, downward flexibility (electricity
+load increase) combines changes in IT execution, cooling and
+storage; eligible work can execute earlier than in the baseline,
+but never before arrival. For the 1 MW IT-rated case study, 100
+kW of upward flexibility can be sustained for six hours at noon
+and 1.25 hours at 06:00, demonstrating the strong dependence
+of feasible duration on the baseline operating state. Linked daily
+optimisation over 2025 gives a 5.05% annual electricity-cost sav-
+ing; resource sensitivities examine workload share, UPS and TES
+capacity. This framework translates abstract flexibility potential
+into quantified flexibility magnitude and duration capability that
+system operators could investigate for use in services such as
+reserve, frequency response, and price responsive demand.
+Index Terms—Data Centre, Power system flexibility, Demand
+side flexibility, Load Shifting, Thermal Inertia
+I. INTRODUCTION
+G
+LOBAL digitalisation, propelled by artificial intelli-
+gence, is driving the rapid expansion of data centres,
+whose electricity demand is both substantial and spatially
+concentrated. This growth coincides with two other major
+shifts in the energy landscape: the increasing share of variable
+renewable generation needed for decarbonisation, and the
+widespread adoption of new demand-side technologies such
+as electric vehicles and heat pumps [1], [2]. The combined
+effect places significant strain on modern power systems
+by intensifying peak loads, steepening net load ramps, and
+aggravating local network constraints. Consequently, there is
+an escalating need for power system flexibility to maintain the
+crucial balance between electricity supply and demand.
+According to the IEA, global data centre electricity con-
+sumption was around 415 TWh in 2024, with projections
+suggesting this will exceed 945 TWh by 2030, raising their
+share of global electricity demand from approximately 1.5%
+to 3% [3]. This expansion is not uniform, with over 80% of
+the increase expected to originate from the United States and
+China [3]. Moreover, geographical clustering intensifies the
+impact on local grids. For instance, data centre consumption
+already accounts for over 20% of national demand in Ireland,
+and 25% in Virginia, USA [3]. In Great Britain, annual
+electricity consumption by data centres is forecast by National
+Grid ESO to rise from 7.6 TWh in 2024 to between 30–71
+TWh by 2050 [4].
+To manage the volatility introduced by these trends, power
+systems require a substantial increase in flexibility services.
+Traditionally provided by dispatchable fossil fuel generators,
+this solution is becoming obsolete under decarbonisation
+mandates. The JRC [5] projects that the European Union’s
+flexibility requirement will rise to 24% of total electricity
+demand in TWh by 2030 and to 30% by 2050. Similarly, Great
+Britain’s Clean Flexibility Roadmap targets an expansion of
+flexibility capacity from 25.2 GW to between 54–66 GW by
+2030 [6]. Demand-side flexibility, where consumers actively
+DATA CENTRE FLEXIBILITY 2
+Table I: Nomenclature
+Symbol Definition Value/Bounds Unit
+IT Workload Modelling (Section 3.1)
+t, sTime slot an IT job originates in (t) and time slot the job is executed in (s). Absolute slot in-
+dices
+-
+TCommitted time slots of local dayd;T d below. 92, 96 or 100
+slots
+-
+T ext Local-day core plus twelve look-ahead slots;T ext
+d below.|T d|+ 12slots -
+kIndex for tranches of a flexible IT job. [1,2,3,4] -
+KSet of tranche indices, with each tranche representing a distinct deferral class. Original classes
+retained in Section IV-C.
+{1,2,3,4}-
+Wt,k Feasible execution window of time slots for tranche k of a job originating at time t. Varies -
+∆tDuration of a single time slot. 0.25 hours
+Dk Maximum deferral duration (in time slots) for tranche k of a job, relative to its arrival time.
+Original classes retained in Section IV-C.
+{2,4,8,12}slots
+P IT
+idle Power consumption of IT equipment at idle CPU utilisation. 166.7 kW
+P IT
+max Power consumption of IT equipment at maximum CPU utilisation. 1000 kW
+umax Maximum available CPU capacity in any single time slot. 1 -
+uinflex
+t CPU utilisation required for the inflexible workload in time slot t. [0–1] -
+uflex,base
+t Base CPU utilisation required to process the flexible job originating at slot t without any
+deferral.
+[0–1] -
+Rt Total computational demand (in CPU-hours) for the flexible job originating in time slot t. Varies CPU-
+hours
+αt,k Fraction of the total computational demandR t that is assigned to tranche k. [0–1] -
+u(t)CPU utilisation at time t, as a fraction of total capacity. [0–1] -
+u(t, k, s)Decision variable for the CPU utilisation of tranche k from a job originating at t, scheduled
+for execution in slot s.
+≥0-
+P IT(t)Total power consumption of IT equipment at time t. [0-1000] kW
+EIT
+base(t)Base IT energy consumption at time t. Varies kWh
+EIT
+opt(t)Optimised IT energy consumption at time t after optimisation. Varies kWh
+P IT
+base(t)Base IT power consumption at time t. [0-1000] kW
+P IT
+opt(t)Optimised IT power consumption at time t after optimisation. [0-1000] kW
+UPS-ESS Modelling (Section 3.2)
+EUPS
+base Base rated energy capacity of the UPS battery system. 600 kWh
+SoCmin Minimum state of charge, expressed as a fraction ofE base
+UPS. 0.5 -
+SoCmax Maximum state of charge, expressed as a fraction ofE base
+UPS. 1.0 -
+P UPS
+ch,min Minimum allowable charging power of the UPS. 0 kW
+P UPS
+ch,max Maximum allowable charging power of the UPS. 270 kW
+P UPS
+disch,min Minimum allowable discharging power of the UPS. 0 kW
+P UPS
+disch,max Nominal UPS discharge rating; useful discharge also cannot exceed IT demand (at most 1000
+kW).
+2700 kW
+ηUPS
+ch Charging efficiency of the UPS battery system. 0.82 -
+ηUPS
+disch Discharging efficiency of the UPS battery system. 0.92 -
+EUPS(t)Energy stored in the UPS battery system at the opening boundary of time slot t.[300,600]kWh
+P UPS
+ch (t)Charging power drawn by the UPS from the grid during time slot t.≥0kW
+P UPS
+disch(t)Discharging power supplied by the UPS during time slot t.≥0kW
+P UPS
+net (t)Net power exchange of the UPS at time t, defined asP UPS
+ch (t)−P UPS
+disch(t). Varies kW
+zUPS
+ch (t)Binary variable indicating charging status in time slot t.{0,1}-
+zUPS
+disch(t)Binary variable indicating discharging status in time slot t.{0,1}-
+Cooling System Modelling (Section 3.3)
+˙ma Constant mass flow rate of air circulated by the cooling unit. 100 kg/s
+cpa Specific heat capacity of air at constant pressure. 1.005 kJ/(kg·K)
+ρa Density of air. 1.16 kg/m 3
+CIT Total heat capacity of the IT components.1.788×10 4 kJ/K
+CR Total heat capacity of the server racks and the air within them.1.802×10 4 kJ/K
+CCA Total heat capacity of the air in the cold aisle.2.33×10 3 kJ/K
+Continued on next page
+DATA CENTRE FLEXIBILITY 3
+Table I – continued from previous page
+Symbol Definition Value/Bounds Unit
+CHA Total heat capacity of the air in the hot aisle.1.17×10 3 kJ/K
+Gcv Convective heat conductance coefficient between IT components and rack air. 109 kW/K
+Gcd Total heat transfer coefficient from the cold aisle to the outside environment. 4.484 kW/K
+κCorrection factor for the effectiveness of the air mass flow through racks. 0.766 -
+COPchiller Coefficient of Performance of the chiller. 5 -
+P Chiller
+max Maximum electrical power consumption capacity of the chiller. 400 kW
+ETES
+max Maximum cooling energy storage capacity of the TES tank. 1000 kWh
+QTES-CRAC
+max Maximum thermal discharging rate of the TES tank. 300 kW
+QChil-TES
+max Maximum thermal charging rate of the TES tank. 300 kW
+ηTES
+ch Charging efficiency of the TES tank. 0.9 -
+ηTES
+dis Discharging efficiency of the TES tank. 0.9 -
+Tout Outside ambient air temperature. 22 ◦C
+QIT(t)Heat generated by ITE, assumed equal toP IT(t). [0-1000] kW
+Qcool(t)Total cooling power provided to the DC from the CRAC and TES.≥0kW
+QChil-CRAC(t)Cooling power provided directly from the chiller to the CRAC system. Varies kW
+QChil-TES(t)Cooling power from the chiller used to charge the Thermal Energy Storage (TES) tank.[0,300]kW
+QTES-CRAC(t)Cooling power discharged by the TES tank to the CRAC system.[0,300]kW
+QCA(t)Rate of change of thermal energy in the air mass of the cold aisle. Varies kW
+QHA(t)Rate of change of thermal energy in the air mass of the hot aisle. Varies kW
+QR(t)Rate of change of thermal energy in the mass of the server racks and the air within them. Varies kW
+QIT m(t)Rate of change of thermal energy in the thermal mass of the IT equipment itself. Varies kW
+Qout(t)Thermal energy transferred into the DC from the outside ambient environment. Varies kW
+P Chil-CRAC(t)Electrical power consumed by the chiller for cooling sent directly to the CRAC.≥0kW
+P Chil-TES(t)Electrical power consumed by the chiller to charge the TES tank.≥0kW
+ETES(t)Cooling energy stored in the TES tank at time t.[0,1000]kWh
+TAin(t)Air temperature at the inlet of the cold aisle.[18,30] ◦C
+TCA(t)Air temperature in the cold aisle.[18,23](all sce-
+narios)
+◦C
+THA(t)Air temperature in the hot aisle.[18,40] ◦C
+TR(t)Air temperature within the server racks.[18,40] ◦C
+TIT (t)Temperature of the IT components.[18,60] ◦C
+zChil-TES(t)Binary variable indicating TES charging status (1 if charging, 0 otherwise).{0,1}-
+zTES-CRAC(t)Binary variable indicating TES discharging status (1 if discharging, 0 otherwise).{0,1}-
+Case Studies (Section 4)
+π(t)Day-ahead spot electricity price at time t. Varies GBP/MWh
+Ptol Power tolerance for flexibility provision. 0.1 kW
+P Grid
+IT (t)Power drawn from grid for IT load.≥0kW
+P Grid
+OD Constant power drawn from the grid for auxiliary devices, calibrated at 7% of an earlier daily
+base-case IT-plus-cooling mean and then held fixed.
+53.095kW
+P Grid
+base (t)Baseline power drawn from grid at time t. Varies kW
+P Grid(t)Total power drawn from grid at time t. Varies kW
+∆PFlexibility magnitude (power deviation from baseline). Varies kW
+τCertified feasible duration of flexibility provision, capped by twelve hours and local-day end. [0–12] hours
+t0 Start time of flexibility provision, sampled hourly. [00:00–23:00] hours
+DATA CENTRE FLEXIBILITY 4
+modulate their electricity use to support the grid, presents a
+key solution.
+While their growth contributes to the challenge, data cen-
+tres are equipped to provide flexibility. Their shiftable IT
+workloads, uninterruptible power supply (UPS) systems with
+battery storage, and inherent thermal inertia as well as cold
+storage, can be leveraged to modulate power consumption
+without disrupting core services. Each of these internal assets
+possesses a distinct flexibility profile in terms of magnitude,
+duration, ramp rate, and recovery time [7]. For example, UPS
+batteries can offer a near instantaneous response, whereas ther-
+mal systems are characterised by lower ramp rates, providing
+a more gradual adjustment [7], [8]. Data centres therefore
+present a dichotomy, they are both a growing strain on the
+power system and a potentially crucial asset for grid flexibility.
+In the context of power systems, flexibility is defined as the
+capability of maintaining the balance between generation and
+demand across all time horizons, by adjusting either energy
+production or consumption in response to sudden variations
+[1], [2], [4], [9]. Upward flexibility is required when demand
+exceeds generation and involves a DC reducing its power
+consumption from the grid. Conversely, downward flexibility
+is needed when generation surpasses demand, and is provided
+by a DC increasing its electricity consumption to absorb the
+surplus energy [1], [10]. In this study, a data centre’s flexibility
+is quantified by its capacity for power consumption deviation
+relative to a baseline, and the certified feasible duration for
+which this deviation can be sustained.
+This paper addresses these challenges through two linked
+contributions. First, we develop a least cost optimisation model
+for scheduling IT workload, UPS dispatch, and cooling system
+operation, considering day-ahead electricity prices. Second,
+and most importantly for power-system operation, we intro-
+duce a duration-aware flexibility assessment that answers the
+question: for a requested start time and power deviation, for
+how long can the data centre sustain that deviation while re-
+specting IT service, storage, thermal and recovery constraints?
+This turns flexibility from a single capacity estimate into an
+operationally useful magnitude–duration envelope. Our anal-
+ysis reveals the asymmetric nature of upward and downward
+flexibility, detailing the distinct roles of each internal asset.
+By providing a method to develop an in-depth understanding
+of data centres’ flexibility potential, this work sheds light on
+how data centres can be more efficiently integrated into our
+power system.
+The main contributions are therefore: (1) a tractable, inte-
+grated data centre model that preserves the flexibility-relevant
+couplings between IT workload execution, UPS operation,
+cooling power and TES state; (2) a duration-aware assessment
+that evaluates the feasible flexibility duration across a grid of
+start times and requested power deviations, including post-
+event recovery; and (3) a full-year evaluation of operational
+electricity-cost savings, with a component-level cost decom-
+position and resource sensitivities, including the incremental
+value of UPS capacity.
+The annual evaluation uses linked daily optimisation to
+avoid basing the economic conclusions on a single price day.
+This rolling procedure supports the valuation of flexibility
+Fig. 1. Data Centre Layout
+rather than constituting a new optimisation algorithm.
+The remainder of this paper is structured as follows. Section
+2 reviews the existing literature on data centre flexibility.
+Section 3 details the mathematical modelling of the key data
+centre components. Section 4 outlines the case studies used to
+test the model. Section 5 presents and discusses the results,
+and Section 6 concludes the paper.
+A. Data Centre Architecture
+DCs are integrated facilities housing IT equipment, such as
+servers and network devices, which are supported by critical
+power and cooling infrastructure. As shown in Figure 1,
+electrical continuity is maintained by uninterruptible power
+supplies (UPS) with associated battery systems, while cooling
+systems, including chillers, Thermal Energy Storage (TES)
+tanks and Computer Room Air Conditioning (CRAC) units,
+manage the substantial heat generated by the servers. Thermal
+efficiency is often enhanced through optimised airflow strate-
+gies like the hot-aisle/cold-aisle arrangement.
+Each of these core subsystems presents an opportunity
+for providing demand-side flexibility to the power grid. The
+strategic scheduling of IT workloads, the dispatch of UPS
+battery storage, and the leveraging of the TES tank and the
+facility’s inherent thermal inertia allow a DC to modulate its
+power consumption. The DC assets are highly interdependent,
+requiring an integrated approach that considers all of them
+simultaneously. This is because a change in one subsystem
+changes the feasible operating range of the others: deferring
+IT workload reduces both server power and subsequent heat
+generation, cooling actions are constrained by thermal states
+and the TES charge level, and UPS discharge can support IT
+execution while altering the grid power draw. A component-
+by-component assessment can therefore overestimate flexibil-
+ity if it ignores recovery requirements, or underestimate it if
+it misses compensating actions across assets. Consequently,
+DCs can transition from being passive electrical loads to active
+assets that enhance the resilience and flexibility of the power
+system.
+DATA CENTRE FLEXIBILITY 5
+B. IT Workload Background
+The fundamental role of a DC is to execute IT workloads,
+which encompass all computational and data processing tasks.
+These workloads can be broadly classified based on their time
+sensitivity, as defined by service-level agreements (SLAs) [11],
+[12]. Inflexible workloads, also known as interactive work-
+loads, are latency-critical and require immediate execution to
+ensure quality of service for user-facing applications like real-
+time streaming or transaction processing.
+In contrast, flexible IT workloads, often referred to as batch
+workloads, can tolerate execution delays within predefined
+time windows without impacting service quality. These typ-
+ically non-user-facing tasks, such as periodic data analytics,
+backups, or machine learning model training, can be deferred
+or rescheduled. This ability to shift the timing of their exe-
+cution is the primary source of IT-based flexibility, allowing
+the DC to adjust its computational power draw in response to
+external signals like electricity prices or grid operational needs
+[12].
+II. LITERATUREREVIEW
+Data centre flexibility has attracted growing attention as an
+enabler of demand-side participation in power systems, with
+a growing body of literature modelling flexibility at the asset
+level, predominantly focusing on IT workloads and, to a lesser
+extent, UPS batteries, cooling systems and other subsystems.
+A smaller body of work has attempted integrated models that
+capture the joint flexibility of multiple DC assets. This review
+therefore first presents the flexibility modelling approaches
+found in the literature for each DC asset, and then discusses
+studies that move towards an integrated data centre flexibility
+assessment.
+IT workload is the most fundamental component of a
+DC and is the focus for many flexibility studies. One study
+develops a machine learning method to predict DC energy
+consumption and server temperature [13]. These data are
+then used to optimise the scheduling of IT workloads to
+minimise fuel costs and power utilisation at times of high grid
+carbon intensity. On average, the implementation achieved a
+6.5% load reduction for a winter day during periods of high
+CO2 intensity. Radovanovi´c et al. [14], performed predictive
+modelling of grid carbon intensity, trained day-ahead demand
+prediction models and used them to optimise IT workload
+for minimum carbon emissions. Cao et al. [12] propose and
+validate a data-driven methodology using real-world Alibaba
+trace data to assess the power flexibility potential of Internet
+Data Centres (IDCs) by rescheduling periodic IT workloads.
+Their findings quantify significant flexibility, particularly in
+early morning hours, revealing potential upward/downward
+load shifts of 400kW and 325kW, respectively—corresponding
+to approximately 50% and 40.6% of the facility’s peak de-
+mand—by optimising job schedules based on power system
+needs and renewable energy availability. In this study, IT
+workloads are defined as either flexible or inflexible, with
+flexibility here referring to flexibility in time.
+UPS batteries are currently providing power flexibility to
+the grid in numerous DCs around the world and have been
+shown to be successful [15]–[17]. Lithium-ion batteries, which
+are increasingly the dominant form used for UPS, are capable
+of rapidly providing or consuming power when needed [8].
+These characteristics make them well suited to frequency
+regulation, a service many power providers require. Results
+from [8] found UPS batteries could be used within their normal
+operating range to provide the required services to the grid and
+in doing so generate a reasonable revenue stream. Furthermore,
+the battery lifetime would not be affected, and the approach
+does not require additional cost.
+Cooling makes up a large proportion, as high as 40%, of
+DC energy consumption [18]. The American Society of Heat-
+ing, Refrigerating and Air-Conditioning Engineers (ASHRAE)
+recommends maintaining an indoor temperature of18 ◦Cto
+27◦Cto ensure optimal DC performance [19]. Exploiting the
+thermal inertia provided by this temperature range has been
+shown to enable power consumption flexibility in DCs [20]
+[21]. Thermal Energy Storage (TES) systems can enhance
+cooling flexibility by decoupling the timing of heat removal
+from the cooling generation process. Du et al. [22] propose
+and evaluate a framework to enhance the energy flexibility
+of district heating (DH) systems integrated with DC waste
+heat recovery. The study utilises dual short-term TES tanks to
+enable simultaneous peak shaving (demand-driven) and load
+shifting (price-driven) within the hybrid system. Simulation
+results demonstrated that this dual TES approach significantly
+improved flexibility, achieving up to a 10% peak demand
+reduction and a 2.1% load shift, leading to a 3.2% operational
+cost saving in the case study. A ‘synergistic control strategy
+for data centre frequency regulation which uses both IT and
+cooling systems’ has also been proposed [23]. Results found
+that a revenue saving of 4% could be made by implementing
+the proposed strategy. Once depleted, the thermal inertia of the
+DC atmosphere / TES must be recovered to baseline levels.
+The recovery time taken to do so will affect how the flexibility
+of the asset can be utilised.
+While individual assets offer flexibility, the flexibility char-
+acteristics change when these assets are integrated into one
+system. Maximising the overall potential requires coordinat-
+ing multiple resources and evaluating their diverse charac-
+teristics, interactions, and constraints. One study proposes
+a co-optimisation of the IT workload and cooling system,
+recognising the strong operational link between them [23].
+The work by S Xiang et al. [24] identifies that data centre
+optimisation models often ignore IT equipment constraints
+like start-stop conditions and ramp rates, which can cause
+excessive wear. The authors propose a model integrating these
+constraints with facility thermal dynamics, solved using a
+Deep Deterministic Policy Gradient (DDPG) algorithm. This
+approach was then validated for practicality and efficiency
+using a large-scale simulation of a 100,000-device data centre.
+H. Xu et al. [25] propose an optimisation which integrates
+IT servers, cooling infrastructure, energy storage, generators
+and renewable energy, and aims to maximise power demand
+flexibility. The objective function is the cumulative change in
+energy taken from the grid before and after the optimisation
+was applied. Other studies use a similar approach, but instead
+minimise the difference between DC power consumption and
+DATA CENTRE FLEXIBILITY 6
+the desired power consumption of the power supply operator
+[26].
+While individual DC assets, including IT workloads, UPS
+batteries and cooling systems, have each been studied for their
+flexibility potential, the interplay between these assets and its
+impact on the overall flexibility of the DC remains largely
+unexplored. Most existing studies adopt a DC-centric, cost-
+minimisation perspective and do not quantify the magnitude
+and duration of grid-facing flexibility that can be delivered
+once coupled asset constraints and post-event recovery are
+accounted for. As DCs scale towards the gigawatt level,
+this power-system-centric perspective becomes increasingly
+important, because system operators require duration-certified
+flexibility offers and a clear understanding of which assets
+enable them; this perspective remains largely absent from the
+literature.
+Addressing these gaps, in this study, a flexibility analysis
+is performed to determine, for a given start time and flexi-
+bility magnitude, a certified feasible duration for which this
+flexibility can be provided. This analysis is run for a large
+range of flexibility magnitudes and start times to establish a
+heatmap of flexibility potential. For each flexibility calculation,
+the contribution that each DC asset makes is investigated. This
+analysis determines the contribution of each asset to the overall
+flexibility and reveals how the characteristics of each asset are
+exploited to maximise the flexibility potential. From a power-
+system-centric view, the magnitude and duration of flexibility
+is what quantifies its utility. Thus, by quantifying these values,
+the benefit the model data centre can provide to the power
+system is determined.
+III. METHODOLOGY
+This section details the mathematical framework developed
+to quantify the demand-side flexibility of a data centre by
+co-optimising its primary subsystems. The conceptual model
+of the data centre, illustrated in Figure 1, integrates three
+dynamically coupled components: the IT systems, which pro-
+cess both flexible and inflexible computational workloads;
+the power infrastructure, featuring an Uninterruptible Power
+Supply which operates as an Energy Storage System (UPS-
+ESS); and the cooling infrastructure, which includes a chiller
+coupled with a Thermal Energy Storage (TES) tank and the
+CRAC system.
+Our approach is centred on a comprehensive optimisation
+model that captures the operational dynamics and physical
+constraints of each subsystem. Flexibility is harnessed from
+three key sources: (1) shifting IT workloads in time, (2)
+strategically charging and discharging the UPS-ESS, and (3)
+strategically managing the cooling system by utilising the TES
+and the inherent thermal inertia of the facility. By integrating
+these components into a unified framework, the data centre’s
+total capacity to modulate its electricity consumption is evalu-
+ated, thereby quantifying its potential to provide valuable grid
+services.
+The model is intentionally aggregate rather than a server-
+level or device-level digital twin. The objective of this work
+is to quantify the flexibility potential available to the power
+system from a data centre, not to reproduce the detailed
+operational behaviour of individual servers or cooling de-
+vices [27], [28]. The modelling therefore prioritises the state
+variables that determine flexibility feasibility: CPU utilisation
+and delay tolerance for IT work, UPS state of charge and
+converter limits for electrical storage, TES state of charge and
+facility temperatures for cooling recovery, and total grid power
+for service delivery. Likewise, the purpose of the cooling
+model is to capture the energy-flexibility interaction between
+thermal storage, cooling demand and electricity consumption,
+rather than detailed airflow dynamics within server racks.
+This abstraction preserves the operational couplings that mat-
+ter for flexibility while keeping the repeated optimisation
+solves required by the flexibility assessment computationally
+tractable. The required computational work is preserved within
+the modelled execution windows. This maintains aggregate
+computational throughput under the adopted assumptions;
+application-specific service quality, task dependencies and
+server placement are not modelled.
+A. IT Workload Methodology
+In the literature, there is no consensus on IT workload
+characteristics and utilisation levels, as they vary significantly
+depending on the data centre size, type (e.g., enterprise,
+colocation, hyperscale) and workload nature (e.g., banking,
+AI). Consequently, even publicly available real-world datasets
+can differ substantially across facilities. Chris Zaloumis [29]
+indicates that average CPU utilisations vary between 12% and
+18% of total capacity, while Ankur Ghia’s findings indicate a
+daily average between 20% and 30%, noting that best practices
+can elevate this to 70%–80% [30].
+A study by Google [31] classified data centre workloads
+into four categories based on their sensitivity to delay, labelled
+from “0” (least sensitive) to “3” (most sensitive). If categories
+2 and 3 are considered inflexible, they account for approxi-
+mately 30% of the total workloads, suggesting that up to 70%
+of the workloads could be flexible. Another study by Cao et
+al. [12], conducted using Alibaba’s cluster trace, found that
+inflexible workloads represent 60% of all jobs but contribute
+only 30% of total energy consumption. In contrast, flexible
+workloads constitute 40% of jobs while consuming 70% of
+the energy. Furthermore, studies such as [13], [23], [25], [32],
+[33] reveal that there is no universally accepted ratio, and the
+estimated shares of flexible and inflexible IT workloads differ
+significantly across studies for a typical 24-hour period.
+Based on the review of the literature, a dataset of reported
+workload ratios and graphs over a 24-hour time horizon was
+compiled. Table III retains the minimum, maximum and aver-
+age values reported in that synthesis as context. The adopted
+workload ratios are modelling assumptions rather than mea-
+surements from a single facility. The “Proposed” columns now
+show hourly means of the quarter-hour inputs actually used in
+the annual calculations; they should not be reconstructed from
+the contextual range columns. The evidence base informing
+these assumptions is consolidated in Table II. The retained
+range summaries do not establish a reproducible statistical
+derivation of each adopted input or a representative distribution
+DATA CENTRE FLEXIBILITY 7
+Table II
+EVIDENCEINFORMING THEWORKLOADASSUMPTIONS
+Evidence type Sources Use in this study
+Observed
+utilisation ranges
+[29], [30] Context for CPU utilisation as-
+sumptions.
+Delay-sensitivity
+classes
+[31] Mapping of workload classes
+into flexible and inflexible
+groups.
+Batch-workload
+flexibility
+[12] Flexible/inflexible workload en-
+ergy shares and periodic work-
+load shifting behaviour.
+Flexibility case
+studies
+[13], [23], [25], [32],
+[33]
+Cross-checking plausible daily
+workload shapes and flexibility
+ranges.
+Table III
+IT WORKLOADRATES
+Time Flexible Workload Ratio (%) Inflexible Workload Ratio (%) Total Workload Ratio (%)
+Min Max Average Proposed Min Max Average Proposed Min Max Average Proposed
+00–01 17 75 37 37.00 20 39 32 26.50 55 80 68 63.50
+01–02 13 72 36 31.75 25 38 32 22.00 46 66 56 53.75
+02–03 18 70 38 29.25 25 37 32 16.25 43 50 47 45.50
+03–04 15 68 37 24.50 19 38 26 13.00 34 37 36 37.50
+04–05 17 64 36 27.00 8 36 21 6.75 25 37 31 33.75
+05–06 15 59 32 23.25 2 39 21 8.00 22 36 29 31.25
+06–07 14 51 29 20.00 13 40 25 15.00 20 36 28 35.00
+07–08 24 42 31 24.00 18 39 27 21.50 24 52 38 45.50
+08–09 23 35 30 25.50 30 53 41 27.50 31 65 48 53.00
+09–10 27 49 35 24.25 36 65 49 35.50 38 85 62 59.75
+10–11 23 50 35 17.50 37 62 51 38.50 45 87 66 56.00
+11–12 19 50 35 17.50 42 70 56 40.50 50 92 71 58.00
+12–13 17 49 33 21.50 40 51 47 39.00 52 89 71 60.50
+13–14 16 49 33 24.75 36 60 49 35.50 54 85 70 60.25
+14–15 16 52 35 27.00 35 68 52 33.50 55 87 71 60.50
+15–16 17 49 35 24.00 33 70 53 34.75 57 82 70 58.75
+16–17 26 43 37 27.50 35 62 52 35.00 63 78 71 62.50
+17–18 37 39 38 41.50 20 60 39 26.75 67 75 71 68.25
+18–19 32 49 39 45.00 10 63 37 26.00 70 73 72 71.00
+19–20 23 54 35 45.50 9 67 38 25.50 62 77 70 71.00
+20–21 22 58 36 45.50 8 62 37 26.50 63 83 73 72.00
+21–22 21 61 38 41.00 7 61 37 29.25 63 87 75 70.25
+22–23 17 64 38 40.50 6 55 35 26.00 61 89 75 66.50
+23–24 16 69 40 42.00 2 45 29 21.00 56 80 68 63.00
+Fig. 2. Adopted Quarter-Hour Workload Ratios Over 24 Hours
+across facilities. The exact 96 quarter-hour input rows are
+supplied in Supplementary Section S1 and the accompanying
+data files.
+Categorising the deferral flexibility of IT workloads, defined
+as the proportion of workloads that can be shifted and the max-
+imum duration by which they can be postponed, is essential
+for developing effective load-shifting strategies. Drawing on
+insights from various studies [1], [12], a representative set of
+deferral windows applicable to flexible IT workloads over a
+24-hour period is defined and summarised in Table IV.
+Table IV presents hourly mean shares of flexible workloads
+across the four delay tranches: tranchek= 1permits a final
+execution-interval start 30 minutes after arrival,k= 260
+minutes,k= 32 hours, andk= 43 hours. The percentages
+Table IV
+HOURLYMEANTRANCHESHARES IN THEADOPTEDQUARTER-HOUR
+INPUTS(%)
+Tranche Deferral Time
+00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+k= 10≤30 min27.50 23.25 29.25 45.00 31.25 18.75 27.50 23.25 29.25 45.00 31.25 18.75 27.50 23.25 29.25 45.00 31.25 18.75 27.50 23.25 29.25 45.00 31.25 18.75k= 20≤60 min20.50 20.75 18.50 22.50 18.75 16.50 20.50 20.75 18.50 22.50 18.75 16.50 20.50 20.75 18.50 22.50 18.75 16.50 20.50 20.75 18.50 22.50 18.75 16.50k= 30≤2 h18.25 15.00 14.25 17.50 22.50 23.50 18.25 15.00 14.25 17.50 22.50 23.50 18.25 15.00 14.25 17.50 22.50 23.50 18.25 15.00 14.25 17.50 22.50 23.50k= 40≤3 h33.75 41.00 38.00 15.00 27.50 41.25 33.75 41.00 38.00 15.00 27.50 41.25 33.75 41.00 38.00 15.00 27.50 41.25 33.75 41.00 38.00 15.00 27.50 41.25
+represent the relative distribution within the flexible workload.
+The solver uses the recorded quarter-hour fractions, rather
+than expanding these hourly means. Figure 2 shows the
+flexible and inflexible arrival utilisation. Together these profiles
+capture the time-dependent and duration-sensitive workload
+assumptions. A final eligible interval closes 15 minutes after
+its start: for example, a three-hour class arriving at noon may
+execute in the interval 15:00–15:15. Thus the class names
+denote deferral between interval starts, not continuous-time
+completion deadlines.
+1) IT Power Consumption Model:In the literature, various
+approaches exist for modelling the power consumption of
+IT equipment, particularly servers. Given that server power
+consumption often constitutes the dominant portion of the total
+IT power draw, other components are frequently disregarded,
+and server power consumption is typically taken as a proxy for
+the overall IT power consumption. Numerous linear and non-
+linear models have been developed to represent server power
+consumption. A fundamental and widely accepted principle
+is that server power consumption is strongly correlated with
+its CPU utilisation. Based on this principle, Equation 1 was
+used in this study to estimate the electric power consumption
+associated with the IT workload [28], [34].
+P IT(t) =P IT
+idle + (PIT
+max −P IT
+idle)×u(t) 1.32 (1)
+Therefore, the flexibility provided through IT workload
+shifting fundamentally depends on the rescheduling of CPU
+utilisation over time.
+The core principle of workload shifting employed in this
+article relies on the concept of constant computational de-
+mand for each job. This demand, denoted asR, is defined
+by the required CPU resources and the duration for which
+they are needed. Representing computational demand as the
+product of CPU utilisation and execution duration is a common
+approximation in aggregate workload modelling, because the
+total amount of computational work can be interpreted as the
+accumulation of processor occupancy over time [12], [28],
+[31]. For example, a workload operating at 50% utilisation
+for two hours produces an equivalent computational demand
+to a workload operating at 100% utilisation for one hour.
+This abstraction is appropriate at the facility level considered
+here, where the modelling target is total processor occupancy
+over time rather than the instruction-level execution path of
+individual jobs. Execution can be at a lower or higher CPU
+utilisation for a longer or shorter duration respectively. In all
+cases, the IT job must be fully executed within the maximum
+delay tolerance defined by its tranche. The crucial relationship
+of constant computational demand for a given IT job is
+mathematically represented in Equation 2 and conceptually
+DATA CENTRE FLEXIBILITY 8
+Fig. 3. Constant Computational Demand (R) with Varying CPU Utilisation
+and Duration
+illustrated in Figure 3.
+R=u(t)×∆T(2)
+As depicted in Figure 3, a job with a constant computational
+demandR, can be executed over varying time frames∆T,
+by adjusting the allocated CPU utilisationu(t). Decreasing
+CPU utilisation extends the job’s duration, while increasing
+it shortens the duration, all while maintaining the same total
+computational demand (R). Consequently, the power con-
+sumption profile corresponding to the CPU utilisation changes
+accordingly. By strategically increasing or decreasing CPU
+utilisation in response to system requirements or grid signals,
+the associated power consumption can be modulated, enabling
+the provision of downward or upward flexibility, respectively.
+2) IT Workload Formulation:The IT workload formulation
+presented in this paper accounts for both flexible and inflexible
+job types and incorporates the power consumption model
+formulated in Equation 1. The formulation is discretized into
+15-minute time slots. Each annual solve covers a local day
+Td and a 3 hour look-ahead, together denotedT ext
+d . For
+readability,TandT ext below denote the current core and
+extended horizon. Work already unfinished at the opening
+boundary is included with its original arrival and deferral limit.
+New workload arrivals and full facility power are represented
+throughout the look-ahead.
+The model conceptualises all servers of the entire DC as
+a single representative server, treating all IT workloads as if
+processed by a single computational unit. This simplification
+enables a tractable yet representative analysis of IT workload
+deferral at the system level.
+The flexible IT workloads are decomposed into tranches as
+shown in Table IV, with each tranche representing the portion
+of the jobs that can be shifted up to a specified maximum delay
+duration. The primary decision variable isu(t, k, s), which
+denotes the CPU utilisation of tranchek, of a job originating
+at slott, including carried arrivals and arrivals in the extended
+horizon, which is executed at time slots∈W t,k. IT workload
+shifting and execution is achieved while satisfying constraints
+(3)–(11).
+The allocated CPU utilisation for any tranche must be non-
+negative and cannot exceed the maximum capacity, as shown
+in (4). The base IT power and energy consumption (i.e.,
+without optimisation) are calculated as shown in (5) and (6),
+respectively. Without load shifting, the workload in the main
+24 hour period consists of both inflexible jobs and flexible
+jobs that are executed at their time of arrival.
+Under the load shifting scenario, the optimised power and
+energy consumption are calculated using (3) and (7). Full IT
+power is modelled in both the committed day and the look-
+ahead; baseline power is not subtracted from extension-period
+demand. This ensures that future work, cooling and storage
+interact through the same physical power balance. Annual
+settlement subsequently counts only committed intervals, as
+described in Section IV-B1.
+LetA d denote the arrival/tranche pairs present in a horizon:
+unfinished cohorts carried from earlier days and new arrivals
+throughoutT ext
+d . Their currently available CPU-hours are
+At,k,d, equal to original workR tαt,k for a new cohort and
+to its residual work for a carried cohort. LetW t,k contain the
+eligible intervals within the current horizon andL d its final
+interval start. In (3), only eligible pairs contribute to execution
+at slots. The same four-segment interpolation bfof Equation 1
+is used in both scenarios. Its implementation is specified in
+Section IV-B.
+IT jobs cannot be scheduled before their arrival or after their
+delay window, which is ensured by (8). While performing IT
+workload shifting, it is essential to ensure that all jobs are ex-
+ecuted and completed within their maximum delay tolerance.
+These conditions are satisfied through (9) and (10). Constraint
+(9) ensures that the fractionsα t,k assigned to each tranche "k"
+of a job sum to one, distributing the entire job demand across
+its tranches. Constraint (10) requires completion when the final
+eligible interval lies within the horizon; otherwise it limits
+processing to the available work. Only execution in committed
+intervals reduces the work carried to the next day, so advisory
+look-ahead processing is never counted as completed work.
+Finally, constraint (11) enforces per-time-slot CPU capacity.
+At each slots, the CPU utilisation equals the inflexible load
+plus the contributions of all eligible flexible tranches. The
+summed utilisation is bounded byu max, ensuring no schedule
+exceeds the available CPU capacity at the time of execution.
+B. UPS ESS Mathematical Model and Constraints
+The key decision variables in this model are the state
+of charge (E UPS(t)), the charging and discharging powers
+(P UPS
+ch (t),P UPS
+disch(t)), and their corresponding binary status
+indicators (z UPS
+ch (t),z UPS
+disch(t)). The dynamic operation of a
+UPS ESS, transitioning from timettot+ ∆t, is governed by
+the set of equations and inequalities shown in (12)–(19).
+The energy level of the batteries at the end of time interval
+tis calculated based on the charging and discharging power
+applied during that interval, as formulated in Equation (12)
+[35]. The energy level of the batteries must be maintained
+within their predefined operational boundaries as shown in
+(13) [35]. The SoC limits prevent overcharging and deep
+discharging, as illustrated in (14). Furthermore, the opening
+DATA CENTRE FLEXIBILITY 9
+P IT
+opt(s) = bf
+
+uinflex(s) +
+X
+(t,k)∈Ad:s∈W t,k
+u(t, k, s)
+
+ , s∈T ext.(3)
+0≤u(t, k, s)≤u max,(t, k)∈ A d, s∈W t,k (4)
+P IT
+base(s) = bf
+ 
+uinflex(s) +u flex,base(s)
+
+(5)
+EIT
+base(t) = ∆t·P IT
+base(t),∀t∈T ext (6)
+EIT
+opt(t) = ∆t×P IT
+opt(t),∀t∈T ext (7)
+u(t, k, s) = 0ifs < tors > t+D k,(t, k)∈ A d (8)X
+k∈K
+αt,k = 1for each new arrivalt(9)
+X
+s∈Wt,k
+u(t, k, s)∆t
+(
+=A t,k,d, t+D k ≤L d,
+≤A t,k,d, t+D k > L d, (10)
+uinflex(s) +
+X
+(t,k)∈Ad:s∈W t,k
+u(t, k, s)≤u max, s∈T ext.
+(11)
+EUPS(t+ ∆t) =E UPS(t) + (ηUPS
+ch ·P UPS
+ch (t)·∆t)− P UPS
+disch(t)
+ηUPS
+disch
+·∆t
+
+,∀t∈T ext (12)
+EUPS
+min ≤E UPS(t)≤E UPS
+max ,∀t∈T ext (13)
+EUPS
+min =SoC min ·E UPS
+base , E UPS
+max =SoC max ·E UPS
+base (14)
+EUPS
+d+1,start =E UPS
+d,core end , E UPS
+1,start =E UPS
+base .(15)
+zUPS
+ch (t)·P UPS
+ch,min ≤P UPS
+ch (t)≤
+zUPS
+ch (t)·P UPS
+ch,max,∀t∈T ext (16)
+zUPS
+disch(t)·P UPS
+disch,min ≤P UPS
+disch(t)≤
+zUPS
+disch(t)·P UPS
+disch,max,∀t∈T ext (17)
+zUPS
+ch (t) +z UPS
+disch(t)≤1,∀t∈T ext (18)
+P UPS
+net (t) =P UPS
+ch (t)−P UPS
+disch(t),∀t∈T ext (19)
+energy of each day equals the preceding committed closing
+energy, as specified in (15). Initial UPS energy is 600 kWh
+and the operational lower bound retains a 50% reserve. No
+daily cyclic recharge is imposed.
+The charging and discharging powers are constrained within
+the allowable limits of the UPS ESS, as shown in (16) and
+(17). Equation (18) guarantees that charging and discharging
+do not occur simultaneously [35]. Net Power, as shown in (19),
+is defined as the difference between charging and discharging
+power, and is a single, signed variable representing the total
+instantaneous power exchange in the UPS. This allows for a
+physically accurate constraint on the UPS converter, whether
+it is charging from the grid or powering the IT equipment to
+reduce the grid load. Discharge cannot exceed IT demand, and
+the facility does not export electricity. [36].
+This constraint model effectively captures the physical lim-
+itations of the power converter. If the battery is charging, then
+P UPS
+disch(t) = 0andP UPS
+net (t) =P UPS
+ch (t). If it is discharging,
+thenP UPS
+ch (t) = 0andP UPS
+net (t) =−P UPS
+disch(t). If idle, both
+powers are zero.
+C. Cooling System Model
+This section models DC cooling infrastructure to assess its
+flexibility potential. The methodology is based on the validated
+thermodynamic model by Cupelli et al. [37], which is adapted
+in this work by incorporating a Thermal Energy Storage (TES)
+tank and scaling the parameters for a 1 MW IT capacity data
+centre. Although modern deployments increasingly reach the
+100 MW scale, the 1 MW case is retained as a normalised
+unit that keeps the coupled optimisation transparent and allows
+the flexibility results to be interpreted per MW of IT capacity;
+transfer to a larger facility remains conditional on its workload,
+equipment ratios and operating limits. Flexibility is harnessed
+from two primary sources. The TES tank, which provides
+downward flexibility by charging (increasing electrical load)
+and upward flexibility by discharging (allowing the chiller to
+reduce its load). The second is the inherent thermal mass
+of the DC components, such as the IT servers, racks, and
+air in the DC. By allowing temperatures to fluctuate within
+their component-specific bounds (cold aisle18–23degrees),
+the masses act as a thermal buffer. The thermal buffer allows
+the chiller’s power consumption to be modulated within the
+modelled IT operating limits. Gross cooling is additionally
+constrained to be at least IT heat generation; this adopted rule
+limits the amount of flexibility credited to thermal accumula-
+tion. The cooling system of the DC is considered a closed-loop
+thermodynamic system where a central chiller provides cooled
+water to a CRAC unit, either directly or via the TES tank. This
+air is circulated through the DC to remove heat generated by
+the IT equipment, with a constant air mass flow rate,˙m a. The
+chiller is considered the main variable electrical load, while the
+power consumption of auxiliary components is treated as the
+constant overheadP Grid
+OD . The governing equations describing
+the system’s thermal dynamics and operational constraints are
+presented below.
+Equation (20) represents the overall thermal energy balance,
+where the rate of change of energy stored in the DC’s thermal
+masses (aisles, racks, ITE) equals the net heat flow from
+the environment, ITE, and cooling system, whereQ out(t) =
+Gcd(Tout −T CA(t+ 1)). It is assumed that all ITE electrical
+power converts to heat, i.e.,P IT(t) =Q IT(t). The discrete-
+time temperature dynamics for the supply air, ITE, racks,
+cold aisle, and hot aisle are governed by Equations (26)
+through (30), employing an implicit backward Euler method.
+Heret+ 1denotes the boundary after intervalt(the same
+boundary ast+ ∆tin the UPS equation). In Equation (20),
+DATA CENTRE FLEXIBILITY 10
+QCA(t) +Q HA(t) +Q R(t) +Q IT m(t) =Q out(t) +Q IT(t)−κQ cool(t), t∈T ext (20)
+Qcool(t) =Q Chil-CRAC(t) +Q TES-CRAC(t),∀t∈T ext (21)
+QChil-CRAC(t) =P Chil-CRAC(t)·COP chiller,∀t∈T ext (22)
+QChil-TES(t) =P Chil-TES(t)·COP chiller,∀t∈T ext (23)
+P Chil-CRAC(t) +P Chil-TES(t)≤P Chiller
+max ,∀t∈T ext (24)
+ETES(t+ 1) =E TES(t) + [ηTES
+ch QChil-TES(t)−Q TES-CRAC(t)/ηTES
+dis ]∆t, t∈T ext (25)
+TAin(t) =T HA(t+ 1)−Q cool(t)/( ˙macpa), t∈T ext (26)
+TIT (t+ 1) =T IT (t) + 3600∆t
+CIT
+[P IT(t)−G cv(TIT (t+ 1)−T R(t+ 1))], t∈T ext (27)
+TR(t+ 1) =T R(t) + 3600∆t
+CR
+[ ˙maκcpa(TCA(t+ 1)−T R(t+ 1)) +G cv(TIT (t+ 1)−T R(t+ 1))], t∈T ext (28)
+TCA(t+ 1) =T CA(t) + 3600∆t
+CCA
+[ ˙maκcpa(TAin(t)−T CA(t+ 1))−G cd(TCA(t+ 1)−T out)], t∈T ext (29)
+THA(t+ 1) =T HA(t) + 3600∆t
+CHA
+[ ˙maκcpa(TR(t+ 1)−T HA(t+ 1))], t∈T ext (30)
+P IT(t)≤Q cool(t)≤(T HA(t+ 1)−T CA,min) ˙macpa, t∈T ext (31)
+0≤Q Chil-TES(t)≤z Chil-TES(t)·Q Chil-TES
+max ,∀t∈T ext (32)
+0≤Q TES-CRAC(t)≤z TES-CRAC(t)·Q TES-CRAC
+max ,∀t∈T ext (33)
+zChil-TES(t) +z TES-CRAC(t)≤1,∀t∈T ext (34)
+ETES
+d+1,start =E TES
+d,core end , E TES
+1,start = 0.5ETES
+max (35)
+0≤E TES(t)≤E TES
+max ,∀t∈T ext (36)
+Tj,min ≤T j(t)≤T j,max,∀j∈ {Ain, CA, R, IT, HA},∀t∈T ext (37)
+Qj(t) =C j[Tj(t+ 1)−T j(t)]/(3600∆t)and the effective
+cooling of the represented nodes isκQ cool, consistent with
+the calibrated airflow factor in the state equations.
+The primary distinction between the equation for cold aisle
+temperature (29) and hot aisle temperature (30), stems from
+the modelled hot aisle containment, which prevents any heat
+loss from the hot aisle to the external environment. Equation
+(21) shows the total cooling power is the sum of contributions
+from the CRAC and the discharging TES. Equations (22)
+and (23) relate the chiller’s electrical power consumption to
+the thermal cooling delivered, governed by its Coefficient of
+Performance (COP chiller). The chiller’s total power draw is
+capped by constraint (24). The cooling power is limited by
+(31) to prevent overcooling the cold aisle. The TES state of
+charge is updated by Equation (25), accounting for charg-
+ing/discharging efficiencies. The operational limits of the TES
+are defined in (31) through (34), which set maximum power
+levels and prevent simultaneous charging and discharging. The
+TES energy level is constrained by (36), while (35) passes
+the committed closing state to the next day, without requiring
+a daily return to the initial state. To ensure safe operation,
+constraint (37) enforces the upper and lower temperature
+bounds for all thermal components, including the final state
+boundary. Initial IT, rack, cold-aisle and hot-aisle temperatures
+are(28.5,26,20,27) ◦C; subsequent daily openings inherit all
+four states. Storage energy bounds also apply at the final
+boundary.
+IV. CASESTUDIES: INTEGRATEDDC MODEL
+This section evaluates the integrated operation of a data
+centre in which IT workload scheduling, UPS ESS dispatch,
+and cooling/TES control are co-optimised. Building on the
+component models in Section 3, a whole-facility formulation is
+assembled, linked by electric and thermal coupling constraints,
+and tested under realistic price signals. The scenarios are
+designed to answer two questions: (i) using cost-optimised
+operation as a baseline, how long can a requested upward or
+downward power deviation be sustained, for any given start
+time, while meeting the modelled workload and operating
+constraints; and (ii) to what extent can an integrated optimum
+energy management algorithm reduce annual electricity cost?
+This two-step approach models a realistic scenario where an
+operator first determines their daily operating schedule and
+then assesses the remaining capacity for flexibility services.
+The annual analysis measures electricity-cost savings; addi-
+tional service revenue is not calculated. The overall workflow
+linking the three scenarios, their inputs and their outputs is
+summarised in Figure 4.
+A hypothetical data centre with 1 MW IT capacity and as-
+sociated infrastructure is considered. Annual electricity prices
+are the 2025 Great Britain day-ahead Intermittent Market
+Reference Prices (IMRP) published by the Low Carbon Con-
+tracts Company [38]. Each hourly price is applied to four
+quarter-hour intervals, retaining negative values. Table V gives
+prices for the selected illustrative day, 22 September 2025;
+DATA CENTRE FLEXIBILITY 11
+Inputs
+day-ahead pricesπ(t);
+workload ratios and deferral
+tranches (Tables III and
+IV); UPS, TES, cooling and
+thermal parameters (Table I)
+Scenario 1: base cost
+workload at arrival; storage
+idle; cooling optimised
+→benchmark cost
+Scenario 2: cost minimisation
+linked daily MILPs over
+2025; full-site 3 h look-ahead
+→optimised schedule,
+cost saving and baseline
+grid powerP Grid
+base (t)
+Scenario 3: flexibility duration
+for each(t 0,∆P): binary
+search overτvia repeated
+MILP feasibility solves
+with recovery window
+Outputs
+τ(t 0,∆P)heatmap; per-
+asset flexibility decomposition
+Outputs
+cost saving and component cost
+breakdown; sensitivity analysis
+Fig. 4. Workflow of the three-scenario optimisation and flexibility assessment. Scenario 1 provides the workload-at-arrival cost benchmark, Scenario 2
+establishes the cost-optimised baseline, and Scenario 3 identifies certified feasible flexibility durations for each requested start time and power deviation while
+enforcing recovery.
+Table V
+DAY-AHEADREFERENCEPRICES ON22 SEPTEMBER2025
+Hour 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+Price (GBP/MWh)60.37 58.18 55.13 53.29 54.32 68.13 94.75 105.38 103.19 87.89 79.76 71.95 69.94 65.74 71.41 73.49 81.35 100.79 125.83 124.39 110.42 88.80 83.04 82.69
+annual costs use all 365 days. The final look-ahead uses
+actual 1 January 2026 prices rather than repeating an earlier
+day’s prices. All principal parameter values remain detailed in
+Table I. The 1 MW value is the IT rating, while the structural
+grid-import bound is 1,723.095 kW including cooling, UPS
+charging and auxiliaries. Workload profiles repeat by local
+clock time, with fixed ambient temperature and COP.
+A. Scenario 1: Base Cost Calculation
+This scenario calculates the overall cost with workload
+executed at arrival and without UPS or TES dispatch, while
+cooling is cost optimised within the same thermal limits as
+Scenario 2. The purpose of this scenario is to define a base
+case that provides a benchmark for measuring the potential
+savings achieved through demand side flexibility. The total
+DC electricity cost is defined as:
+X
+t∈T
+ 
+P Grid
+IT (t) +P Grid
+OD +P Chil-CRAC(t)
+
+·∆t·π(t)/1000,
+(38)
+P Grid
+OD =γ OD · P
+legacy
+IT+cool = 0.07×758.5 = 53.095 kW
+(39)
+whereπ(t)is the signed day-ahead reference price at time
+(t)in GBP/MWh; the factor1/1000converts kW to MW. The
+expression is settled over each committed day and summed
+over 2025. The UPS and TES tank are not utilised and so incur
+no dispatch electricity cost in this scenario. The auxiliary-
+device powerP Grid
+OD is a fixed overhead assumption rather
+than an optimisation decision: it was calibrated as a fraction
+γOD = 0.07(7%) of an earlier daily base-case IT-plus-
+cooling mean of 758.5 kW, giving the constant value reported
+in Table I, and it is held constant in all scenarios rather
+than recalculated from annual operation. Additionally, all IT
+workload executes at arrival, while temperatures evolve within
+the same bounds as in the coordinated case. These adaptations
+isolate the additional benefit of workload shifting and storage
+coordination beyond cost-optimised cooling.
+B. Scenario 2: Cost Minimisation
+This scenario calculates the cost-optimised operating condi-
+tions by shifting IT workloads over time, utilising the UPS as
+an energy storage system (ESS), and leveraging the thermal
+mass of the DC and TES tank for energy storage. This
+optimisation is highly dependent on the electricity pricing
+mechanism. In this study, a set of day-ahead spot electricity
+prices is utilised, and the annual price variation is repre-
+sented directly, while resource sensitivities are evaluated in
+Section IV-H. The objective function is to minimise the DC
+total electricity cost, as defined in Equation (40). This is
+subject to some additional constraints presented in Equations
+(41-42). Equation (41) ensures that the power supplied to the
+IT equipment from the grid and the UPS sums to the optimised
+IT power demand (P IT
+opt(t)), which is defined in Equation (3).
+Power from auxiliary devices,P Grid
+OD , is kept constant at the
+value defined in Scenario 1, so it is included in the objective
+but is not an optimisation decision. Equation (42) enforces the
+non-negativity of all power variables.
+Note that the objective explicitly includes grid with-
+drawals (e.g.P Grid
+IT (t)) and charging powers (e.g.P UPS
+ch (t),
+P Chil-TES(t)). UPS dischargeP UPS
+disch(t)therefore does not
+appear directly in the cost sum; its economic effect is realised
+implicitly through Equation (41), which reducesP Grid
+IT (t)
+when the UPS discharges.
+The resulting optimisation problem is a Mixed-Integer Lin-
+ear Program (MILP), as it includes binary variables for the
+UPS charging/discharging status and TES operation alongside
+continuous power, energy, temperature and CPU-utilisation
+decision variables. In this scenario, the integrated DC model is
+used in linked daily MILP optimisations over the full year. To
+maintain the model’s linearity, the non-linear function in Equa-
+tion 1 is linearized using a piecewise linear approximation.
+This technique approximates the non-linear curve with a series
+of connected line segments. The implemented four segments
+have breakpointsb i = (i/4)1.5,i= 0, . . . ,4, and use Pyomo’s
+DLOG representation; the maximum approximation error is
+6.241 kW (0.624% of rated IT power). Scenario 1 evaluates the
+identical interpolation at its fixed utilisation. The model was
+DATA CENTRE FLEXIBILITY 12
+min
+X
+t∈T ext
+ 
+P Grid
+IT (t) +P Grid
+OD +P UPS
+ch (t) +P Chil-CRAC(t) +P Chil-TES(t)
+
+·∆t·π(t)/1000,(40)
+P IT
+opt(t) =P Grid
+IT (t) +P UPS
+disch(t),∀t∈T ext (41)
+0≤P Grid
+IT (t), PGrid
+OD , PUPS
+ch (t), PChil-CRAC(t), PChil-TES(t),∀t∈T ext (42)
+implemented in Python using the Pyomo modelling library
+and solved using HiGHS. The retained run record identifies
+Python 3.12.0, Pyomo 6.10.1 and HiGHS 1.15.1 on Windows
+11 with an AMD Ryzen 7 9800X3D. The standard daily time
+limit is 300 s and requested relative MILP gap 0.1%; feasible
+time-limited solutions and diagnostic checks are disclosed in
+Supplementary Section S5. These linked solves are not a single
+globally optimal year-long programme.
+1) Annual operation and cost accounting:Scenarios 1 and
+2 are evaluated over all 365 local days of 2025. Each solve
+contains the local-day coreT d and twelve look-ahead intervals,
+with full workload arrivals, cooling and storage operation
+throughout. Only core decisions are committed. The next day
+inherits UPS and TES energy, all four temperatures and each
+unfinished arrival/tranche pair with its original execution win-
+dow. Look-ahead controls are reoptimised; their trial execution
+is not counted as completed work.
+For a cohort available in dayd, its committed residual is
+At,k,d+1 =A t,k,d −
+X
+s∈Td∩Wt,k
+u(t, k, s)∆t,(43)
+provided it has arrived before the next core boundary. New
+look-ahead arrivals are generated afresh when their arrival
+day is processed. Physical time follows a continuous UTC
+timeline; local-day and workload labels use Europe/London.
+Normal days have 96 committed intervals, with 92 and 100 on
+daylight-saving transitions. The resulting year contains 35,040
+quarter-hours.
+Annual settlement counts each committed interval once:
+C(i)
+year =
+365X
+d=1
+X
+t∈Td
+P Grid,(i)(t)π(t)∆t/1000,(44)
+wherei= 1,2. The percentage saving is100(C (1)
+year −
+C(2)
+year)/C(1)
+year. Overlapping look-ahead costs are excluded until
+their intervals become committed. Actual prices for the first
+three hours of 1 January 2026 supply the final continuation;
+these intervals are outside 2025 settlement. No terminal stor-
+age credit is imposed. Supplementary Section S2 details the
+procedure and year-end workload treatment, and Section S5
+records existing terminal and solver checks.
+This retrospective annual assessment uses known inputs
+within each daily horizon. It avoids extrapolating a single day’s
+savings, while leaving forecast uncertainty, network tariffs,
+battery degradation and flexibility-service revenues outside the
+objective. The event assessment uses the resulting operating
+trajectory; the rolling procedure provides temporal coverage
+and continuity rather than the paper’s principal methodological
+contribution.
+C. Scenario 3: Flexibility Duration Calculation
+The third scenario evaluates the data centre’s capacity to
+provide flexibility in response to a direct grid signal. This
+approach models a realistic situation where the grid operator
+requests a specific magnitude of power change for a certain
+duration, for example during planned balancing events or un-
+foreseen emergencies. The optimised baseline from Scenario
+2 is taken and from it a certified feasible duration for which
+the DC can sustain specified levels of flexibility magnitude
+is determined. This is calculated at any given time slot over
+the 24-hour period. Here, flexibility magnitude,∆P(kW), is
+defined as the power deviation from the optimised baseline;
+with upward flexibility (load reduction) represented by nega-
+tive magnitudes and downward flexibility (load increase) by
+positive magnitudes. For each combination of start timet 0 and
+requested flexibility magnitude∆P, a continuous periodτis
+identified over which the system can track a correspondingly
+modified grid-power trajectory while maintaining operational
+feasibility and respecting all physical and thermal constraints.
+This temporal measure of flexibility provides a key input for
+assessing the DC’s potential participation in demand-response
+schemes and ancillary-services markets by quantifying its
+ability to meet specific grid needs.
+The flexibility analysis takes the optimised baseline from
+Scenario IV-B as the reference trajectory and fixes the initial
+states at the chosen start timet 0. Each IT job may already have
+been shifted by a variable amount, so its remaining flexibility
+is its original execution window less the time already elapsed.
+The original four classes are retained, but unfinished work is
+tracked for each arrival/tranche pair rather than aggregated into
+new delay classes. Equations 45 and 46 express the remaining
+eligible execution window. This prevents a job that has already
+been deferred from receiving a fresh full deferral allowance.
+Another constraint added to the formulation described in
+Section III is the core requirement to deviate the power drawn
+from the grid, relative to the Scenario 2 baseline, at the
+requested level over the chosen window. Denoting the baseline
+grid power draw asP Grid
+base (t)and the new grid power draw as
+P Grid(t), the flexibility constraint is given in (47).
+K={1,2,3,4},(t, k)∈ A t0 (45)
+W event
+t,k ={s: max(t, t 0)≤s≤t+D k} ∩T event (46)P Grid(t)−P Grid
+base (t)−∆P
+ ≤P tol, t 0 ≤t < t 0 +τ.
+(47)
+For each start timet 0 and flexibility magnitude∆P, the
+feasibility of providing the given∆Pis tested over a series
+of durations. The optimisation described in Scenario 2 is run
+for each duration over the event and a further twelve-slot
+DATA CENTRE FLEXIBILITY 13
+(three-hour) recovery window. The flexibility constraint in
+Equation 47 applies only during service delivery. During re-
+covery, all physical, thermal, storage and workload constraints
+continue to apply but the grid-power deviation is no longer
+enforced. At recovery boundaryH=t 0 +τ+ 3h, UPS
+and TES energy must be at least their undisturbed Scenario 2
+values, each of the four temperatures must be within0.05 ◦C
+of its corresponding value, and every cohort’s unfinished
+work must be no greater than its undisturbed residual plus
+10−7 CPU-hours. Recovery work remains schedulable within
+its original execution windows; it is not all reclassified as
+inflexible. These comparative conditions prevent additional
+depletion or unfinished work from being left beyond recovery.
+If an audited feasible solution is found for a given duration
+τ, the DC can provide that level of flexibility for the given
+duration. The same feasibility test is then repeated for a longer
+duration; shorter candidates are explored after unsuccessful tri-
+als. The duration is modified using a logarithmic search, with
+an adjacent-duration check. Candidate durations are multiples
+of 15 minutes and capped at twelve hours or the remaining
+local day. An unresolved solve is not proof of infeasibility.
+Moreover, changingτchanges the recovery boundary and
+its reference states, so adjacent checks do not prove that
+all longer durations are infeasible. The results are therefore
+certified feasible durations found by the search, with cap-
+reaching and unresolved-next-step cases identified separately.
+Supplementary Section S3 gives the full procedure and status
+conventions.
+The assessment uses 22 September 2025, selected by the
+smallest standardised distance to twelve annual daily price,
+demand, cost, utilisation and opening-state features among
+eligible 96-slot days. Starts are sampled hourly; requests are
+−100to−500kW in 50 kW steps and+25,+50and+75
+kW, giving 288 combinations. Each event inherits the actual
+coordinated state and cohort ledger, without preconditioning.
+All scenarios retain the same18–23 ◦C cold-aisle bounds. The
+selected day illustrates state-dependent capability; it does not
+measure annual service availability.
+D. Sensitivity Analysis Design
+To assess the dependence of the cost-optimisation results
+on resource assumptions, a one-at-a-time (OAT) sensitivity
+analysis is performed around the base case, covering the
+IT load flexibility ratio and equipment sizing. The flexible
+workload share is scaled by moving load between the flexible
+and inflexible pools while preserving the total CPU demand in
+every time slot, so that the flexibility share is isolated from the
+demand level; at high multipliers the share saturates in slots
+that are already almost fully flexible. The TES and UPS energy
+capacities are scaled while keeping their charge/discharge
+power limits unchanged, isolating the sizing of the energy
+buffers. Multipliers are0.5,0.75,1.25and1.5, with the
+shared central case completing each curve. All cases cover 365
+days and use the same workload-at-arrival annual comparator.
+Storage initial energy fractions and the 50% UPS reserve
+fraction are preserved as capacities change. Annual observed
+prices replace the earlier separate price-volatility perturbation.
+The results are presented in Section IV-H. Additional UPS
+savings are compared with annualised incremental investment,
+using a capital recovery factor; the main results give a compact
+screen and Supplementary Section S6 states its assumptions.
+E. Scenario 1 and 2: Operating Profiles
+Figure 5 juxtaposes power and workload profiles in sub-
+figures (a) and (b) to highlight optimisation impacts on the
+selected day, 22 September 2025. Subfigure (a) shows the
+base and optimised grid power of the DC and the day-ahead
+electricity reference price. Subfigure (b) shows the combined
+CPU utilisation of all the servers in the DC over time.
+The dashed reference shows the CPU utilisation before IT
+workload shifting has taken place. The stacked areas show
+CPU utilisation after IT workload shifting. The grey area
+shows the inflexible workload which cannot be shifted, and the
+blue area shows flexible workload as executed; the green line
+gives their total. The opening physical states and unfinished
+workloads are inherited from the preceding day, rather than
+reset for this illustration.
+Subfigure (a) shows how the optimisation algorithm shifts
+power consumption away from some higher-price periods.
+Subfigure (b) shows how the IT workload is rescheduled
+within its permitted execution windows. The difference be-
+tween total arrival and execution shows when work is deferred
+and subsequently processed. The y-axis shows the CPU utilisa-
+tion of all the servers in the data centre, which has a maximum
+value of 1. The shifting shown in Figure 5(b) changes both
+IT electricity demand and the heat that must be removed by
+cooling.
+The amount of load shifted to later slots illustrates the
+optimiser using the available execution windows to avoid
+higher energy prices. IT workload deferral during a period of
+rising prices is useful when prices fall within the remaining
+execution window or when other facility constraints favour the
+change. The daily pattern also depends on storage states and
+unfinished work inherited from earlier intervals. Thus a price
+profile alone does not explain every execution decision, and
+the annual cost saving cannot be inferred from this selected
+day.
+Figure 6 provides a detailed decomposition of the data
+centre’s power consumption and resource dispatch strategy
+under the cost-minimisation objective of Scenario 2. The chart
+visualises the co-optimised management of various electrical
+loads and energy storage assets over the 24 hour period.
+The positive stacked areas represent the components of power
+drawn from the grid, including IT, CRAC, and charging power
+for the energy storage systems. The negative stacked areas
+indicate UPS discharge supplying IT demand. TES discharge
+reduces the direct chiller electricity needed for cooling; it is not
+a separate electrical injection. The dotted black line represents
+the base DC power demand before optimisation, serving as a
+baseline to illustrate the impact of the flexibility measures.
+When electricity prices are favourable, the optimisation
+algorithm can draw more power from the grid than required
+in the base case. This surplus energy can charge the TES
+tank, effectively storing cooling produced with cheaper elec-
+tricity, or charge the UPS. It can also be used to process
+DATA CENTRE FLEXIBILITY 14
+(a)
+(b)
+Fig. 5. (a) Grid power and reference prices on 22 September 2025. (b) The
+corresponding IT workload arrival and execution profiles. Scenario 2 supplies
+the undisturbed trajectory for the event assessment.
+Fig. 6. Optimised DC Component Power Consumption
+eligible IT workloads, with a consequent change in CRAC
+power consumption. Conversely, grid power can be reduced
+by dispatching the TES tank and UPS and by shifting IT
+workload as shown in Figure 5(b). These decisions establish
+the operating baseline from which the following flexibility
+requests are assessed; their annual economic effect is reported
+after the physical flexibility results.
+F . Scenario 3 Results
+Scenario 3 proposes a comprehensive test to identify certi-
+fied feasible flexibility durations for a set of flexibility magni-
+tudes and start times. The resulting data is three-dimensional
+and can be effectively visualised as a heatmap. This heatmap
+is shown in Figure 7, withτrepresented by the colour and
+(t0,∆P) shown on the (x, y) axes. Each cell corresponds to
+one evaluated(t 0,∆P)pair, with the printed value giving a
+certified feasible durationτin hours. The underlying model
+operates at a 15-minute resolution; the assessed start times
+are sampled hourly across the operating day. The top three
+rows (positive∆P) correspond to downward flexibility and
+the remaining rows (negative∆P) to upward flexibility.
+Figure 7 illustrates significant variations in flexibility du-
+rationτwith start timet 0 and deviation∆P. A 100 kW
+upward request can be sustained for 1.25 h from 06:00 and 6
+h from noon; a 150 kW reduction also lasts 6 h from noon. A
+25 kW downward request reaches the twelve-hour assessment
+cap at 03:00, 10:00, 11:00 and 12:00. These changes reflect
+the specific baseline from which flexibility is provided: storage
+energy, unfinished work and thermal conditions differ between
+starts despite unchanged installed capacities.
+Another clear observation is that larger requested mag-
+nitudes generally have shorter certified durations, although
+plateaus occur. Larger deviations require more flexibility per
+time slot, while recovery also constrains the response. The
+positive and negative request ranges differ in magnitude, so
+their durations do not isolate direction from request size.
+Late-day durations are additionally limited by the end of the
+selected day. Thirteen cells have an unresolved next trial: for
+example, a 25 kW increase at 06:00 is feasible for at least
+11.25 h and a 50 kW increase for at least 8.75 h. A timeout
+does not establish an infeasible longer response, and even an
+adjacent infeasible duration does not prove global maximality
+under the moving recovery reference.
+Each of the elements in Figure 7 can be decomposed and
+visualised as a stacked bar chart. A range of these stacked bar
+charts are shown in Figures 8 and 9. The plotted decomposition
+is an accepted feasible dispatch returned by the MILP for
+the given start time, flexibility magnitude and certified dura-
+tion. The event-plus-recovery electricity-cost objective selects
+among feasible dispatches, subject to the recorded solver
+gap; the component contributions shown should therefore be
+interpreted as one economically preferred realisation of the
+flexibility provision rather than a unique physical decomposi-
+tion. In these plots, the duration is shown on the x-axis and the
+flexibility magnitude on the y-axis. Each stacked bar consists
+of the different sources of flexibility in the DC, illustrating
+how much flexibility is being provided by each DC asset
+throughout the flexibility provision. The dashed line shows the
+requested cumulative flexibility during the event. The target
+is released during the post-event region; recovery is checked
+through the terminal conditions rather than fully displayed
+in each panel. Notably, in a considerable number of time
+slots, certain DC assets change their power consumption in
+the opposite direction to what is required. The other DC assets
+compensate by adjusting their power consumption to a greater
+DATA CENTRE FLEXIBILITY 15
+Fig. 7. Flexibility provision magnitude and duration. Cell values are certified feasible durationsτin hours for each start timet 0 (x-axis) and requested
+power deviation∆P(y-axis). Positive∆P(top three rows) denotes downward flexibility (load increase) and negative∆Pdenotes upward flexibility (load
+reduction). A plus sign marks an unresolved next 15-minute trial. Blank cells have no positive duration certified by the search; twelve-hour and local-day-end
+values are assessment-capped.
+Fig. 8. DC component contributions to upward flexibility (negative∆P). The
+four panels are arranged in a 2-by-2 grid: rows correspond to the requested
+flexibility magnitudes (−100and−200kW, top to bottom) and columns
+to the start times (06:00, left; 15:00, right). Colours show the flexibility
+contribution of each DC asset.
+extent, ensuring that the desired net flexibility magnitude is
+achieved. This is visible in the charts, where the stacked bars
+include both negative and positive components. This effect
+clearly illustrates the DC assets working in conjunction to
+achieve the desired net effect in the data centre.
+Figure 8 presents the upward flexibility (negative∆P)
+results as four stacked bar charts arranged into a 2-by-2
+grid, in which the rows correspond to the requested flexibility
+magnitudes (−100and−200kW) and the columns to the
+start times (06:00 and 15:00). The colours show how much
+flexibility each DC asset is providing. Figure 8 shows that
+τdepends strongly on∆Pandt 0. It is intuitive that the
+larger the flexibility magnitude the shorter the duration it
+can be provided for.t 0 has a large impact on duration due
+Fig. 9. DC component contributions to downward flexibility (positive∆P).
+Rows correspond to the requested flexibility magnitudes (+25and+75kW,
+top to bottom) and columns to the start times (00:00, left; 06:00, right).
+Colours show the flexibility contribution of each DC asset.
+to the specific baseline from which the flexibility is being
+provided. The left-hand side of Figure 8 shows the morning
+response: the selected 100 and 200 kW reductions at 06:00 are
+provided entirely by additional UPS discharge for 1.25 h. At
+15:00, both reductions last 3 h and are provided mainly by IT
+workload deferral and reduced direct cooling. Additionally,
+cooling power reduction can take place when there is IT
+workload shifting as less heat is generated by the servers. TES
+is full and idle in the undisturbed trajectory at that afternoon
+start, so there is no TES charging to curtail. The 200 kW case
+uses IT and cooling alone, while the 100 kW case includes a
+single 37 kW UPS-discharge interval. Thus the participating
+resources change with the operating state; installed capacity
+alone does not determine which asset provides the response.
+DATA CENTRE FLEXIBILITY 16
+Figure 9 presents the downward flexibility (positive∆P)
+results, with magnitudes of+25and+75kW and start times
+00:00 and 06:00. As with the upward flexibility charts,τ
+depends strongly on∆Pandt 0. The IT workload, CRAC, TES
+charging and UPS net exchange contribute through changes
+that may reinforce or oppose one another. Eligible work can be
+executed earlier than in Scenario 2, provided that it has already
+arrived. At 06:00, the 25 kW increase lasts at least 11.25 h and
+the 75 kW increase 7.75 h. One approach could be to include
+a ‘charge up’ time before the flexibility window where earlier
+time slots could reschedule their workload to later time slots in
+the flexibility window. This is akin to the recovery time slot
+implemented after the flexibility provision. Another notable
+result is the large positive and negative magnitudes exhibited
+by different DC assets within the same timeslot. As mentioned
+previously, these assets provide opposing flexibility responses
+that cancel each other out to achieve the desired effect.
+This allows one asset to provide flexibility while the other
+“recharges” its flexibility potential, thereby demonstrating the
+value of an integrated DC model.
+G. Scenario 1 and 2: Annual Electricity Costs
+The total annual base and optimised costs are
+GBP 550,503.59 and GBP 522,702.95, respectively,
+representing a GBP 27,800.64 cost saving. This demonstrates
+that, with an appropriate management algorithm, the modelled
+data centre flexibility assets can be used for electricity-cost
+minimisation, yielding savings of 5.05%. The calculation
+includes conversion losses and preserves computational work,
+but excludes degradation, additional operating costs and
+service revenues.
+Annual grid electricity increases from 6.718 to 6.794 GWh
+(approximately 1.13%), and peak import increases from 974.9
+to 1,681.9 kW. Lower expenditure therefore does not imply
+lower electricity use or lower network peak demand. The
+valuation includes all observed 2025 prices, including 672
+negative-price quarter-hours, whereas the selected physical-
+assessment day has none. It is a reference-price electricity-cost
+comparison rather than a complete site bill or market-revenue
+calculation.
+Table VI decomposes the total annual electricity cost of both
+scenarios by component. In the base case, IT load dominates
+the cost (74% of the total), followed by cooling (19%) and the
+constant auxiliary overhead (7%). Over 2025, the optimisation
+reduces the IT electricity-cost term by GBP 15,243.51 and
+direct CRAC cooling by GBP 14,084.33. TES charging adds
+GBP 6,903.30, while net UPS exchange reduces expenditure
+by GBP 5,376.10; auxiliary expenditure is unchanged. These
+are signed accounting terms in the integrated schedule, not
+independent asset profits: TES benefits appear partly through
+reduced direct chiller demand, and the UPS term is charging
+minus discharging valued at interval prices. The net effect is
+the overall saving of GBP 27,800.64 (5.05%).
+H. Sensitivity Analysis
+Figure 10 summarises the OAT sensitivity analysis de-
+scribed in Section IV-D using the full-year electricity-cost
+Fig. 10. Change in annual saving, in percentage points from the central case,
+for one-at-a-time resource variations. Panel (a) uses the realised flexible share
+after clipping. Note the different vertical scales.
+saving. The base case yields a 5.05% saving; each curve shows
+the response when the corresponding resource parameter is
+varied between0.5×and1.5×its base value. All intermediate
+points are completed annual runs.
+The cost saving is most sensitive to the flexible workload
+share among the resource variations tested: halving the share
+reduces the saving to 3.522%, while increasing it by1.5×
+raises the saving to 6.257%. At high multipliers the realised
+share saturates in slots where all arriving work is already
+flexible. Varying UPS energy capacity between0.5×and
+1.5×changes the saving between 4.565% and 5.501%, while
+varying TES capacity over the same range changes it between
+4.800% and 5.167%. Storage power ratings remain fixed, so
+larger energy buffers do not remove charge/discharge or chiller
+limits. These results quantify dependence on the adopted
+workload and equipment assumptions rather than establishing
+robustness to all uncertainties or comparing resources at equal
+investment cost. The full annual results and solver exceptions
+are provided in Supplementary Sections S4–S5.
+1) Incremental value of larger UPS batteries:The UPS
+sensitivity addresses whether additional energy capacity could
+be justified partly by its flexibility value. Increasing the
+central 600 kWh capacity to 750 and 900 kWh produces
+additional annual electricity-cost savings of GBP 1,292.28 and
+GBP 2,481.41, respectively. With the reserve fraction fixed at
+50%, the additions of 150 and 300 nameplate kWh increase
+the operational energy window by 75 and 150 kWh. Power
+ratings remain unchanged.
+For a constant annual incremental saving∆S, additional
+annual non-electricity costO, real discount raterand lifen,
+the break-even incremental investment is
+IBE = ∆S−O
+CRF(r, n),CRF(r, n) = r(1 +r) n
+(1 +r) n −1 .(48)
+The capital recovery factor annualises initial expenditure [39].
+At an illustrative 8% real rate over ten years, withO= 0,
+the additional savings support investments of approximately
+GBP 8,671 and GBP 16,650, or GBP 57.81 and GBP 55.50 per
+added nameplate kWh. These are expenditure thresholds, not
+installed battery prices or an unconditional case for enlarge-
+ment. Installation, degradation, O&M and replacement costs
+would need to be covered, and the retained single-year savings
+are not demonstrated lifetime cash flows: initial and terminal
+energy differ between capacities. Supplementary Section S6
+gives the assumptions and alternative rate/life combinations.
+No revenue for the physical flexibility events is added to these
+electricity-cost savings.
+DATA CENTRE FLEXIBILITY 17
+Table VI
+ANNUAL SIGNED ELECTRICITY-COST COMPOSITION(GBP). CHANGES ARE COORDINATED MINUS REFERENCE;DISPLAYED VALUES ARE ROUNDED.
+Component Scenario 1 Scenario 2 Change
+IT electrical demand 407,653 392,409 -15,244
+CRAC chiller 105,337 91,252 -14,084
+TES charging chiller 0 6,903 +6,903
+UPS net grid effect 0 -5,376 -5,376
+Auxiliary overhead 37,514 37,514 +0
+Total settlement cost 550,504 522,703 -27,801
+I. Value of Integrated Co-optimisation
+The results allow the central question of what the integrated
+model reveals that separate, asset-level models would miss to
+be answered directly. First, the IT–cooling coupling: upward
+flexibility obtained by deferring IT workload produces a
+secondary reduction in cooling power because less heat is
+generated. A stand-alone IT flexibility model would omit the
+associated cooling-power change, while a stand-alone cooling
+model with fixed IT demand would not represent the deferred
+heat load. Second, the change in resource participation visible
+in Figure 8: morning reductions rely on UPS discharge,
+whereas afternoon reductions rely mainly on IT deferral and
+cooling. This temporal coordination is only visible in a model
+that schedules both assets against a common grid-power trajec-
+tory. Third, the TES buffering role: changes in direct CRAC
+cooling and TES charging interact with the other resources,
+allowing opposing responses in which one asset “recharges”
+its flexibility potential while others over-deliver, as observed
+in Figures 8 and 9. These cross-asset interactions explain why
+the feasible duration envelope depends so strongly on the
+baseline operating state, and why a duration-aware, whole-
+facility formulation is required to characterise feasible grid-
+facing responses. These dispatch mechanisms do not quantify
+an integration premium over separately optimised subsystems,
+which would require an explicit comparator.
+Finally, the scope of the grid interpretation should be noted.
+The model characterises the flexibility that the data centre
+can offer at its grid connection point; assessing the impact
+of the resulting load profile on upstream network stability or
+hosting capacity would require network topology, voltage and
+thermal limits, and the concurrent behaviour of other loads.
+The outputs of this work are therefore best interpreted as
+candidate flexibility offers to be evaluated within a system-
+or network-level study.
+The workload split is context-dependent: applications, cus-
+tomer requirements, incentives and SLAs determine what may
+be shifted. The repeated daily workload, fixed ambient temper-
+ature and COP exclude seasonal and weekly facility changes.
+GPU power management, task dependencies and other forms
+of computational flexibility are outside the aggregate CPU-
+hour representation. The representative-day envelope does not
+establish annual availability, response speed below the quarter-
+hour resolution, or eligibility for a particular market product.
+V. CONCLUSION
+This paper presents an integrated, whole-facility frame-
+work that allows a DC to act as a flexible power consumer
+with quantifiable flexibility provision. By co-optimising IT
+workload scheduling, UPS-ESS dispatch, and thermodynamic
+cooling with thermal energy storage, a cost-minimising op-
+erating baseline was established through linked daily op-
+timisation over 2025, achieving a 5.05% reduction in an-
+nual electricity costs. A sensitivity analysis showed that the
+flexible workload share has the greatest effect among the
+tested resource variations, followed by UPS and TES energy
+capacity. Increasing UPS capacity from 600 to 900 kWh
+adds approximately GBP 2,481/year in savings, supporting a
+conditional incremental investment screen. Building on this
+baseline, our core contribution is a duration-aware flexibility
+assessment that, for any start time (t 0) and requested power
+deviation (∆P), identifies certified feasible durations (τ) of
+flexibility provision while enforcing operational constraints
+and the specified comparative recovery conditions. The re-
+sulting flexibility duration envelope reveals a strong temporal
+structure and a notable asymmetry. Upward flexibility (load
+reduction) is driven by deferring IT workload, allowing for
+a reduction in cooling power. At other start times, UPS
+discharge supplies the reduction without changing IT demand;
+TES and cooling participate according to the inherited state.
+In contrast, downward flexibility (load increase) combines
+changes in IT execution, cooling and storage, including earlier
+execution of work already available to process. This frame-
+work successfully quantifies power deviations and feasible
+durations under stated recovery rules, turning abstract potential
+into capabilities that can be assessed against market-specific
+requirements. Figure 7 provides a comprehensive set of results
+for the flexibility potential, detailing how the duration of flexi-
+bility provision changes depending on the magnitude required
+and specific start time. Results show a significant change in
+flexibility potential, with100kW of upward flexibility possible
+for6hours at noon and1.25hours at06:00. This change
+reflects the varying operating conditions of the baseline from
+which flexibility is being provided. The trade-off between
+magnitude and duration is equally clear: a25kW increase
+reaches the twelve-hour assessment cap at several start times,
+while larger tested requests generally have shorter certified
+durations. Cap-reaching results and unresolved adjacent trials
+are not intrinsic maximum-duration estimates. Interpreted per
+MW of IT capacity, these results indicate that the modelled
+data centre can sustain power deviations of the order of10%
+of its IT capacity for multiple hours, with the feasible envelope
+determined by the start time and the requested magnitude.
+Promising future work includes incorporating explicit rev-
+DATA CENTRE FLEXIBILITY 18
+enue stacking, exploring a “pre-conditioning” window to
+assess additional IT participation in downward events, and
+aggregating facilities to a portfolio scale. Ultimately, the
+methodology presented offers a practical pathway for integrat-
+ing data centres into power system operations, characterising
+candidate grid responses alongside annual electricity-cost sav-
+ings. Those savings do not imply lower energy consumption or
+peak import, and service revenues remain outside the present
+valuation.
+REFERENCES
+[1] Centrica, “LEM flexibility market platform design and trials report,”
+Centrica, Tech. Rep., 2020, https://www.centrica.com/media/4614/lem-
+flexibility-market-platform-design-and-trials-report.pdf on 2025-08-22.
+[2] European Environment Agency (EEA) and ACER, “Flexibility so-
+lutions to support a decarbonised and secure EU electricity sys-
+tem,” EEA and ACER, Tech. Rep. EEA/ACER Report 09/2023,
+oct 2023, https://www.eea.europa.eu/en/analysis/publications/flexibility-
+solutions-to-support on 2025-08-12.
+[3] International Energy Agency. (2025) Energy and AI.
+Https://www.iea.org/reports/energy-and-ai on 2025-10-14.
+[4] National Energy System Operator (NESO), “Future Energy Scenar-
+ios 2025: Pathways to Net Zero,” National Energy System Operator,
+Tech. Rep., 2025, https://www.neso.energy/document/364541/download
+on 2025-07-23.
+[5] D. Koolen, M. D. Felice, and S. Busch, “Flexibility requirements
+and the role of storage in future European power systems,”
+Publications Office of the European Union, Luxembourg, Tech.
+Rep. JRC130519, 2023. [Online]. Available: https://publications.jrc.ec.
+europa.eu/repository/handle/JRC130519
+[6] Department for Energy Security and Net Zero, Ofgem and National
+Energy System Operator, “Clean flexibility roadmap,” Department for
+Energy Security and Net Zero, Tech. Rep., jul 2025. [Online]. Available:
+https://www.gov.uk/government/publications/clean-flexibility-roadmap
+[7] Y . Zhang, H. Tang, H. Li, and S. Wang, “Unlocking the flexibilities
+of data centers for smart grid services: optimal dispatch and
+design of energy storage systems under progressive loading,”
+Energy, vol. 316, p. 134511, 2025. [Online]. Available: https:
+//doi.org/10.1016/j.energy.2024.134511
+[8] I. Alaperä, S. Honkapuro, and J. Paananen, “Data centers as a source
+of dynamic flexibility in smart grids,”Applied energy, vol. 229, pp.
+69–79, 2018. [Online]. Available: https://doi.org/10.1016/j.apenergy.
+2018.07.056
+[9] H. Nosair and F. Bouffard, “Flexibility envelopes for power
+system operational planning,”IEEE Transactions on Sustainable
+Energy, vol. 6, no. 3, pp. 800–809, jul 2015. [Online]. Available:
+https://doi.org/10.1109/TSTE.2015.2410760
+[10] National Grid, “System needs and product strategy: UK
+electricity transmission,” National Grid, Tech. Rep., jun 2017,
+https://www.nationalgrid.com/sites/default/files/documents/8589940795-
+Systemon 2025-06-21.
+[11] L. Liu, X. Shen, Z. Chen, Q. Sun, and R. Wennersten, “Optimal
+energy management of data center micro-grid considering computing
+workloads shift,”IEEE Access, vol. 12, pp. 102 061–102 075, 2024.
+[Online]. Available: https://doi.org/10.1109/ACCESS.2024.3432120
+[12] Y . Cao, M. Cheng, S. Zhang, H. Mao, P. Wang, C. Li, Y . Feng,
+and Z. Ding, “Data-driven flexibility assessment for internet data
+center towards periodic batch workloads,”Applied Energy, vol. 324,
+p. 119665, oct 2022. [Online]. Available: https://doi.org/10.1016/j.
+apenergy.2022.119665
+[13] M. S. Misaghian, G. Tardioli, A. G. Cabrera, I. Salerno, D. Flynn, and
+R. Kerrigan, “Assessment of carbon-aware flexibility measures from
+data centres using machine learning,”IEEE Transactions on Industry
+Applications, vol. 59, no. 1, pp. 70–80, jan 2023. [Online]. Available:
+https://doi.org/10.1109/TIA.2022.3213637
+[14] A. Radovanovi ´c, R. Koningstein, I. Schneider, B. Chen, A. Duarte,
+B. Roy, D. Xiao, M. Haridasan, P. Hung, N. Careet al., “Carbon-
+aware computing for datacenters,”IEEE Transactions on Power
+Systems, vol. 38, no. 2, pp. 1270–1280, 2023. [Online]. Available:
+https://doi.org/10.1109/TPWRS.2022.3173250
+[15] I. Alaperä, J. Paananen, K. Dalen, and S. Honkapuro, “Fast frequency
+response from a UPS system of a data center, background, and
+pilot results,” in2019 16th International Conference on the European
+Energy Market (EEM). IEEE, 2019, pp. 1–5. [Online]. Available:
+https://doi.org/10.1109/EEM.2019.8916344
+[16] J. Roach. (2022) Microsoft datacenter batteries to support growth
+of renewables on the power grid. Microsoft Innovation Stories.
+Https://news.microsoft.com/source/features/sustainability/microsoft-
+datacenter-batteries-to-support-growth-of-renewables-on-the-power-
+grid/ on 2025-05-11.
+[17] V .-G. Anghel. (2023) What you need to know about grid-interactive data
+centers. Https://tinyurl.com/32ppzxx5 2025-05-21.
+[18] M. Zhao and X. Wang, “A synthetic approach for datacenter
+power consumption regulation towards specific targets in smart grid
+environment,”Energies, vol. 14, no. 9, p. 2602, 2021. [Online].
+Available: https://doi.org/10.3390/en14092602
+[19] ASHRAE TC 9.9, “Data center power equipment thermal guidelines and
+best practices,” ASHRAE, Tech. Rep., 2016.
+[20] M. T. Takci, M. Qadrdan, J. Summers, and J. Gustafsson, “Data centres
+as a source of flexibility for power systems,”Energy Reports, vol. 13,
+pp. 3661–3671, 2025.
+[21] R. Basmadjian, “Flexibility-based energy and demand management in
+data centers: a case study for cloud computing,”Energies, vol. 12, no. 17,
+p. 3301, 2019. [Online]. Available: https://doi.org/10.3390/en12173301
+[22] H. Du, X. Zhou, N. Nord, Y . Carden, P. Cui, and Z. Ma, “A
+new framework for evaluating and enhancing the performance of
+district heating systems integrated with data centres using short-term
+thermal energy storage,”Energy, p. 134934, 2025. [Online]. Available:
+https://doi.org/10.1016/j.energy.2025.134934
+[23] Y . Fu, X. Han, K. Baker, and W. Zuo, “Assessments of data centers
+for provision of frequency regulation,”Applied Energy, vol. 277,
+p. 115621, nov 2020. [Online]. Available: https://doi.org/10.1016/j.
+apenergy.2020.115621
+[24] S. Xiang, Y . Xiang, Y . Lu, Y . Guo, Z. Tan, and Y . Wang, “Modeling and
+optimization of data center energy consumption,” in2023 Panda Forum
+on Power and Energy (PandaFPE). IEEE, 2023, pp. 544–549. [Online].
+Available: https://doi.org/10.1109/PandaFPE58872.2023.10249234
+[25] H. Xu, Y . Li, H. Zhu, J. Wang, and C. Hou, “Data center
+demand response potential assessment considering multiple types of
+flexible resources,” inProceedings of SPIE – Fourth International
+Conference on Computer Science and Communication Technology
+(ICCSCT 2023), vol. 12918, oct 2023. [Online]. Available: https:
+//doi.org/10.1117/12.3009383
+[26] T. Cioara, I. Anghel, M. Bertoncini, I. Salomie, D. Arnone,
+M. Mammina, T.-H. Velivassaki, and M. Antal, “Optimized flexibility
+management enacting data centres participation in smart demand
+response programs,”Future Generation Computer Systems, vol. 78,
+pp. 330–342, 2018. [Online]. Available: https://doi.org/10.1016/j.future.
+2016.05.010
+[27] L. A. Barroso, U. Hölzle, and P. Ranganathan,The Datacenter as a
+Computer: Designing Warehouse-Scale Machines, 3rd ed., ser. Synthesis
+Lectures on Computer Architecture. Morgan & Claypool Publishers,
+2018.
+[28] M. Dayarathna, Y . Wen, and R. Fan, “Data center energy consumption
+modeling: A survey,”IEEE Communications Surveys & Tutorials,
+vol. 18, no. 1, pp. 732–794, 2016. [Online]. Available: https:
+//doi.org/10.1109/COMST.2015.2481183
+[29] C. Zaloumis. Are your data centers keeping you from sustainabil-
+ity? IBM Think Blog. Https://www.ibm.com/think/insights/are-your-
+data-centers-keeping-you-from-sustainability on 2025-07-12.
+[30] A. Ghia, “Capturing value through IT consolidation and shared
+services,”McKinsey on Government, pp. 18–23, 2011, autumn issue.
+[Online]. Available: https://www.mckinsey.com/~/media/mckinsey/
+dotcom/client_service/Public%20Sector/PDFS/McK%20on%20Govt/
+IT%20Challenge%20and%20opportunity/MOG7_Consolidation.ashx
+[31] M. Rasheduzzaman, M. A. Islam, T. Islam, T. Hossain, and R. M.
+Rahman, “Task shape classification and workload characterization of
+google cluster trace,” in2014 IEEE International Advance Computing
+Conference (IACC), 2014, pp. 893–898.
+[32] S. Zhou, M. Zhou, Z. Wu, Y . Wang, and G. Li, “Energy-
+aware coordinated operation strategy of geographically distributed
+data centers,”International Journal of Electrical Power & Energy
+Systems, vol. 159, p. 110032, aug 2024. [Online]. Available:
+https://doi.org/10.1016/j.ijepes.2024.110032
+[33] Z. Liu, Y . Chen, C. Bash, A. Wierman, D. Gmach, Z. Wang, M. Marwah,
+and C. Hyser, “Renewable and cooling aware workload management for
+sustainable data centers,”ACM SIGMETRICS Performance Evaluation
+DATA CENTRE FLEXIBILITY 19
+Review, vol. 40, no. 1, pp. 175–186, jun 2012. [Online]. Available:
+https://doi.org/10.1145/2318857.2254779
+[34] J. v. Kistowski, H. Block, J. Beckett, K.-D. Lange, J. A. Arnold,
+and S. Kounev, “Analysis of the influences on server power
+consumption and energy efficiency for CPU-intensive workloads,”
+inProceedings of the 6th ACM/SPEC International Conference on
+Performance Engineering, 2015, pp. 223–234. [Online]. Available:
+https://doi.org/10.1145/2668930.2688057
+[35] M. T. Takcı, T. Gözel, and M. H. Hocaoglu, “Modelling, analysis,
+and improvement of energy consumption in data centres via
+demand side management,” inEnergy Efficiency of Modern Power
+and Energy Systems, S. H. E. A. Aleem, M. E. Balci, and
+M. J. H. Rawa, Eds. Elsevier, 2024, pp. 73–99. [Online]. Available:
+https://doi.org/10.1016/B978-0-443-21644-2.00005-1
+[36] M. U. Hashmi, D. V . Hertem, A. van der Meer, and A. Keane,
+“Linear energy storage and flexibility model with ramp rate, ramping,
+deadline and capacity constraints,” sep 2024. [Online]. Available:
+https://arxiv.org/abs/2409.08084
+[37] L. Cupelli, T. Schütz, P. Jahangiri, M. Fuchs, A. Monti, and
+D. Müller, “Data center control strategy for participation in demand
+response programs,”IEEE Transactions on Industrial Informatics,
+vol. 14, no. 11, pp. 5087–5099, 2018. [Online]. Available: https:
+//doi.org/10.1109/TII.2018.2806889
+[38] Low Carbon Contracts Company, “IMRP actuals,” LCCC Data
+Portal, 2026. [Online]. Available: https://dp.lowcarboncontracts.uk/
+dataset/imrp-actuals
+[39] National Renewable Energy Laboratory, “System Advisor Model:
+LCOE Calculator, capital recovery factor,” SAM Help, n.d., accessed 8
+September 2026. [Online]. Available: https://samrepo.nlr.gov/help/fin_
+lcoefcr.html
+ACKNOWLEDGEMENTS
+This work was supported by the Engineering and Physi-
+cal Sciences Research Council (EPSRC) and the Economic
+and Social Research Council (ESRC) through funding pro-
+vided to the Energy Demand Research Centre (grant number
+EP/Y010078/1).
+CREDIT AUTHORSHIPCONTRIBUTIONSTATEMENT
+James Day:Writing – original draft, Investigation, Method-
+ology, Conceptualization.
+Mehmet Türker TAKCI:Writing – original draft, Investiga-
+tion, Methodology, Conceptualization.
+Meysam Qadrdan:Review & editing, Supervision, Concep-
+tualization.
