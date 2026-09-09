@@ -660,25 +660,7 @@ P^{\mathrm{Grid}}_{\mathrm{IT}}(t)
 
 
 
-\subsubsection{Annual operation and cost accounting}\label{sec:annual-operation}
-Scenarios 1 and 2 are evaluated over all 365 local days of 2025. Each solve contains the local-day core $T_d$ and twelve look-ahead intervals, with full workload arrivals, cooling and storage operation throughout. Only core decisions are committed. The next day inherits UPS and TES energy, all four temperatures and each unfinished arrival/tranche pair with its original execution window. Look-ahead controls are reoptimised; their trial execution is not counted as completed work.
-
-For a cohort available in day $d$, its committed residual is
-\begin{equation}
-A_{t,k,d+1}=A_{t,k,d}-\sum_{s\in T_d\cap W_{t,k}}u(t,k,s)\Delta t,
-\label{eq:cohort-handoff}
-\end{equation}
-provided it has arrived before the next core boundary. New look-ahead arrivals are generated afresh when their arrival day is processed. Physical time follows a continuous UTC timeline; local-day and workload labels use Europe/London. Normal days have 96 committed intervals, with 92 and 100 on daylight-saving transitions. The resulting year contains 35,040 quarter-hours.
-
-Annual settlement counts each committed interval once:
-\begin{equation}
-C^{(i)}_{\mathrm{year}}=\sum_{d=1}^{365}\sum_{t\in T_d}P^{\mathrm{Grid},(i)}(t)\pi(t)\Delta t/1000,
-\label{eq:annual-cost}
-\end{equation}
-where $i=1,2$. The percentage saving is $100(C^{(1)}_{\mathrm{year}}-C^{(2)}_{\mathrm{year}})/C^{(1)}_{\mathrm{year}}$. Overlapping look-ahead costs are excluded until their intervals become committed. Actual prices for the first three hours of 1 January 2026 supply the final continuation; these intervals are outside 2025 settlement. No terminal storage credit is imposed. Supplementary Section~S2 details the procedure and year-end workload treatment, and Section~S5 records existing terminal and solver checks.
-
-This retrospective annual assessment uses known inputs within each daily horizon. It avoids extrapolating a single day's savings, while leaving forecast uncertainty, network tariffs, battery degradation and flexibility-service revenues outside the objective. The event assessment uses the resulting operating trajectory; the rolling procedure provides temporal coverage and continuity rather than the paper's principal methodological contribution.
-
+\input{annual_operation.tex}
 
 \subsection{Scenario 3: Flexibility Duration Calculation}\label{sec:scenario 3}
 The third scenario evaluates the data centre's capacity to provide flexibility in response to a direct grid signal. This approach models a realistic situation where the grid operator requests a specific magnitude of power change for a certain duration, for example during planned balancing events or unforeseen emergencies. The optimised baseline from Scenario 2 is taken and from it a certified feasible duration for which the DC can sustain specified levels of flexibility magnitude is determined. This is calculated at any given time slot over the 24-hour period. Here, flexibility magnitude, $\Delta P$ (kW), is defined as the power deviation from the optimised baseline; with upward flexibility (load reduction) represented by negative magnitudes and downward flexibility (load increase) by positive magnitudes. For each combination of start time $t_0$ and requested flexibility magnitude $\Delta P$, a continuous period $\tau$ is identified over which the system can track a correspondingly modified grid-power trajectory while maintaining operational feasibility and respecting all physical and thermal constraints. This temporal measure of flexibility provides a key input for assessing the DC's potential participation in demand-response schemes and ancillary-services markets by quantifying its ability to meet specific grid needs.
@@ -801,17 +783,7 @@ Total settlement cost & 550,504 & 522,703 & -27,801 \\
  \label{fig:sensitivity_tornado}
 \end{figure}
 
-\subsubsection{Incremental value of larger UPS batteries}
-The UPS sensitivity addresses whether additional energy capacity could be justified partly by its flexibility value. Increasing the central 600 kWh capacity to 750 and 900 kWh produces additional annual electricity-cost savings of GBP~1,292.28 and GBP~2,481.41, respectively. With the reserve fraction fixed at 50\%, the additions of 150 and 300 nameplate kWh increase the operational energy window by 75 and 150 kWh. Power ratings remain unchanged.
-
-For a constant annual incremental saving $\Delta S$, additional annual non-electricity cost $O$, real discount rate $r$ and life $n$, the break-even incremental investment is
-\begin{equation}
-I_{\mathrm{BE}}=\frac{\Delta S-O}{\mathrm{CRF}(r,n)},\qquad
-\mathrm{CRF}(r,n)=\frac{r(1+r)^n}{(1+r)^n-1}.
-\label{eq:ups-investment}
-\end{equation}
-The capital recovery factor annualises initial expenditure~\cite{sam_crf}. At an illustrative 8\% real rate over ten years, with $O=0$, the additional savings support investments of approximately GBP~8,671 and GBP~16,650, or GBP~57.81 and GBP~55.50 per added nameplate kWh. These are expenditure thresholds, not installed battery prices or an unconditional case for enlargement. Installation, degradation, O\&M and replacement costs would need to be covered, and the retained single-year savings are not demonstrated lifetime cash flows: initial and terminal energy differ between capacities. Supplementary Section~S6 gives the assumptions and alternative rate/life combinations. No revenue for the physical flexibility events is added to these electricity-cost savings.
-
+\input{ups_investment.tex}
 
 \subsection{\rev{Value of Integrated Co-optimisation}}\label{sec:integration-value}
 \rev{The results allow the central question of what the integrated model reveals that separate, asset-level models would miss to be answered directly. First, the IT--cooling coupling: upward flexibility obtained by deferring IT workload produces a secondary reduction in cooling power because less heat is generated. A stand-alone IT flexibility model would omit the associated cooling-power change, while a stand-alone cooling model with fixed IT demand would not represent the deferred heat load. Second, the change in resource participation visible in Figure~\ref{fig:stacked_barcharts_neg}: morning reductions rely on UPS discharge, whereas afternoon reductions rely mainly on IT deferral and cooling. This temporal coordination is only visible in a model that schedules both assets against a common grid-power trajectory. Third, the TES buffering role: changes in direct CRAC cooling and TES charging interact with the other resources, allowing opposing responses in which one asset ``recharges'' its flexibility potential while others over-deliver, as observed in Figures~\ref{fig:stacked_barcharts_neg} and \ref{fig:stacked_barcharts_pos}. These cross-asset interactions explain why the feasible duration envelope depends so strongly on the baseline operating state, and why a duration-aware, whole-facility formulation is required to characterise feasible grid-facing responses. These dispatch mechanisms do not quantify an integration premium over separately optimised subsystems, which would require an explicit comparator.}

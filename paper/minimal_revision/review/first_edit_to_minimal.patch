@@ -529,7 +529,7 @@
  %
  & P^{\mathrm{IT}}_{\mathrm{opt}}(t) = P^{\mathrm{Grid}}_{\mathrm{IT}}(t) + P^{\mathrm{UPS}}_{\mathrm{disch}}(t), \quad \forall t \in T^{\text{ext}} & \label{eq:43} \\
  %
-@@ -657,74 +656,61 @@
+@@ -657,74 +656,62 @@
  \end{figure*}
  % *** END NEW FIX ***
  
@@ -607,8 +607,9 @@
  
  \subsection{\rev{Sensitivity Analysis Design}}\label{sec:sensitivity-design}
 -\rev{To assess the robustness of the cost-optimisation results, a one-at-a-time (OAT) sensitivity analysis is performed around the base case, covering the electricity price fluctuation range, the IT load flexibility ratio, and equipment sizing. Scenarios 1 and 2 are re-run for each case and the cost saving is recomputed against the corresponding base cost. Price volatility is varied with a mean-preserving spread, $\pi'(t) = \bar{\pi} + k(\pi(t)-\bar{\pi})$ with $k \in \{0.5, 0.75, 1.25, 1.5\}$, which changes the price fluctuation range while isolating it from the average price level. The flexible workload share is scaled by moving load between the flexible and inflexible pools while preserving the total CPU demand in every time slot, so that the flexibility share is isolated from the demand level; at high multipliers the share saturates in slots that are already almost fully flexible. Finally, the TES and UPS energy capacities are scaled while keeping their charge/discharge power limits unchanged, isolating the sizing of the energy buffers. The results are presented in Section~\ref{sec:sensitivity}.}
--\section{Results}
--
++\rev{To assess the dependence of the cost-optimisation results on resource assumptions, a one-at-a-time (OAT) sensitivity analysis is performed around the base case, covering the IT load flexibility ratio and equipment sizing. The flexible workload share is scaled by moving load between the flexible and inflexible pools while preserving the total CPU demand in every time slot, so that the flexibility share is isolated from the demand level; at high multipliers the share saturates in slots that are already almost fully flexible. The TES and UPS energy capacities are scaled while keeping their charge/discharge power limits unchanged, isolating the sizing of the energy buffers. Multipliers are $0.5$, $0.75$, $1.25$ and $1.5$, with the shared central case completing each curve. All cases cover 365 days and use the same workload-at-arrival annual comparator. Storage initial energy fractions and the 50\% UPS reserve fraction are preserved as capacities change. Annual observed prices replace the earlier separate price-volatility perturbation. The results are presented in Section~\ref{sec:sensitivity}.} Additional UPS savings are compared with annualised incremental investment, using a capital recovery factor; the main results give a compact screen and Supplementary Section~S6 states its assumptions.
+ \section{Results}
+ 
 -\subsection{Scenario 1 and 2 Results}
 -Figure \ref{fig:stacked_images} juxtaposes cost and workload profiles in subfigures (a) and (b) to highlight optimisation impacts. Subfigure (a) shows the base and optimised cost of operating the DC and the day-ahead electricity price in GBP over the simulation window. \rev{The total base and optimised costs are $1,658.38$ and $1,554.77$ GBP, respectively, representing a $103.61$ GBP cost saving. This cost saving is significant as it demonstrates that, with an appropriate management algorithm, existing data centre flexibility assets can be repurposed for cost minimisation, yielding savings of $6.25\%$ without additional investment, operational expenditure or sacrificing quality of service.} Subfigure (b) shows the combined CPU utilisation of all the servers in the DC over time. The dotted grey line shows the CPU utilisation in the base case before IT workload shifting has taken place. The stacked bar chart shows the optimised CPU utilisation after IT workload shifting. The black bars show the inflexible workload which cannot be shifted. The coloured bars show the flexible workload that is either shifted between 15 minutes (labelled as Flexible: 0.25 hours) and 3 hours (labelled as Flexible: 3.0 Hours), or not shifted and so executed in its original timeslot. 
 -
@@ -640,8 +641,6 @@
 -\end{table}
 -
 -The large amount of flexible load that is shifted by $3$ hours illustrates the optimiser delaying load for as long as possible to avoid higher energy prices. Equally, the long period between $06$:$00$ and $15$:$00$ of very minimal shifting is explained by an almost continuous rise in energy prices. IT workload deferral during a period of energy price increase only makes sense when the energy price drops soon after, as evidenced by the subsequent huge increase in load shifting as energy prices begin to fall. The coloured bars show continued IT workload shifting to the end of the extended time period to take advantage of the lower energy prices overnight. Additionally, at the beginning of the time window IT workload is shifted as energy prices fall during the early hours of the morning. 
-+\rev{To assess the dependence of the cost-optimisation results on resource assumptions, a one-at-a-time (OAT) sensitivity analysis is performed around the base case, covering the IT load flexibility ratio and equipment sizing. The flexible workload share is scaled by moving load between the flexible and inflexible pools while preserving the total CPU demand in every time slot, so that the flexibility share is isolated from the demand level; at high multipliers the share saturates in slots that are already almost fully flexible. The TES and UPS energy capacities are scaled while keeping their charge/discharge power limits unchanged, isolating the sizing of the energy buffers. Multipliers are $0.5$, $0.75$, $1.25$ and $1.5$, with the shared central case completing each curve. All cases cover 365 days and use the same workload-at-arrival annual comparator. Storage initial energy fractions and the 50\% UPS reserve fraction are preserved as capacities change. Annual observed prices replace the earlier separate price-volatility perturbation. The results are presented in Section~\ref{sec:sensitivity}.} Additional UPS savings are compared with annualised incremental investment, using a capital recovery factor; the main results give a compact screen and Supplementary Section~S6 states its assumptions.
-+
 +\subsection{Scenario 1 and 2: Operating Profiles}
 +Figure \ref{fig:stacked_images} juxtaposes power and workload profiles in subfigures (a) and (b) to highlight optimisation impacts on the selected day, 22 September 2025. Subfigure (a) shows the base and optimised grid power of the DC and the day-ahead electricity reference price. Subfigure (b) shows the combined CPU utilisation of all the servers in the DC over time. The dashed reference shows the CPU utilisation before IT workload shifting has taken place. The stacked areas show CPU utilisation after IT workload shifting. The grey area shows the inflexible workload which cannot be shifted, and the blue area shows flexible workload as executed; the green line gives their total. The opening physical states and unfinished workloads are inherited from the preceding day, rather than reset for this illustration.
 +
@@ -654,7 +653,7 @@
  
  \begin{figure}[!t]
   \centering
-@@ -733,12 +719,12 @@
+@@ -733,12 +720,12 @@
   \vspace{2mm} 
   \subfloat[]{\includegraphics[width=\columnwidth]{images/Figure_4b.png}%
   \label{fig:it_load_chart}}
@@ -669,7 +668,7 @@
  \begin{figure}[!t]
   \centering
   \includegraphics[width=\columnwidth]{images/Figure_5.png}
-@@ -746,61 +732,98 @@
+@@ -746,61 +733,98 @@
   \label{fig:power_resource_stack_chart}
  \end{figure}
  

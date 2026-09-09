@@ -1,5 +1,7 @@
 # Minimal revision of first_edit.tex
 
+**Blue comparison against the original submission:** `main.tex` now marks added or changed text blue relative to `paper/original_submission.tex`, with deleted text suppressed. `main_clean.tex` preserves the unmarked manuscript. The first-edit comparison below remains available separately. Newly cited or corrected bibliography entries are also blue; embedded raster figures retain their original colours. Compile `main.tex` for the marked version or `main_clean.tex` for the clean version.
+
 Open `main.tex` for the manuscript and `supplement.tex` for the additional supporting material. This version starts directly from `paper/first_edit.tex`; it does not use the shortened introduction or reorganised component methodology from the earlier rewrite. The original files remain unchanged.
 
 The existing architecture description, literature discussion, nomenclature, workload tables, IT power/work equations, UPS equations and cooling equations remain in the main paper. Equations and numerical inputs that conflict with the retained runs have been corrected in place. No original component section has been relocated to the supplement.

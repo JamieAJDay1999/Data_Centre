@@ -10,5 +10,13 @@
     "original_tokens_retained_percent": 99.3
   },
   "all_original_labels_retained": true,
+  "top_level_sections": [
+    "Introduction",
+    "Literature Review",
+    "Methodology",
+    "Case Studies: Integrated DC Model",
+    "Results",
+    "Conclusion"
+  ],
   "first_edit_sha256": "ce51d521b4f9a1974d36461762f16046e36b324fefc5885dd7f261d58941bdb4"
 }

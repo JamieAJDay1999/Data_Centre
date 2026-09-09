@@ -247,85 +247,114 @@ fg)) (C:\GitHub\Data_Centre\paper\minimal_revision\build\main.out)
 Underfull \vbox (badness 10000) has occurred while \output is active [1{C:/User
 s/jamie/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/jamie/AppDat
 a/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}]
-Overfull \hbox (17.04126pt too wide) in alignment at lines 250--250
+Overfull \hbox (17.04126pt too wide) in alignment at lines 309--309
  [] [] [] [] 
 
-Overfull \hbox (17.04126pt too wide) in alignment at lines 250--250
+Overfull \hbox (17.04126pt too wide) in alignment at lines 309--309
  [] [] [] [] 
 
-Overfull \hbox (17.04126pt too wide) in alignment at lines 250--250
+Overfull \hbox (17.04126pt too wide) in alignment at lines 309--309
  [] [] [] [] 
 
-Overfull \hbox (17.04126pt too wide) in alignment at lines 250--250
+Overfull \hbox (17.04126pt too wide) in alignment at lines 309--309
  [] [] [] [] 
 
-Underfull \hbox (badness 2119) in paragraph at lines 250--250
+Underfull \hbox (badness 2119) in paragraph at lines 309--309
 []|\T1/ptm/m/n/9 92, 96 or 100
 
-Underfull \hbox (badness 10000) in paragraph at lines 250--250
+Underfull \hbox (badness 10000) in paragraph at lines 309--309
 []|\T1/ptm/m/n/9 CPU-
 
-Overfull \hbox (3.6054pt too wide) in paragraph at lines 250--250
+Overfull \hbox (3.6054pt too wide) in paragraph at lines 309--309
 []|\T1/ptm/m/n/9 kJ/(kg$\OMS/cmsy/m/n/9 ^^A$\T1/ptm/m/n/9 K)| 
 
-Overfull \hbox (3.15237pt too wide) in paragraph at lines 250--250
+Overfull \hbox (3.15237pt too wide) in paragraph at lines 309--309
 []|$\OML/cmm/m/it/9 Q[]\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 t\OT1/cmr/m/n/9 )$| 
 
-Overfull \hbox (3.84125pt too wide) in paragraph at lines 250--250
+Overfull \hbox (3.84125pt too wide) in paragraph at lines 309--309
 []|$\OML/cmm/m/it/9 Q[]\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 t\OT1/cmr/m/n/9 )$| 
 
-Overfull \hbox (3.04745pt too wide) in paragraph at lines 250--250
+Overfull \hbox (3.04745pt too wide) in paragraph at lines 309--309
 []|$\OML/cmm/m/it/9 P[]\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 t\OT1/cmr/m/n/9 )$| 
 
-Overfull \hbox (1.23668pt too wide) in paragraph at lines 250--250
+Overfull \hbox (1.23668pt too wide) in paragraph at lines 309--309
 []|$\OML/cmm/m/it/9 z[]\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 t\OT1/cmr/m/n/9 )$| 
 
-Overfull \hbox (10.04485pt too wide) in paragraph at lines 250--250
+Overfull \hbox (10.04485pt too wide) in paragraph at lines 309--309
 []|\T1/ptm/m/n/9 GBP/MWh| 
 
-Overfull \hbox (17.04126pt too wide) in alignment at lines 250--250
+Overfull \hbox (17.04126pt too wide) in alignment at lines 309--309
  [] [] [] [] 
-main.tex:250: ignored error: Infinite glue shrinkage found in box being split
+main.tex:309: ignored error: Infinite glue shrinkage found in box being split
 [2] [3] [4 <./images/Figure_1.png>] [5] [6]
-Underfull \hbox (badness 10000) in paragraph at lines 332--332
+Underfull \hbox (badness 10000) in paragraph at lines 394--394
 []|\T1/ptm/m/n/7 Observed
 
-Underfull \hbox (badness 10000) in paragraph at lines 332--332
+Underfull \hbox (badness 10000) in paragraph at lines 395--395
 []|\T1/ptm/m/n/7 Delay-sensitivity
 
-Underfull \hbox (badness 10000) in paragraph at lines 332--332
+Underfull \hbox (badness 10000) in paragraph at lines 395--396
 \T1/ptm/m/n/7 into flex-i-ble and in-flex-i-ble
 
-Underfull \hbox (badness 10000) in paragraph at lines 332--332
+Underfull \hbox (badness 10000) in paragraph at lines 396--396
 []|\T1/ptm/m/n/7 Batch-workload
 
-Underfull \hbox (badness 10000) in paragraph at lines 332--332
+Underfull \hbox (badness 10000) in paragraph at lines 397--397
 []|\T1/ptm/m/n/7 Flexibility case
 
-Overfull \hbox (0.72015pt too wide) in paragraph at lines 332--334
+Overfull \hbox (0.72015pt too wide) in paragraph at lines 390--401
  [][] 
 [7 <./images/Figure_2.png>] [8 <./images/Figure_3.png>] [9]
 Underfull \vbox (badness 10000) has occurred while \output is active [10]
-Underfull \hbox (badness 1584) in paragraph at lines 632--633
+Underfull \hbox (badness 1584) in paragraph at lines 715--716
 []\T1/ptm/m/n/10 Note that the ob-jec-tive ex-plic-itly in-cludes grid with-
-[11] (annual_operation.tex) [12]
+[11]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 751.
+
+[12]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 801.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 805.
+
 (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1phv.fd)
 [13] [14 <./images/Figure_4a.png> <./images/Figure_4b.png> <./images/Figure_5.p
 ng>]
-Underfull \vbox (badness 7030) has occurred while \output is active [15 <./imag
-es/Figure_6.png> <./images/Figure_7.png> <./images/Figure_8.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 753--754
+Underfull \vbox (badness 10000) has occurred while \output is active [15 <./ima
+ges/Figure_6.png> <./images/Figure_7.png>]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 874.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 877--877
 []\T1/ptm/m/n/10 The to-tal an-nual base and op-ti-mised costs are
 
-Underfull \hbox (badness 10000) in paragraph at lines 753--754
+Underfull \hbox (badness 10000) in paragraph at lines 877--877
 \T1/ptm/m/n/10 GBP 550,503.59 and GBP 522,702.95, re-spec-tively,
 
-Underfull \hbox (badness 1418) in paragraph at lines 753--754
+Underfull \hbox (badness 1418) in paragraph at lines 877--877
 \T1/ptm/m/n/10 but ex-cludes degra-da-tion, ad-di-tional op-er-at-ing costs and
 
-(ups_investment.tex) [16 <./images/Figure_9.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active [17]
-(C:\GitHub\Data_Centre\paper\minimal_revision\build\main.bbl
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 901.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 920.
+
+[16 <./images/Figure_8.png> <./images/Figure_9.png>]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 933.
+
+[17] (C:\GitHub\Data_Centre\paper\minimal_revision\build\main.bbl
 Underfull \hbox (badness 1383) in paragraph at lines 31--36
 \T1/ptm/m/n/8 tem,'' EEA and ACER, Tech. Rep. EEA/ACER Re-port 09/2023,
 
@@ -387,7 +416,7 @@ KTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Users/jamie/AppData/Local/Programs
 s/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/jamie/AppData/Local/Program
 s/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
 Output written on C:\GitHub\Data_Centre\paper\minimal_revision\build\main.pdf (
-19 pages, 1741747 bytes).
+19 pages, 1743992 bytes).
 Transcript written on C:\GitHub\Data_Centre\paper\minimal_revision\build\main.l
 og.
 pdflatex: major issue: So far, you have not checked for MiKTeX updates.

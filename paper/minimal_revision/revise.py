@@ -19,6 +19,9 @@ def span(start,end,new,reason):
     replace(s[a:b],new+'\n\n',reason)
 def paragraph(start,new,reason):
     a=s.index(start); b=s.find('\n\n',a)
+    if b<0:b=len(s)
+    heading=re.search(r'\n\\(?:sub)*section\*?\{',s[a:b])
+    if heading:b=a+heading.start()
     replace(s[a:b],new,reason)
 for folder in ('images','data','tables','supplement','review','build'):
     (HERE/folder).mkdir(exist_ok=True)

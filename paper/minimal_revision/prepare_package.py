@@ -72,8 +72,12 @@ for label,o,n in [('Introduction prose',without_nomenclature(intro_old),without_
 oldlabels=set(re.findall(r'\\label\{([^}]+)\}',original));newlabels=set(re.findall(r'\\label\{([^}]+)\}',expanded))
 missing=sorted(oldlabels-newlabels)
 assert not missing,missing
+expected_sections=['Introduction','Literature Review','Methodology','Case Studies: Integrated DC Model','Results','Conclusion']
+actual_sections=re.findall(r'^\\section\{([^}]+)\}',expanded,re.M)
+assert actual_sections==expected_sections,actual_sections
 assert (ROOT/'paper/first_edit.tex').read_text(encoding='utf-8')==original
 preservation['all_original_labels_retained']=True
+preservation['top_level_sections']=actual_sections
 preservation['first_edit_sha256']=hashlib.sha256((ROOT/'paper/first_edit.tex').read_bytes()).hexdigest()
 (HERE/'review/preservation_check.json').write_text(json.dumps(preservation,indent=2))
 print(json.dumps(preservation,indent=2))
