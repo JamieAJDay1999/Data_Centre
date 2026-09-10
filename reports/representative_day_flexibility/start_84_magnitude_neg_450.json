@@ -11,8 +11,8 @@
     "magnitude_kw": -450.0,
     "duration_steps": 0,
     "duration_hours": 0.0,
-    "solver_calls": 3,
-    "solver_runtime_s": 0.176487000000634,
+    "solver_calls": 4,
+    "solver_runtime_s": 0.34509409999918716,
     "maximum_solver_relative_gap": null,
     "validated": true,
     "boundary_verified": true,
@@ -22,32 +22,42 @@
     {
       "duration_steps": 1,
       "feasible_incumbent": false,
-      "wall_time_s": 0.04642670000066573,
+      "wall_time_s": 0.06696659999943222,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_refinement"
+      "purpose": "duration_binary_search"
     },
     {
-      "duration_steps": 2,
+      "duration_steps": 3,
       "feasible_incumbent": false,
-      "wall_time_s": 0.07636160000038217,
+      "wall_time_s": 0.06882220000079542,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_refinement"
+      "purpose": "duration_binary_search"
     },
     {
-      "duration_steps": 4,
+      "duration_steps": 6,
       "feasible_incumbent": false,
-      "wall_time_s": 0.0536986999995861,
+      "wall_time_s": 0.11533239999880607,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_screening"
+      "purpose": "duration_binary_search"
+    },
+    {
+      "duration_steps": 12,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.09397290000015346,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "maximum_duration_screening"
     }
   ],
   "solver": null,

@@ -11,8 +11,8 @@
     "magnitude_kw": -500.0,
     "duration_steps": 0,
     "duration_hours": 0.0,
-    "solver_calls": 3,
-    "solver_runtime_s": 0.13229660000069998,
+    "solver_calls": 6,
+    "solver_runtime_s": 0.6464174000011553,
     "maximum_solver_relative_gap": null,
     "validated": true,
     "boundary_verified": true,
@@ -22,32 +22,62 @@
     {
       "duration_steps": 1,
       "feasible_incumbent": false,
-      "wall_time_s": 0.040451299999404,
+      "wall_time_s": 0.048405100000309176,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_refinement"
+      "purpose": "duration_binary_search"
     },
     {
-      "duration_steps": 2,
+      "duration_steps": 3,
       "feasible_incumbent": false,
-      "wall_time_s": 0.04429800000070827,
+      "wall_time_s": 0.0473468000000139,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_refinement"
+      "purpose": "duration_binary_search"
     },
     {
-      "duration_steps": 4,
+      "duration_steps": 6,
       "feasible_incumbent": false,
-      "wall_time_s": 0.04754730000058771,
+      "wall_time_s": 0.06792589999895426,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_screening"
+      "purpose": "duration_binary_search"
+    },
+    {
+      "duration_steps": 12,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.10799060000135796,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_binary_search"
+    },
+    {
+      "duration_steps": 24,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.11722069999996165,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_binary_search"
+    },
+    {
+      "duration_steps": 48,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.2575283000005584,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "maximum_duration_screening"
     }
   ],
   "solver": null,

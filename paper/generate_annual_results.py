@@ -309,7 +309,8 @@ def _plot_day_import_and_price(
     )
     axis.set_ylabel("Grid import (kW)")
     axis.set_xlabel("Local time (h)")
-    axis.set_ylim(0, 1500)
+    peak = max(float(baseline['grid_import_kw'].max()), float(central['grid_import_kw'].max()))
+    axis.set_ylim(0, np.ceil(peak * 1.08 / 100) * 100)
     hour_axis(axis)
 
     handles, labels = axis.get_legend_handles_labels()
@@ -359,7 +360,8 @@ def _plot_day_workload(baseline: pd.DataFrame, central: pd.DataFrame) -> None:
     )
     axis.set_ylabel("Aggregate CPU utilisation")
     axis.set_xlabel("Local time (h)")
-    axis.set_ylim(0, 0.95)
+    axis.set_ylim(0, 1.05)
+    axis.set_yticks(np.arange(0, 1.01, 0.2))
     hour_axis(axis)
     legend_above(axis, 2)
     save(fig, IMAGES / "Figure_4b.png")
@@ -417,7 +419,8 @@ def _plot_day_dispatch(baseline: pd.DataFrame, central: pd.DataFrame) -> None:
     axis.set_ylabel("Power (kW)")
     axis.set_xlabel("Local time (h)")
     hour_axis(axis, step=2.0)
-    axis.set_ylim(-1.25 * float(discharge.max()), 1450)
+    axis.set_ylim(-1.25 * float(discharge.max()),
+                  np.ceil(float(bottom.max()) * 1.08 / 100) * 100)
     legend_above(axis, 7)
     save(fig, IMAGES / "Figure_5.png")
 

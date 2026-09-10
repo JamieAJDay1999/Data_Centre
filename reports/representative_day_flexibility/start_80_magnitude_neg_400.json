@@ -11,8 +11,8 @@
     "magnitude_kw": -400.0,
     "duration_steps": 0,
     "duration_hours": 0.0,
-    "solver_calls": 3,
-    "solver_runtime_s": 0.17694080000001122,
+    "solver_calls": 5,
+    "solver_runtime_s": 0.3896744999983639,
     "maximum_solver_relative_gap": null,
     "validated": true,
     "boundary_verified": true,
@@ -22,32 +22,52 @@
     {
       "duration_steps": 1,
       "feasible_incumbent": false,
-      "wall_time_s": 0.04687509999894246,
+      "wall_time_s": 0.056184299999586074,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_refinement"
+      "purpose": "duration_binary_search"
     },
     {
       "duration_steps": 2,
       "feasible_incumbent": false,
-      "wall_time_s": 0.0480478999998013,
+      "wall_time_s": 0.05968659999962256,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_refinement"
+      "purpose": "duration_binary_search"
     },
     {
       "duration_steps": 4,
       "feasible_incumbent": false,
-      "wall_time_s": 0.08201780000126746,
+      "wall_time_s": 0.07188979999955336,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_screening"
+      "purpose": "duration_binary_search"
+    },
+    {
+      "duration_steps": 8,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.07598690000122588,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_binary_search"
+    },
+    {
+      "duration_steps": 16,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.12592689999837603,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "maximum_duration_screening"
     }
   ],
   "solver": null,

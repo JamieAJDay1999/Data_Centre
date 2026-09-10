@@ -1,0 +1,5 @@
+- Integrated IT/UPS/cooling model developed for a data centre.
+- Cost-optimised operation cuts annual electricity costs by 5.38\%.
+- Flexibility characterised and quantified by a duration-aware flexibility assessment.
+- 100 kW of upward flexibility sustained for six hours by a 1 MW IT-rated DC.
+- Additional UPS capacity is assessed using annual savings and investment thresholds.

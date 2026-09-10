@@ -1,0 +1,186 @@
+{
+  "status": "passed",
+  "hourly_tranche_mapping_matches_first_edit": true,
+  "annual_scenarios": [
+    {
+      "scenario": "2025_baseline_reformulated",
+      "intervals": 35040,
+      "settlement_gbp": 550503.5946101338,
+      "grid_energy_kwh": 6717861.513945443,
+      "fingerprint": "d78ab3912c94ca1336128fc3ec7f29b697db22389cc96661a812ef2107a3effc"
+    },
+    {
+      "scenario": "2025_flex_0p5",
+      "intervals": 35040,
+      "settlement_gbp": 529933.9840448622,
+      "grid_energy_kwh": 6776798.264964379,
+      "fingerprint": "ece169bd75f6f744c62e8d9b2711cb472ccedd784a26f469008559646cabfcdf"
+    },
+    {
+      "scenario": "2025_flex_0p75",
+      "intervals": 35040,
+      "settlement_gbp": 525156.8600715662,
+      "grid_energy_kwh": 6780955.505816202,
+      "fingerprint": "e36a9801fb661fb9a8fa4ad47a403bdb00bd6d2e6e79c2c63fc8a9ff65fad6ca"
+    },
+    {
+      "scenario": "2025_optimised_cohort_trace",
+      "intervals": 35040,
+      "settlement_gbp": 520876.68187068333,
+      "grid_energy_kwh": 6788545.4347325675,
+      "fingerprint": "5d880015d17127cbe4a918aad72334bbfe123e7047f72147c276fa75f74437bd"
+    },
+    {
+      "scenario": "2025_flex_1p25",
+      "intervals": 35040,
+      "settlement_gbp": 516996.94217014755,
+      "grid_energy_kwh": 6796898.8710194165,
+      "fingerprint": "1bd889ddf643e4de8f72858506b74e26809112ab7b0f863880ab1fec5595c19f"
+    },
+    {
+      "scenario": "2025_flex_1p5",
+      "intervals": 35040,
+      "settlement_gbp": 513988.6757388726,
+      "grid_energy_kwh": 6805677.133733617,
+      "fingerprint": "dd11dba994376c20a82398a9223682a719081999724c3129833970fb03597113"
+    },
+    {
+      "scenario": "2025_ups_0p5",
+      "intervals": 35040,
+      "settlement_gbp": 523543.71163195453,
+      "grid_energy_kwh": 6765624.367247717,
+      "fingerprint": "94eb035fc1eacdb2a991700f246f7cb1a08aded57dc12df159edcf99f8b65bdd"
+    },
+    {
+      "scenario": "2025_ups_0p75",
+      "intervals": 35040,
+      "settlement_gbp": 522187.1976987061,
+      "grid_energy_kwh": 6777809.528163747,
+      "fingerprint": "b6a08be781028e1f738b6123b9d2739e071819300062c2cefd632eccaf68d08b"
+    },
+    {
+      "scenario": "2025_ups_1p25",
+      "intervals": 35040,
+      "settlement_gbp": 519601.9333285429,
+      "grid_energy_kwh": 6799249.548687734,
+      "fingerprint": "ff3a2e9a0d9fd517883e87df1800e0494152419cffd108f0a780552f3d96c932"
+    },
+    {
+      "scenario": "2025_ups_1p5",
+      "intervals": 35040,
+      "settlement_gbp": 518416.7930410169,
+      "grid_energy_kwh": 6809955.826328183,
+      "fingerprint": "92efb2a9f9df87e115c5279966187598168ae7015e4f93b29b2e4ee38ff76218"
+    },
+    {
+      "scenario": "2025_tes_0p5",
+      "intervals": 35040,
+      "settlement_gbp": 522267.82299053564,
+      "grid_energy_kwh": 6778667.523964719,
+      "fingerprint": "d6e258bdae68d0705fd9f7b405c9bd19be6f1d3cb108a034a4fd4c7900bd31b6"
+    },
+    {
+      "scenario": "2025_tes_0p75",
+      "intervals": 35040,
+      "settlement_gbp": 521496.13614177855,
+      "grid_energy_kwh": 6783875.0644859895,
+      "fingerprint": "3a2948089344853e4c6164c0790aa38d37af4d8dfd6d170d2d67cb6d0518dc74"
+    },
+    {
+      "scenario": "2025_tes_1p25",
+      "intervals": 35040,
+      "settlement_gbp": 520501.98249804106,
+      "grid_energy_kwh": 6791606.353940337,
+      "fingerprint": "85590bc074a2b49387ebd8d26f2dc641cda19d3241997e44d3541f5f15cc18bf"
+    },
+    {
+      "scenario": "2025_tes_1p5",
+      "intervals": 35040,
+      "settlement_gbp": 520228.82878280024,
+      "grid_energy_kwh": 6793602.666041201,
+      "fingerprint": "2fb4561692ffdf2d5df3983b371789ffed3cd8e4754e169605d9d2c792a9f93a"
+    }
+  ],
+  "checked_checkpoint_count": 5110,
+  "event_cells": 288,
+  "positive_event_dispatches": 148,
+  "boundary_or_cap_verified_cells": 280,
+  "lower_bound_cells": 8,
+  "annual_gap_exceptions": [
+    {
+      "scenario": "2025_flex_0p5",
+      "date": "2025-05-25",
+      "gap_percent": 1.3005654650468192,
+      "absolute_bound_width_gbp": 0.10338771724211515,
+      "termination": "maxTimeLimit",
+      "accepted_gap": false
+    },
+    {
+      "scenario": "2025_ups_0p5",
+      "date": "2025-05-25",
+      "gap_percent": 1.1108595004505912,
+      "absolute_bound_width_gbp": 0.3290736355091539,
+      "termination": "maxTimeLimit",
+      "accepted_gap": false
+    },
+    {
+      "scenario": "2025_tes_0p5",
+      "date": "2025-05-25",
+      "gap_percent": 1.0094556871673575,
+      "absolute_bound_width_gbp": 0.35928687127445613,
+      "termination": "maxTimeLimit",
+      "accepted_gap": false
+    }
+  ],
+  "central_nonoptimal_horizons": [
+    {
+      "scenario": "2025_optimised_cohort_trace",
+      "date": "2025-05-25",
+      "gap_percent": 0.8679612685420464,
+      "absolute_bound_width_gbp": 0.3738689541282625,
+      "termination": "maxTimeLimit",
+      "accepted_gap": true
+    },
+    {
+      "scenario": "2025_optimised_cohort_trace",
+      "date": "2025-08-06",
+      "gap_percent": 0.22811947003211194,
+      "absolute_bound_width_gbp": 3.130098005613945,
+      "termination": "maxTimeLimit",
+      "accepted_gap": true
+    },
+    {
+      "scenario": "2025_optimised_cohort_trace",
+      "date": "2025-10-04",
+      "gap_percent": 0.6118400372242175,
+      "absolute_bound_width_gbp": 0.16841297300276992,
+      "termination": "maxTimeLimit",
+      "accepted_gap": true
+    }
+  ],
+  "corrected_year_end_audit": {
+    "closing_workload_cpu_h": 0.7871154735808356,
+    "committed_grid_energy_kwh": 18357.65791632288,
+    "committed_settlement_cost_gbp": 1467.40475161115,
+    "committed_workload_cpu_h": 7.25615357925749,
+    "core_workload_completed_in_lookahead_cpu_h": 0.7871154735808356,
+    "core_workload_unserved_after_lookahead_cpu_h": 0.0,
+    "effective_grid_import_limit_kw": 1723.095,
+    "energy_objective_gbp": 1565.679302914867,
+    "initial_state_max_residual": 0.0,
+    "lookahead_grid_energy_kwh": 2531.3593643168388,
+    "lookahead_settlement_cost_gbp": 98.27455130371699,
+    "max_tes_charge_discharge_overlap_kw": -0.0,
+    "max_ups_charge_discharge_overlap_kw": -0.0,
+    "maximum_it_power_approximation_error_kw": 6.240844634472694,
+    "mean_it_power_approximation_error_kw": 4.089006870638188,
+    "objective_reconciliation_gbp": 0.0,
+    "opening_workload_cpu_h": 8.04326905283833,
+    "recovery_workload_max_excess_cpu_h": 0.0,
+    "terminal_value_gbp": 0.0,
+    "tes_throughput_cost_gbp": 0.0,
+    "ups_throughput_cost_gbp": 0.0,
+    "workload_conservation_residual_cpu_h": 3.885780586188048e-15,
+    "workload_trace_max_interval_residual_cpu": 5.551115123125783e-17
+  }
+}

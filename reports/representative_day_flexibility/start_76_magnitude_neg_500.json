@@ -11,8 +11,8 @@
     "magnitude_kw": -500.0,
     "duration_steps": 0,
     "duration_hours": 0.0,
-    "solver_calls": 3,
-    "solver_runtime_s": 0.1710090999986278,
+    "solver_calls": 5,
+    "solver_runtime_s": 0.4058323000008386,
     "maximum_solver_relative_gap": null,
     "validated": true,
     "boundary_verified": true,
@@ -22,32 +22,52 @@
     {
       "duration_steps": 1,
       "feasible_incumbent": false,
-      "wall_time_s": 0.075195999999778,
+      "wall_time_s": 0.06191999999828113,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_refinement"
+      "purpose": "duration_binary_search"
     },
     {
       "duration_steps": 2,
       "feasible_incumbent": false,
-      "wall_time_s": 0.04566449999947508,
+      "wall_time_s": 0.054797299999336246,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_refinement"
+      "purpose": "duration_binary_search"
     },
     {
-      "duration_steps": 4,
+      "duration_steps": 5,
       "feasible_incumbent": false,
-      "wall_time_s": 0.05014859999937471,
+      "wall_time_s": 0.05627630000162753,
       "solver_runtime_s": null,
       "solver_quality": "proven_infeasible",
       "solver_relative_gap": null,
       "time_limit_s": 60,
-      "purpose": "duration_screening"
+      "purpose": "duration_binary_search"
+    },
+    {
+      "duration_steps": 10,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.09187580000070739,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "duration_binary_search"
+    },
+    {
+      "duration_steps": 20,
+      "feasible_incumbent": false,
+      "wall_time_s": 0.1409629000008863,
+      "solver_runtime_s": null,
+      "solver_quality": "proven_infeasible",
+      "solver_relative_gap": null,
+      "time_limit_s": 60,
+      "purpose": "maximum_duration_screening"
     }
   ],
   "solver": null,

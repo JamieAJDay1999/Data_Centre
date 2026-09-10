@@ -1,6 +1,7 @@
 /static
 /.venv
-/archive/data
+/archive
+/reports
 /rev_stack/results
 /.codex_tmp/
 /.pytest_cache/

@@ -19,15 +19,15 @@ for row in annual:
     assert abs(expected-float(row['saving_percent']))<1e-9
 def duration(hour,power):
     return float(next(r for r in events if float(r['start_hour'])==hour and float(r['magnitude_kw'])==power)['duration_hours'])
-for h,p,d in [(6,-100,1.25),(6,-200,1.25),(12,-100,6),(12,-150,6),(15,-100,3),(15,-200,3),(6,25,11.25),(6,50,8.75),(6,75,7.75),(3,25,12),(10,25,12),(11,25,12),(12,25,12)]:assert duration(h,p)==d,(h,p)
-assert sum(r['duration_is_lower_bound']=='True' for r in events)==13
-assert abs(float(base['annual_cost_gbp'])-float(central['annual_cost_gbp'])-27800.6437982245)<1e-6
+for h,p,d in [(6,-100,1),(6,-200,1),(12,-100,6),(13,-150,5),(15,-100,3),(15,-200,3),(6,25,10.25),(6,50,8.75),(6,75,7.25),(3,25,12),(4,25,12),(8,25,12),(10,25,12),(11,25,12),(12,25,12)]:assert duration(h,p)==d,(h,p)
+assert sum(r['duration_is_lower_bound']=='True' for r in events)==8
+assert abs(float(base['annual_cost_gbp'])-float(central['annual_cost_gbp'])-29626.91273945046)<1e-6
 crf=.08*1.08**10/(1.08**10-1)
-for label,expected in [('UPS capacity 1.25x',8671.30),('UPS capacity 1.5x',16650.46)]:
+for label,expected in [('UPS capacity 1.25x',8553.67),('UPS capacity 1.5x',16506.05)]:
     scenario=next(r for r in annual if r['label']==label)
     assert abs((float(central['annual_cost_gbp'])-float(scenario['annual_cost_gbp']))/crf-expected)<.01
-verification={'annual_scenarios_verified':14,'annual_days_per_case':365,'annual_intervals_per_case':35040,'event_cells':288,'quoted_event_durations_checked':13,'unresolved_next_step_cells':13,'new_optimisation_runs':0,'pdfs':{}}
-for name in ('main','supplement'):
+verification={'annual_scenarios_verified':14,'annual_days_per_case':365,'annual_intervals_per_case':35040,'event_cells':288,'quoted_event_durations_checked':15,'unresolved_next_step_cells':8,'new_optimisation_runs':0,'pdfs':{}}
+for name in ('main','main_clean','supplement'):
     log=(HERE/f'build/{name}.log').read_text(errors='replace')
     assert 'undefined references' not in log and 'undefined on input line' not in log
     assert 'multiply defined' not in log
@@ -36,7 +36,7 @@ for name in ('main','supplement'):
     assert len(text)>1000
     verification['pdfs'][name]={'pages':len(reader.pages),'unresolved_references':False,'overfull_box_warnings':len(re.findall('Overfull',log))}
     (HERE/f'build/{name}_extracted.txt').write_text(text,encoding='utf-8')
-    pngs=sorted((HERE/'build/qa').glob(name+'-*.png'))
+    pngs=sorted((ROOT/'tmp/pdfs/minimal_corrected').glob(name+'-*.png'))
     for start in range(0,len(pngs),12):
         selected=pngs[start:start+12]
         sheet=Image.new('RGB',(4*390,3*540),'#d8d8d8');draw=ImageDraw.Draw(sheet)

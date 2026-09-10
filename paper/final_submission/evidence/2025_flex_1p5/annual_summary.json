@@ -1,24 +1,24 @@
 {
   "committed_intervals": 35040,
   "cost_reconciliation_gbp": 0.0,
-  "final_outstanding_workload_cpu_h": 0.898218447161671,
+  "final_outstanding_workload_cpu_h": 1.1842422632095824,
   "final_workload_unserved_after_planned_lookahead_cpu_h": 0.0,
-  "gap_exceeded_dates": [
-    "2025-05-25"
-  ],
-  "gap_exceeded_horizons": 1,
-  "grid_energy_kwh": 6806893.469304491,
+  "gap_exceeded_dates": [],
+  "gap_exceeded_horizons": 0,
+  "grid_energy_kwh": 6805677.133733616,
   "local_dates": 365,
   "maximum_daily_boundary_residual": 0.0,
   "maximum_initial_state_residual": 0.0,
-  "maximum_recorded_solver_gap": 0.011813913369563212,
+  "maximum_recorded_solver_gap": 0.004961707335116524,
   "maximum_tes_overlap_kw": -0.0,
   "maximum_ups_overlap_kw": 0.0,
-  "maximum_workload_conservation_residual_cpu_h": 2.142730437526552e-14,
+  "maximum_workload_conservation_residual_cpu_h": 2.4646951146678475e-14,
+  "maximum_workload_trace_interval_residual_cpu": 1.1102230246251565e-16,
   "mode": "optimised",
-  "non_optimal_horizons": 2,
-  "peak_grid_import_kw": 1682.0747853585872,
+  "non_optimal_horizons": 1,
+  "peak_grid_import_kw": 1682.6056238077729,
   "scenario_id": "2025_flex_1p5",
-  "settlement_cost_gbp": 516058.3170264206,
-  "total_solver_runtime_s": 1143.9868664000078
+  "settlement_cost_gbp": 513988.6757388726,
+  "total_solver_runtime_s": 967.1015753999982,
+  "workload_trace_rows": 166647
 }

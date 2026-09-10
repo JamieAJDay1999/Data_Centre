@@ -3,17 +3,22 @@
   "annual_days_per_case": 365,
   "annual_intervals_per_case": 35040,
   "event_cells": 288,
-  "quoted_event_durations_checked": 13,
-  "unresolved_next_step_cells": 13,
+  "quoted_event_durations_checked": 15,
+  "unresolved_next_step_cells": 8,
   "new_optimisation_runs": 0,
   "pdfs": {
     "main": {
-      "pages": 19,
+      "pages": 20,
+      "unresolved_references": false,
+      "overfull_box_warnings": 12
+    },
+    "main_clean": {
+      "pages": 20,
       "unresolved_references": false,
       "overfull_box_warnings": 12
     },
     "supplement": {
-      "pages": 9,
+      "pages": 10,
       "unresolved_references": false,
       "overfull_box_warnings": 0
     }

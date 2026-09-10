@@ -1,8 +1,8 @@
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Continue'
 Push-Location $PSScriptRoot
 try {
     New-Item -ItemType Directory -Force -Path build | Out-Null
-    foreach ($document in @('main','supplement')) {
+    foreach ($document in @('main','main_clean','supplement')) {
         & pdflatex -interaction=nonstopmode -halt-on-error -file-line-error -output-directory=build "$document.tex" *> "build/$document-pass1.txt"
         if ($LASTEXITCODE -ne 0) { Get-Content "build/$document-pass1.txt" -Tail 25; throw "$document first pass failed" }
         & bibtex "build/$document" *> "build/$document-bibtex.txt"

@@ -1,5 +1,7 @@
 # Minimal revision of first_edit.tex
 
+**10 September 2026 corrected-results update:** The manuscript, affected figures/tables and supplement now use the corrected workload results (5.38% central annual saving). See `review/corrected_results_notes.md` and `review/corrected_results.patch` for this narrowly scoped update. Unrelated paper content and the blue comparison against the original submission are preserved.
+
 **Blue comparison against the original submission:** `main.tex` now marks added or changed text blue relative to `paper/original_submission.tex`, with deleted text suppressed. `main_clean.tex` preserves the unmarked manuscript. The first-edit comparison below remains available separately. Newly cited or corrected bibliography entries are also blue; embedded raster figures retain their original colours. Compile `main.tex` for the marked version or `main_clean.tex` for the clean version.
 
 Open `main.tex` for the manuscript and `supplement.tex` for the additional supporting material. This version starts directly from `paper/first_edit.tex`; it does not use the shortened introduction or reorganised component methodology from the earlier rewrite. The original files remain unchanged.

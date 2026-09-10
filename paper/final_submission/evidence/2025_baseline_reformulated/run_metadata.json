@@ -1,9 +1,10 @@
 {
-  "code_hash": "438c776e6d2701c26c3886264d03ae8d1989fc18ccdd2fbe6fe858d235b14584",
+  "code_hash": "edbf78562a65f123168a5412036be6918b85bb9e97d47d855514e7156dfac16d",
   "config": {
     "baseline_cold_aisle_setpoint_c": 22.5,
     "dt_seconds": 900,
     "fail_on_gap_exceeded": true,
+    "flexible_workload_multiplier": 1.0,
     "flow_tolerance_kw": 0.001,
     "grid_import_limit_kw": null,
     "it_power_breakpoint_exponent": 1.5,
@@ -15,26 +16,28 @@
     "mode": "baseline",
     "price_treatment": "signed",
     "scenario_id": "2025_baseline_reformulated",
-    "solver_name": "auto",
+    "solver_name": "appsi_highs",
     "solver_time_limit_s": 300,
     "state_tolerance": 1e-05,
     "terminal_tes_value_gbp_per_kwh_th": 0.0,
     "terminal_ups_value_gbp_per_kwh": 0.0,
+    "tes_capacity_multiplier": 1.0,
     "tes_throughput_cost_gbp_per_kwh_th": 0.0,
+    "ups_capacity_multiplier": 1.0,
     "ups_reserve_kwh": null,
     "ups_throughput_cost_gbp_per_kwh": 0.0,
     "workload_tolerance_cpu_h": 1e-07
   },
-  "created_utc": "2026-07-23T15:24:39.853366+00:00",
+  "created_utc": "2026-09-10T10:20:28.923690+00:00",
   "end_date": "2025-12-31",
-  "fingerprint": "65bf125142eb2156ddd2f41a2791d08c86fd71ef86eedf2fc6bf9bb3a2f7378a",
-  "finished_utc": "2026-07-23T15:25:27.025663+00:00",
+  "fingerprint": "d78ab3912c94ca1336128fc3ec7f29b697db22389cc96661a812ef2107a3effc",
+  "finished_utc": "2026-09-10T10:21:38.379472+00:00",
   "git": {
-    "dirty": false,
-    "revision": "c9ca049e60eaad7e0901db857315a1dc6a0eb4b9"
+    "dirty": true,
+    "revision": "5e72f63f6e0dd96beb73dbc8ba9ea002ecaf8e35"
   },
-  "input_hash": "bd5f02c07c3d93d2c11181856a805689ced970083fce69d01e4d8983ad06ae61",
-  "schema_version": 2,
+  "input_hash": "abf89894b74f4a9a6a2000a4ac19554834bc7a7e5691b4f95a2a5258b4dfa97c",
+  "schema_version": 3,
   "start_date": "2025-01-01",
   "summary": {
     "committed_intervals": 35040,
@@ -51,12 +54,14 @@
     "maximum_tes_overlap_kw": 0.0,
     "maximum_ups_overlap_kw": 0.0,
     "maximum_workload_conservation_residual_cpu_h": 0.0,
+    "maximum_workload_trace_interval_residual_cpu": 0.0,
     "mode": "baseline",
     "non_optimal_horizons": 0,
     "peak_grid_import_kw": 974.9227347080529,
     "scenario_id": "2025_baseline_reformulated",
     "settlement_cost_gbp": 550503.5946101338,
-    "total_solver_runtime_s": 33.01367890000074
+    "total_solver_runtime_s": 46.39282649999586,
+    "workload_trace_rows": 0
   },
   "tail_price_mode": "actual",
   "year": 2025

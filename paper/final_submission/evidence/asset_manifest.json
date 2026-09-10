@@ -7,37 +7,37 @@
   {
     "source": "paper/images/Figure_4a.png",
     "package": "figures/Figure_4a.png",
-    "sha256": "16fdc551dca59288f98d828f44593a4998d490a587b96067e254504d96f8a806"
+    "sha256": "f9d2f185bdeadd2f7051cef59bbd48cfaa9f000faccaf5d948e7e300c3ec8646"
   },
   {
     "source": "paper/images/Figure_4b.png",
     "package": "figures/Figure_4b.png",
-    "sha256": "dad4a4f74c6b32fd267f0da8d504f2123cb563326604cad5b7b8b1ad866ddbe4"
+    "sha256": "2533876284143cfc41ec392406c15d9d096d99ff82d6685baf06e7a33a203d39"
   },
   {
     "source": "paper/images/Figure_5.png",
     "package": "figures/Figure_5.png",
-    "sha256": "1c1a8ce8b1b47865dbed4600ae7b5593fe9e895d8633e825a9cbbc1bc943fde4"
+    "sha256": "822e2d3332dc343de502565140653f223dbe1150aa24c4f60cd7f5882cfa883f"
   },
   {
     "source": "paper/images/Figure_6.png",
     "package": "figures/Figure_6.png",
-    "sha256": "6684c51a60ac1be4766851588e4a5e75eaf1f5e62d7efefd1f475fdda76c504a"
+    "sha256": "5eb385d0769d460418f345a0c72a24141872b891d69fecb5d0b253e42f6bccc5"
   },
   {
     "source": "paper/images/Figure_7.png",
     "package": "figures/Figure_7.png",
-    "sha256": "5c98ce88296cae465ef8bba11ea02a44c90084a0d243e1ec5295ee70cbbaaeac"
+    "sha256": "073a51d1aefb1fdc35addc15044d7565cea229bb480c07ce7f73c3663570fa36"
   },
   {
     "source": "paper/images/Figure_8.png",
     "package": "figures/Figure_8.png",
-    "sha256": "ab26cdad725157f60775026c160d19f69d9cc47711e5a31a952cd8be5e864461"
+    "sha256": "4dc76ebe5db873b6fa85a94e8fef98dd6873a44753136ed14ff012015ec02152"
   },
   {
     "source": "paper/images/Figure_9.png",
     "package": "figures/Figure_9.png",
-    "sha256": "d99987ae8264ec48f2331a9f80e74be365c1f5eafb28d4442be18815b9e7bc62"
+    "sha256": "1522efd3c66f9c26c6a1348eea2e2804d05e253677ea5727947e3af73538dac1"
   },
   {
     "source": "static/data/inputs/load_profiles.csv",
@@ -47,37 +47,47 @@
   {
     "source": "static/data/inputs/shiftability_profile.csv",
     "package": "data/shiftability_profile.csv",
-    "sha256": "151e049c5480d3329dd224990eec2f259bb9699a9fde9f5442b37fa21ce5d92c"
+    "sha256": "7af149ab0824940c9d84a7ce6d474f973ce0b5a90f56c1095b37c1825199e4fa"
   },
   {
     "source": "reports/final_annual_results/annual_endpoints.csv",
     "package": "data/annual_endpoints.csv",
-    "sha256": "932969e369eff7cad613a0b3361d22025cca9e081e3ae6cba3000b888cdf97dc"
+    "sha256": "c7eb4f3be8ad3c5c6e0560d49e5e15998ad6fb305b3bbe9b84499d8e331e8136"
   },
   {
     "source": "reports/final_annual_results/annual_cost_components.csv",
     "package": "data/annual_cost_components.csv",
-    "sha256": "5bb11048e53ce4931272b34081d688fa79c27ce0a54b3767da8ab3cc08544387"
+    "sha256": "0fbc8006adc6b47b3a35ed514fd6993757660bd7feaa6a5f368e19dd91a31651"
   },
   {
     "source": "reports/final_annual_results/representative_day_selection.csv",
     "package": "data/representative_day_selection.csv",
-    "sha256": "f1cb8445649f9860856d420e5446908ae0fc2459583a2518a938b5c8286a3826"
+    "sha256": "9b3c4d51acc8dc3da2136055c094f1be82754fc6de92358f84b0fcf689fec92e"
   },
   {
-    "source": "reports/final_annual_results/intermediate_quality_reruns.csv",
-    "package": "data/intermediate_quality_reruns.csv",
-    "sha256": "90b0676b76c73b419c30e436b5de13510ccb2e8592923c72f325959a3dd9755b"
+    "source": "reports/final_annual_results/corrected_solver_horizons.csv",
+    "package": "data/corrected_solver_horizons.csv",
+    "sha256": "c0f2f44d924fd42da6f52176ff2fdf7c02f768f7d51eeef8d9b87df476e03ba8"
+  },
+  {
+    "source": "reports/final_annual_results/corrected_event_components.csv",
+    "package": "data/corrected_event_components.csv",
+    "sha256": "c07bfb30345b36344384ca20210d60e8c8d3c47fe0f54dc58a1cb496644662be"
+  },
+  {
+    "source": "reports/final_annual_results/corrected_evidence_audit.json",
+    "package": "evidence/corrected_evidence_audit.json",
+    "sha256": "8cf05139aed54112bc3eca3d96ed1e1b7c613809c2440c0bea44c233909b16cf"
   },
   {
     "source": "reports/representative_day_flexibility/flexibility_results.csv",
     "package": "data/flexibility_results.csv",
-    "sha256": "e0952e8057c386051c0f03400f0231fa835791d9a96080ae60bb274295eca8c7"
+    "sha256": "7273156bedb9bcf8d26dfa7ff69ff8c22e4a3b6429c30b58cc76348718d6542b"
   },
   {
     "source": "reports/representative_day_flexibility/summary.json",
     "package": "evidence/event_summary.json",
-    "sha256": "b4abb20caf6e3294b33835bb0cec4bccbe808ffff786ee75191765d896eb55f3"
+    "sha256": "265efd568365c2f80b9064516268eb2aa46aa3bd13cd143f623070799367ca0a"
   },
   {
     "source": "reports/terminal_treatment/terminal_treatment_report.md",
@@ -117,147 +127,247 @@
   {
     "source": "paper/generate_annual_results.py",
     "package": "source_snapshot/generate_annual_results.py",
-    "sha256": "fabbb9c0c26ce063ed328483ffd9ae0401fe65f8e5d72bbddcdaa366e4790442"
+    "sha256": "92f86f972ef851cb34ddcbfda53d155dd5a6da108ba640df43acb797a121e077"
+  },
+  {
+    "source": "rolling_optimisation/plot_flexibility_figures.py",
+    "package": "source_snapshot/rolling_optimisation/plot_flexibility_figures.py",
+    "sha256": "3ce5a602959d6ce46b4db301831283be11345c8231eafa1039e92815abf799d9"
+  },
+  {
+    "source": "paper/figure_style.py",
+    "package": "source_snapshot/figure_style.py",
+    "sha256": "19d5c482ebaa0e11ff29199b7500e75a0b0a58fa9bf06c59a46b66d96f8fa15a"
+  },
+  {
+    "source": "static/data/rolling_year_outputs/2025_optimised_cohort_trace/checkpoints/2025-12-31.json",
+    "package": "evidence/corrected_year_end_checkpoint.json",
+    "sha256": "b6f91ac28a53d620c340ed6813ddc7f4d8cebbfa44f1318db9905654d1f3509d"
+  },
+  {
+    "source": "static/data/representative_day_flexibility/2025-09-22_baseline_planned.csv",
+    "package": "data/event_reference.csv",
+    "sha256": "b0b3471b2c79628fc3d08185828278f8b0966e83f068d3a83087c70376333ab9"
+  },
+  {
+    "source": "static/data/representative_day_flexibility/2025-09-22_start_24_magnitude_neg_100.csv",
+    "package": "data/event_dispatch/2025-09-22_start_24_magnitude_neg_100.csv",
+    "sha256": "b60fd470ee9ec263d748933e1ef02b111d1c924d97cdaa47e792832146c66ece"
+  },
+  {
+    "source": "reports/representative_day_flexibility/start_24_magnitude_neg_100.json",
+    "package": "evidence/event_dispatch/start_24_magnitude_neg_100.json",
+    "sha256": "3ad8543fd6c9420808650429ee6b379d5371456d45fed84faac8e9cf0bd5119c"
+  },
+  {
+    "source": "static/data/representative_day_flexibility/2025-09-22_start_24_magnitude_neg_200.csv",
+    "package": "data/event_dispatch/2025-09-22_start_24_magnitude_neg_200.csv",
+    "sha256": "f5505d55ad6060a40cef87650292f7e569a7f4ba1f417e59eadbd6414627a35b"
+  },
+  {
+    "source": "reports/representative_day_flexibility/start_24_magnitude_neg_200.json",
+    "package": "evidence/event_dispatch/start_24_magnitude_neg_200.json",
+    "sha256": "747be13b16f59772162e7318f103ba43a3e9032306b5172ccde0022a1074bf10"
+  },
+  {
+    "source": "static/data/representative_day_flexibility/2025-09-22_start_60_magnitude_neg_100.csv",
+    "package": "data/event_dispatch/2025-09-22_start_60_magnitude_neg_100.csv",
+    "sha256": "46af2efe5a0be7797ad19aeb07fcd72df246d83d0dd9ea810581f56da4ab7e08"
+  },
+  {
+    "source": "reports/representative_day_flexibility/start_60_magnitude_neg_100.json",
+    "package": "evidence/event_dispatch/start_60_magnitude_neg_100.json",
+    "sha256": "134b357ae45f071f96259904535e999abbd0795b1dd021b3a7bf9cd8d69f8cf3"
+  },
+  {
+    "source": "static/data/representative_day_flexibility/2025-09-22_start_60_magnitude_neg_200.csv",
+    "package": "data/event_dispatch/2025-09-22_start_60_magnitude_neg_200.csv",
+    "sha256": "7c2e52b527c0297a7a944184a75d98ba77610cf42114890c52df4406a2947c74"
+  },
+  {
+    "source": "reports/representative_day_flexibility/start_60_magnitude_neg_200.json",
+    "package": "evidence/event_dispatch/start_60_magnitude_neg_200.json",
+    "sha256": "2c43daab99f86f2962deacaaa6ed2abfd5a7eafca746c94c9341879f8886ad05"
+  },
+  {
+    "source": "static/data/representative_day_flexibility/2025-09-22_start_00_magnitude_pos_25.csv",
+    "package": "data/event_dispatch/2025-09-22_start_00_magnitude_pos_25.csv",
+    "sha256": "b30dc60a7740d0590826da6cae8637c5f108944b5557b55794266b5c547a5721"
+  },
+  {
+    "source": "reports/representative_day_flexibility/start_00_magnitude_pos_25.json",
+    "package": "evidence/event_dispatch/start_00_magnitude_pos_25.json",
+    "sha256": "6433d4835d3b9a328afcd7e459ba5e6ae48d4bf1219f6c3c7e1e020f18f3ef49"
+  },
+  {
+    "source": "static/data/representative_day_flexibility/2025-09-22_start_00_magnitude_pos_75.csv",
+    "package": "data/event_dispatch/2025-09-22_start_00_magnitude_pos_75.csv",
+    "sha256": "1df72e918635b9a6f5ab13534f087573b0fc6acde1e4393bc5b2f991d311df0b"
+  },
+  {
+    "source": "reports/representative_day_flexibility/start_00_magnitude_pos_75.json",
+    "package": "evidence/event_dispatch/start_00_magnitude_pos_75.json",
+    "sha256": "7478f1c3ed8bb291671a17077eed2e09637262611daf59204f9cb3c666e065db"
+  },
+  {
+    "source": "static/data/representative_day_flexibility/2025-09-22_start_24_magnitude_pos_25.csv",
+    "package": "data/event_dispatch/2025-09-22_start_24_magnitude_pos_25.csv",
+    "sha256": "fd59716a9e1bc5e52ed46fb1ff144050fb72e6f892b39fc16cd04a6cc1d2aa5b"
+  },
+  {
+    "source": "reports/representative_day_flexibility/start_24_magnitude_pos_25.json",
+    "package": "evidence/event_dispatch/start_24_magnitude_pos_25.json",
+    "sha256": "8e3ba0248d34b8205bf3117c22b58c363c0a9ce540eb714d47d3efe8c6f3b83b"
+  },
+  {
+    "source": "static/data/representative_day_flexibility/2025-09-22_start_24_magnitude_pos_75.csv",
+    "package": "data/event_dispatch/2025-09-22_start_24_magnitude_pos_75.csv",
+    "sha256": "d93e01692a76a1bcc2ca3011dffaae05f3f677638a6d0c92913be41b45013730"
+  },
+  {
+    "source": "reports/representative_day_flexibility/start_24_magnitude_pos_75.json",
+    "package": "evidence/event_dispatch/start_24_magnitude_pos_75.json",
+    "sha256": "7bb739d6508762b3dbc8de3e29b65c06e2c1d200ba43341ee753ad1fcb4ed46c"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_baseline_reformulated/annual_summary.json",
     "package": "evidence/2025_baseline_reformulated/annual_summary.json",
-    "sha256": "431f57e006c0392045c320d5cc3a9e864c0922b2f5f28660479dd75538f6edf0"
+    "sha256": "324b458f7bdcac8c250dacdb62288ed153436213821ebc95a708c7b37135e8ac"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_baseline_reformulated/run_metadata.json",
     "package": "evidence/2025_baseline_reformulated/run_metadata.json",
-    "sha256": "b9b0e8bc61664fec34729127abe7a32e1462379c22a1b8d641f3d86e0fc54726"
+    "sha256": "e397701a5cc3e805ec69daa73f3d1828eb6a6155d9500715402e07924fcd9240"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_flex_0p5/annual_summary.json",
     "package": "evidence/2025_flex_0p5/annual_summary.json",
-    "sha256": "1766c77dcd21b6652a8d57c42b9f48c705b0d8d91f59f14ef72eabb08e68c57d"
+    "sha256": "b7a206a5f8e0070e71dc2d405a73aa3c25044f746dbd5a24caf351a297ca2392"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_flex_0p5/run_metadata.json",
     "package": "evidence/2025_flex_0p5/run_metadata.json",
-    "sha256": "2dc5f7530eaabc4fe45085fb1f250405bc17f1bc496fd26ee3ea2014d5ee9410"
+    "sha256": "e0c48c84024e633ca8a7dc5615b0cb5f002c95bfbbc33466874412ab05aa722c"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_flex_0p75/annual_summary.json",
     "package": "evidence/2025_flex_0p75/annual_summary.json",
-    "sha256": "ff1829054d9e21ea523bf806f0861d4291261666f620953116e20d7c813cd353"
+    "sha256": "d7d3b11b2bca1ca26f79b894b50ddb060d9a9ce1d4c0af8efecb41d20b2eded4"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_flex_0p75/run_metadata.json",
     "package": "evidence/2025_flex_0p75/run_metadata.json",
-    "sha256": "b59a27bd1d9a77b4a054160bfa3a02879286dda51ba790976bed57fa7c27031c"
+    "sha256": "3656277d6cf26b4bc6180ec9a56fb92ac03d13366fb26731abe73dbe444a08d4"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_optimised_cohort_trace/annual_summary.json",
     "package": "evidence/2025_optimised_cohort_trace/annual_summary.json",
-    "sha256": "6b1f3360843d031f80bd45e6ac3dd5dace037765fdb7e60dd8a784a85821b709"
+    "sha256": "811e1b6edb6ae6547b7230644ccb9579298f8766f404c98303ba023d4beb57c8"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_optimised_cohort_trace/run_metadata.json",
     "package": "evidence/2025_optimised_cohort_trace/run_metadata.json",
-    "sha256": "5c071799c518e704a7cdda3da0c6d132bfc2c95c11f9eb297363db42485a2b28"
+    "sha256": "73daed446f3cf78370c259067cfdfa2f5bbe73e0f2cc45984d2c5d82d3836644"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_flex_1p25/annual_summary.json",
     "package": "evidence/2025_flex_1p25/annual_summary.json",
-    "sha256": "45777f962cee19f74a8a2ab864677f9ebe822c9430f30b4c3479e5ff678a3c9e"
+    "sha256": "2cc5712346aeff20aaf6389d0461ff15372121421329d30d22f0fc43421df835"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_flex_1p25/run_metadata.json",
     "package": "evidence/2025_flex_1p25/run_metadata.json",
-    "sha256": "badc11462b42d96683736b8c89e24142522191e08596c2ac1a8b3238e8ca78a8"
+    "sha256": "7d4f46b4848c81eb405f93c603f334b39094a664db45ef26474c5866802e65d5"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_flex_1p5/annual_summary.json",
     "package": "evidence/2025_flex_1p5/annual_summary.json",
-    "sha256": "b6767eae0f67f366190364ff3d18c02662e81a295aecbb8f21dd582f31f0439f"
+    "sha256": "e58c3710e6d3b1c2806291670677aee1d4d29d89f8caf9a56cbb616dcc4aa3b5"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_flex_1p5/run_metadata.json",
     "package": "evidence/2025_flex_1p5/run_metadata.json",
-    "sha256": "be3674b2ba5683763817d9ce36199e0e84eb7c0de15defc71639929814bd7971"
+    "sha256": "381b5be2d7d4e70bd1c1c0c04471020acc19d1b85cfcfd336a8108214bb2044a"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_ups_0p5/annual_summary.json",
     "package": "evidence/2025_ups_0p5/annual_summary.json",
-    "sha256": "f2c40c88b9a181586f2dcb30aefe831403288353eeaa7789dbc106d832a074f8"
+    "sha256": "8999aefd1cb7bde0b7194a79ab780b718ff28b2872589671d96e7126daca154a"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_ups_0p5/run_metadata.json",
     "package": "evidence/2025_ups_0p5/run_metadata.json",
-    "sha256": "65b4836b5e06fe518283c97653415825f7c2d2e4be0aefa4d1a097c4cb223334"
+    "sha256": "22430019dcfca15628d67de31e5250351108f941107c417726dccba019ce46a0"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_ups_0p75/annual_summary.json",
     "package": "evidence/2025_ups_0p75/annual_summary.json",
-    "sha256": "399aaf526b8a63c1bc8cecc4d245fdf7687de4c88d798b2ba12b13b48f393691"
+    "sha256": "f51017cd922cf8370ee6e89a596f356fab00bd8ce58dcaf39056540c1aab83c6"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_ups_0p75/run_metadata.json",
     "package": "evidence/2025_ups_0p75/run_metadata.json",
-    "sha256": "453cacb3ae072a2812d36f0400c88d7df3fc2575d8ba39e03945f3658cfe0f7f"
+    "sha256": "e8a82eae354f44bd211d9653bc005efe073dc9b6e72d26ecc78546b932bc4c32"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_ups_1p25/annual_summary.json",
     "package": "evidence/2025_ups_1p25/annual_summary.json",
-    "sha256": "abcef9c7543f2a2307fbe4a2a2744c6be3e58dfa6b151dbd4f3175b3e0791a2c"
+    "sha256": "8c8d8baa0302414b58b870eccafca69a0377dbc58af4e5105b4b0ec9718e9ee7"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_ups_1p25/run_metadata.json",
     "package": "evidence/2025_ups_1p25/run_metadata.json",
-    "sha256": "970c869192485b2726dcb970e403a2cc891b13c1e4757b832af5cc7f4226bf2d"
+    "sha256": "f44ff7c1c9c6c57c1df44f4914e0f78f817a1f23099fc5158e39937c456de640"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_ups_1p5/annual_summary.json",
     "package": "evidence/2025_ups_1p5/annual_summary.json",
-    "sha256": "05836641e188da49880f6097a933566c4570664d7295adccd63ee0c9699f19c1"
+    "sha256": "038932d529a61d70c8320d4cc655f8cd4cbbd2fab54a8c650050420b079770d6"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_ups_1p5/run_metadata.json",
     "package": "evidence/2025_ups_1p5/run_metadata.json",
-    "sha256": "0b8a6b60f71fe96ea640af4bfe7a489aa1976ecfe060057828605d7e2ce03981"
+    "sha256": "5c1eb692d323321ca713218aab54276d93e1b809bf33beffb56308b41345bb54"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_tes_0p5/annual_summary.json",
     "package": "evidence/2025_tes_0p5/annual_summary.json",
-    "sha256": "7cdb6774a9785748c74c040e29380d809433d43710785b7bbf7087ea7b184f00"
+    "sha256": "8b72177dd0c8e9210cb0cd528f5c5285576adf9a8425e77e770b33e72fa958b7"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_tes_0p5/run_metadata.json",
     "package": "evidence/2025_tes_0p5/run_metadata.json",
-    "sha256": "a240953acc242f6ca14bdab0268701bbcf8a2010fcdc715ae2f4ffed746ccec0"
+    "sha256": "46eb3f132ac3f4a4452b124bc18d77e32858eea22aa37176fe089c0c87d090c5"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_tes_0p75/annual_summary.json",
     "package": "evidence/2025_tes_0p75/annual_summary.json",
-    "sha256": "20735ea5ac637d9e6be3413c4cf1d82c102469fa4fdaf6b6e5c2150bcd6bcdd4"
+    "sha256": "acb68d3433bb4ecd64d92cb83c3db73c9adde50031d07328e106a06c83275980"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_tes_0p75/run_metadata.json",
     "package": "evidence/2025_tes_0p75/run_metadata.json",
-    "sha256": "c9f23b71dd216a65440bfe3155af594ceec48cb2a0812e798b618fe7872e44a1"
+    "sha256": "9e67e28b4a243a12e43952ec9010e3696fde320c35b3f23c918c032f2c3dc5c3"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_tes_1p25/annual_summary.json",
     "package": "evidence/2025_tes_1p25/annual_summary.json",
-    "sha256": "b17c1f156acfeb3cc09caf2726f5461d8d12802163a590a5b116bb957088eb1a"
+    "sha256": "4928b3115685d2b87ca9036eaf77b7fb29f48641cdc4c0f30a962112e0931700"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_tes_1p25/run_metadata.json",
     "package": "evidence/2025_tes_1p25/run_metadata.json",
-    "sha256": "6330edc33b503283c38e7345c9d19c9571a8d2f02718255ae067537144239a50"
+    "sha256": "68d952f2d6af09fe1ca6ba6ec76996e86348ba4fc31dff799452ac8f4005470c"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_tes_1p5/annual_summary.json",
     "package": "evidence/2025_tes_1p5/annual_summary.json",
-    "sha256": "39ea6ad1cbdd243c28cb0b472290f7ec3556df76bd46067e28c18e9a124acadc"
+    "sha256": "6885dd67ec7a530814c60a9fa7187a7f0ce1eb8b625cec7aee336cffd62769ae"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_tes_1p5/run_metadata.json",
     "package": "evidence/2025_tes_1p5/run_metadata.json",
-    "sha256": "c4ace8a806226eccb34301b9c67336d52bf74ade80119297af15c7cb2d56c3bd"
+    "sha256": "c881773d29066164a9cbf19e415719f2058abfb3629005af4de8b176ac610f33"
   },
   {
     "source": "static/data/rolling_year_outputs/2025_baseline_reformulated/days/2025-09-22.csv",
@@ -267,11 +377,71 @@
   {
     "source": "static/data/rolling_year_outputs/2025_optimised_cohort_trace/days/2025-09-22.csv",
     "package": "data/2025_optimised_cohort_trace_representative_day.csv",
-    "sha256": "9670b4a3ec8fe6b5d2879c0faaee923bc1bed11ae703ac1f488b4975246a2a8a"
+    "sha256": "6285c238b5618dd3651d65c0d222dfd1383b2d1cb7a77b97bf8271dedd7a9463"
   },
   {
     "source": "paper/references.bib",
     "package": "references.bib",
-    "sha256": "3bf08b743ff4bddcc679d97f74dabdcbd3319eb15d083bc66966798659e40ebd"
+    "sha256": "81ab1f4316acf25d0c0d7fe40c1fe1a1b1eecc50e09c66bb42b10815ea62d38c"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "tables/annual_components.tex",
+    "sha256": "4412a302be13ecc0581b294239bd58449d849406bdfafd4be979d44a1b75bfdd"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "tables/annual_endpoints.tex",
+    "sha256": "6977b398d7b8025b5488bf140f9ef84e44b4c2db1edeccae36f770ed7918bf33"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "tables/financial_range.tex",
+    "sha256": "3bd5930dd8f319301545f610e97faac1674eef83d0a8bd89094640345f934a65"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "tables/hourly_tranches.tex",
+    "sha256": "43f7f0111f6968bca2959056bd2c46c302654e35771a88a8433044e906ba5ed2"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "tables/solver_quality.tex",
+    "sha256": "f9b7aff4d65882c2ae8d215de464483e87d7d1e27bb213bc21de3d47ce9f33c3"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "tables/thermal_parameters.tex",
+    "sha256": "dfeae112d8ded3f1833c3f0449975c7d1d00b9f1186ab900e8ef8cde7073b62e"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "tables/ups_screen.tex",
+    "sha256": "bd974a3336b3986c433b0d770dca9bd9226bea1779e8a1c42f33a0318d5edf40"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "tables/workload_inputs.tex",
+    "sha256": "4a08ecc2893b3a405924d7c36fe2960b847f48fe84cb6668351fd1391e41ea48"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "data/price_timeline.csv",
+    "sha256": "09cda8c148942d8ca07708a2c10c19f8487623a0ca5dacc5add8c4a170fe3008"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "evidence/bibliography_audit.json",
+    "sha256": "4911b87dc631be393c275221111a6feaf9b09929b1690caf3512bab02e19cdb1"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "evidence/historical/intermediate_quality_reruns.csv",
+    "sha256": "90b0676b76c73b419c30e436b5de13510ccb2e8592923c72f325959a3dd9755b"
+  },
+  {
+    "source": "generated or retained package evidence",
+    "package": "evidence/reference_corrections.json",
+    "sha256": "8d544b276c4f3c682a5435c41534c6cd313d077dec6459ca12abe94d0945b6b4"
   }
 ]

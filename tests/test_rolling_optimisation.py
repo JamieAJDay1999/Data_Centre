@@ -55,6 +55,15 @@ def test_annual_timeline_covers_dst_and_every_interval(timeline: pd.DataFrame) -
     assert (timestamps.diff().dropna() == pd.Timedelta(minutes=15)).all()
 
 
+def test_hourly_tranche_shares_are_held_for_four_quarter_hours() -> None:
+    shift = pd.read_csv(SHIFT, index_col="time_slot")
+    assert len(shift.loc[1:96]) == 96
+    for hour in range(24):
+        block = shift.iloc[hour * 4 : hour * 4 + 4]
+        expected = pd.concat([block.iloc[[0]]] * 4, ignore_index=True)
+        pd.testing.assert_frame_equal(block.reset_index(drop=True), expected)
+
+
 def test_state_and_workload_round_trip() -> None:
     config = RollingConfig()
     state = default_initial_state(config)

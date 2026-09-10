@@ -86,110 +86,51 @@ fg)) (C:\GitHub\Data_Centre\paper\final_submission\build\supplement.out)
 (supplement/inputs.tex
 supplement/inputs.tex:24: ignored error: Infinite glue shrinkage found in box b
 eing split [1{C:/Users/jamie/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
- (tables/thermal_parameters.tex)
-Overfull \hbox (5.02701pt too wide) in paragraph at lines 30--31
-[]\T1/cmr/m/n/10.95 Initial tem-per-a-tures $\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/
-10.95 T[]; T[]; T[]; T[]\OT1/cmr/m/n/10.95 )$ \T1/cmr/m/n/10.95 are $\OT1/cmr/m
-/n/10.95 (28\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 5\OML/cmm/m/it/10.95 ; \OT1
-/cmr/m/n/10.95 26\OML/cmm/m/it/10.95 ; \OT1/cmr/m/n/10.95 20\OML/cmm/m/it/10.95
- ; \OT1/cmr/m/n/10.95 27)[]$\T1/cmr/m/n/10.95 C. Bounds at ev-ery state bound-
-
-Overfull \hbox (60.4943pt too wide) in paragraph at lines 30--31
-\T1/cmr/m/n/10.95 cases use the same ther-mal bounds. A his-tor-i-cal con-fig-u
--ra-tion field named \T1/cmtt/m/n/10.95 baseline_cold_aisle_setpoint_c
-
-Package natbib Warning: Citation `Cao2022ApEn' on page 2 undefined on input lin
-e 36.
-
-
-Package natbib Warning: Citation `6779441' on page 2 undefined on input line 36
-.
-
-
-Package natbib Warning: Citation `Misaghian2023TIA' on page 2 undefined on inpu
-t line 36.
-
-
-Package natbib Warning: Citation `Liu2012PER' on page 2 undefined on input line
- 36.
-
-
-Overfull \hbox (58.80032pt too wide) in paragraph at lines 38--39
-[]\T1/cmr/m/n/10.95 The au-thor-i-ta-tive nu-mer-i-cal in-puts are \T1/cmtt/m/n
-/10.95 data/load_profiles.csv \T1/cmr/m/n/10.95 and \T1/cmtt/m/n/10.95 data/shi
-ftability_profile.csv\T1/cmr/m/n/10.95 ,
-[2] (tables/workload_inputs.tex
+ (tables/thermal_parameters.tex) [2] (tables/hourly_tranches.tex) [3]
+(tables/workload_inputs.tex
 tables/workload_inputs.tex:102: ignored error: Infinite glue shrinkage found in
- box being split [3]
+ box being split [4]
 tables/workload_inputs.tex:102: ignored error: Infinite glue shrinkage found in
- box being split [4])
-
-Package natbib Warning: Citation `lccc_imrp_actuals' on page 5 undefined on inp
-ut line 58.
-
-) (supplement/model.tex [5] [6]
-
-Package natbib Warning: Citation `cupelli2018data' on page 7 undefined on input
- line 58.
-
-[7]) (supplement/procedures.tex [8] [9]) (supplement/evidence.tex
-(tables/annual_endpoints.tex)
-Overfull \hbox (13.61635pt too wide) in paragraph at lines 2--4
-\T1/cmr/m/n/10.95 All sen-si-tiv-ity points in Ta-ble []S4[] are com-pleted an-
-nual chains. They su-per-sede ear-lier representative-
-[10] (tables/solver_quality.tex) [11 <./figures/Figure_5.png>]
-Overfull \hbox (11.05571pt too wide) in paragraph at lines 30--31
-\OML/cmm/m/it/10.95 C[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 E\OT1/cmr/m/n/10
-.95 )$\T1/cmr/m/n/10.95 . The re-tained re-sults give GBP 1,292.2794/year for $
-\OML/cmm/m/it/10.95 E \OT1/cmr/m/n/10.95 = 750$ \T1/cmr/m/n/10.95 kWh and GBP 2
-,481.4101/year
-
-Overfull \hbox (3.57263pt too wide) in paragraph at lines 32--33
-[]\T1/cmr/m/n/10.95 For con-stant real an-nual ben-e-fits, ad-di-tional in-vest
--ment $\OML/cmm/m/it/10.95 I$ \T1/cmr/m/n/10.95 and ad-di-tional an-nual non-el
-ectricity
-
-Package natbib Warning: Citation `sam_crf' on page 12 undefined on input line 3
-7.
-
-(tables/financial_range.tex) [12])
-(C:\GitHub\Data_Centre\paper\final_submission\build\supplement.bbl [13])
-
-Package natbib Warning: There were undefined citations.
-
-[14] (C:\GitHub\Data_Centre\paper\final_submission\build\supplement.aux
-
-Package natbib Warning: Citation(s) may have changed.
-(natbib)                Rerun to get citations correct.
-
-) )
+ box being split [5])) (supplement/model.tex [6] [7])
+(supplement/procedures.tex [8] [9]) (supplement/evidence.tex
+(tables/annual_endpoints.tex) [10] [11 <./figures/Figure_5.png>]
+(tables/solver_quality.tex) [12]
+Underfull \hbox (badness 1552) in paragraph at lines 30--31
+\T1/cmr/m/n/10.95 Let the ad-di-tional an-nual electricity-cost sav-ing for en-
+ergy ca-pac-ity $\OML/cmm/m/it/10.95 E$ \T1/cmr/m/n/10.95 be $\OT1/cmr/m/n/10.9
+5 ^^A\OML/cmm/m/it/10.95 S\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 E\OT1/cmr/m/n
+/10.95 ) =
+(tables/financial_range.tex) [13])
+(C:\GitHub\Data_Centre\paper\final_submission\build\supplement.bbl) [14]
+(C:\GitHub\Data_Centre\paper\final_submission\build\supplement.aux) )
 (see the transcript file for additional information) <C:\Users\jamie\AppData\Lo
-cal\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1095.pk> <C:\Users\jamie\AppD
-ata\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1095.pk> <C:\Users\jami
-e\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C:\User
-s\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.pk> <C
-:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1000.
-pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecb
-x1440.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi6
-00\ecrm1095.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/e
-c/dpi600\ecrm1200.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jkna
-ppen/ec/dpi600\ecrm1728.pk><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/
-type1/public/amsfonts/cm/cmex10.pfb><C:/Users/jamie/AppData/Local/Programs/MiKT
-eX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/jamie/AppData/Local/Prog
-rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/jamie/AppData/Lo
-cal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/jamie/Ap
-pData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/
-jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmib10.pfb>
-<C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
-r10.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
-ts/cm/cmr6.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public
-/amsfonts/cm/cmr7.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1
-/public/amsfonts/cm/cmr8.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/font
-s/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/jamie/AppData/Local/Programs/Mi
-KTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/jamie/AppData/Local/Pro
-grams/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+cal\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1000.pk> <C:\Users\jamie\AppD
+ata\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1000.pk> <C:\Users\jami
+e\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1095.pk> <C:\User
+s\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C
+:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.
+pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecr
+m1000.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi6
+00\ecbx1440.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/e
+c/dpi600\ecrm1095.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfour/jkna
+ppen/ec/dpi600\ecrm1200.pk> <C:\Users\jamie\AppData\Local\MiKTeX\fonts/pk/ljfou
+r/jknappen/ec/dpi600\ecrm1728.pk><C:/Users/jamie/AppData/Local/Programs/MiKTeX/
+fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/jamie/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/jamie/AppData/Loca
+l/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/jamie/AppD
+ata/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/ja
+mie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/
+Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmib1
+0.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts
+/cm/cmr10.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/
+amsfonts/cm/cmr6.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/
+public/amsfonts/cm/cmr7.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts
+/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/jamie/AppData/Local/Progr
+ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/jamie/AppData/Loc
+al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
 Output written on C:\GitHub\Data_Centre\paper\final_submission\build\supplement
-.pdf (14 pages, 450586 bytes).
+.pdf (14 pages, 458301 bytes).
 Transcript written on C:\GitHub\Data_Centre\paper\final_submission\build\supple
 ment.log.
 pdflatex: major issue: So far, you have not checked for MiKTeX updates.

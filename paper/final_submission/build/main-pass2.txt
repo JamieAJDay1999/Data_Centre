@@ -206,12 +206,7 @@ aryarrows.meta.code.tex)
 (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
 z/libraries\tikzlibrarypositioning.code.tex)
 (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
-tex.def)
-
-LaTeX Warning: Unused global option(s):
-    [lettersize].
-
-(C:\GitHub\Data_Centre\paper\final_submission\build\main.aux)
+tex.def) (C:\GitHub\Data_Centre\paper\final_submission\build\main.aux)
 -- Lines per column: 58 (exact).
 
 (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
@@ -231,17 +226,18 @@ se/8r.enc}]) (sections/literature.tex [2 <./figures/Figure_1.png>])
 (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
 [3]
 Underfull \vbox (badness 1226) has occurred while \output is active [4])
-(sections/case_study.tex [5]) (sections/results.tex
-Underfull \vbox (badness 10000) has occurred while \output is active [6]
+(sections/case_study.tex [5]) (sections/results.tex [6]
 Underfull \vbox (badness 10000) has occurred while \output is active [7 <./figu
 res/Figure_4a.png> <./figures/Figure_4b.png> <./figures/Figure_6.png>]
 Underfull \vbox (badness 2626) has occurred while \output is active
-(tables/annual_components.tex) [8 <./figures/Figure_7.png>] [9 <./figures/Figur
-e_8.png>] (tables/ups_screen.tex)) (sections/conclusion.tex) [10]
+(tables/annual_components.tex [8 <./figures/Figure_7.png>])
+(tables/ups_screen.tex) [9 <./figures/Figure_8.png>]
+Underfull \vbox (badness 10000) has occurred while \output is active)
+(sections/conclusion.tex [10 <./figures/Figure_9.png>])
 (C:\GitHub\Data_Centre\paper\final_submission\build\main.bbl
 Underfull \hbox (badness 10000) in paragraph at lines 25--27
 []\T1/ptm/m/n/8 International En-ergy Agency. (2025) En-ergy and AI.
-) [11] (C:\GitHub\Data_Centre\paper\final_submission\build\main.aux) )
+[11]) [12] (C:\GitHub\Data_Centre\paper\final_submission\build\main.aux) )
 (see the transcript file for additional information)<C:/Users/jamie/AppData/Loc
 al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/jamie/Ap
 pData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users
@@ -259,7 +255,7 @@ ocal/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/jamie/AppData/
 Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/jamie/AppData/
 Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
 Output written on C:\GitHub\Data_Centre\paper\final_submission\build\main.pdf (
-11 pages, 1092894 bytes).
+12 pages, 1188025 bytes).
 Transcript written on C:\GitHub\Data_Centre\paper\final_submission\build\main.l
 og.
 pdflatex: major issue: So far, you have not checked for MiKTeX updates.

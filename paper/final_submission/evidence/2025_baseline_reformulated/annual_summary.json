@@ -13,10 +13,12 @@
   "maximum_tes_overlap_kw": 0.0,
   "maximum_ups_overlap_kw": 0.0,
   "maximum_workload_conservation_residual_cpu_h": 0.0,
+  "maximum_workload_trace_interval_residual_cpu": 0.0,
   "mode": "baseline",
   "non_optimal_horizons": 0,
   "peak_grid_import_kw": 974.9227347080529,
   "scenario_id": "2025_baseline_reformulated",
   "settlement_cost_gbp": 550503.5946101338,
-  "total_solver_runtime_s": 33.01367890000074
+  "total_solver_runtime_s": 46.39282649999586,
+  "workload_trace_rows": 0
 }

@@ -2,6 +2,4 @@ This is BibTeX, Version 0.99e (MiKTeX 25.12)
 The top-level auxiliary file: build/supplement.aux
 The style file: plainnat.bst
 Database file #1: references.bib
-Warning--empty year in sam_crf
-(There was 1 warning)
 bibtex: major issue: So far, you have not checked for MiKTeX updates.

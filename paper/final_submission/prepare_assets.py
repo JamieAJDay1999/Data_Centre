@@ -18,8 +18,16 @@ for name in ('Figure_1.png','Figure_4a.png','Figure_4b.png','Figure_5.png','Figu
     copy('paper/images/'+name, 'figures/'+name)
 for name in ('load_profiles.csv','shiftability_profile.csv'):
     copy('static/data/inputs/'+name, 'data/'+name)
-for name in ('annual_endpoints.csv','annual_cost_components.csv','representative_day_selection.csv','intermediate_quality_reruns.csv'):
+for name in ('annual_endpoints.csv','annual_cost_components.csv','representative_day_selection.csv',
+             'corrected_solver_horizons.csv','corrected_event_components.csv'):
     copy('reports/final_annual_results/'+name, 'data/'+name)
+copy('reports/final_annual_results/corrected_evidence_audit.json','evidence/corrected_evidence_audit.json')
+# Older diagnostic solves are not evidence for the corrected input run.
+obsolete = HERE/'data/intermediate_quality_reruns.csv'
+if obsolete.exists():
+    historical = HERE/'evidence/historical'
+    historical.mkdir(exist_ok=True)
+    obsolete.replace(historical/obsolete.name)
 copy('reports/representative_day_flexibility/flexibility_results.csv','data/flexibility_results.csv')
 copy('reports/representative_day_flexibility/summary.json','evidence/event_summary.json')
 copy('reports/terminal_treatment/terminal_treatment_report.md','evidence/earlier_terminal_assessment.md')
@@ -27,6 +35,17 @@ for name in ('model.py','types.py','timeline.py','config.py','run_representative
     copy('rolling_optimisation/'+name,'source_snapshot/rolling_optimisation/'+name)
 copy('inputs/parameters_optimisation.py','source_snapshot/inputs/parameters_optimisation.py')
 copy('paper/generate_annual_results.py','source_snapshot/generate_annual_results.py')
+copy('rolling_optimisation/plot_flexibility_figures.py','source_snapshot/rolling_optimisation/plot_flexibility_figures.py')
+copy('paper/figure_style.py','source_snapshot/figure_style.py')
+copy('static/data/rolling_year_outputs/2025_optimised_cohort_trace/checkpoints/2025-12-31.json',
+     'evidence/corrected_year_end_checkpoint.json')
+copy('static/data/representative_day_flexibility/2025-09-22_baseline_planned.csv',
+     'data/event_reference.csv')
+for start, magnitude in ((24,-100),(24,-200),(60,-100),(60,-200),(0,25),(0,75),(24,25),(24,75)):
+    name=f'2025-09-22_start_{start:02d}_magnitude_{"pos" if magnitude > 0 else "neg"}_{abs(magnitude)}.csv'
+    copy('static/data/representative_day_flexibility/'+name, 'data/event_dispatch/'+name)
+    status=f'start_{start:02d}_magnitude_{"pos" if magnitude > 0 else "neg"}_{abs(magnitude)}.json'
+    copy('reports/representative_day_flexibility/'+status, 'evidence/event_dispatch/'+status)
 def rows(name):
     with (HERE/'data'/name).open(encoding='utf-8-sig',newline='') as f: return list(csv.DictReader(f))
 annual = rows('annual_endpoints.csv')
@@ -59,7 +78,7 @@ def case_label(label): return label[:-1]+r'$\times$' if label.endswith('x') else
 body=[f"{case_label(r['label'])} & {float(r['annual_cost_gbp']):,.0f} & {float(r['saving_percent']):.3f} & {float(r['change_from_central_pp']):+.3f} & {float(r['grid_energy_kwh'])/1e6:.3f} \\\\" for r in annual]
 write('annual_endpoints.tex',table('Full-year cost and resource sensitivity. Change is percentage points from the central coordinated saving; baseline denotes reference operation.','tab:annual-endpoints','lrrrr','Case & Cost (GBP) & Saving (\\%) & Change (pp) & Energy (GWh)',body))
 body=[f"{case_label(r['label'])} & {r['non_optimal_horizons']} & {float(r['maximum_recorded_gap_percent']):.3f} \\\\" for r in annual]
-write('solver_quality.tex',table('Original annual-chain solver records. Non-optimal denotes the stored termination classification; diagnostic reruns are reported separately.','tab:solver-quality','lrr','Case & Non-optimal horizons & Maximum recorded gap (\\%)',body))
+write('solver_quality.tex',table('Corrected annual-chain solver records. Non-optimal denotes the stored termination classification; each listed chain covers all 365 days.','tab:solver-quality','lrr','Case & Non-optimal horizons & Maximum recorded gap (\\%)',body))
 base=float(next(r for r in annual if r['label']=='Flexible workload 1.0x')['annual_cost_gbp'])
 increments=[(750,150,base-float(next(r for r in annual if r['label']=='UPS capacity 1.25x')['annual_cost_gbp'])),(900,300,base-float(next(r for r in annual if r['label']=='UPS capacity 1.5x')['annual_cost_gbp']))]
 def crf(r,n):return r*(1+r)**n/((1+r)**n-1) if r else 1/n
@@ -73,6 +92,11 @@ write('financial_range.tex',table('Illustrative supported investment per added n
 loads=[r for r in rows('load_profiles.csv') if 1<=int(r['time_slot'])<=96]
 shares=[r for r in rows('shiftability_profile.csv') if 1<=int(r['time_slot'])<=96]
 assert len(loads)==len(shares)==96
+assert all(shares[i][str(k)]==shares[(i//4)*4][str(k)] for i in range(96) for k in range(1,5))
+hourly=[]
+for h in range(24):
+    hourly.append(f'{h:02d}:00--{h+1:02d}:00 & '+' & '.join(f'{100*float(shares[h*4][str(k)]):.0f}' for k in range(1,5))+r' \\')
+write('hourly_tranches.tex',table('Intended hourly allocation of flexible arrivals (percent). Each row is held constant over its four quarter-hour intervals.','tab:hourly-tranches','lrrrr','Local hour & $\\alpha_1$ & $\\alpha_2$ & $\\alpha_3$ & $\\alpha_4$',hourly))
 lines=[]
 for a,b in zip(loads,shares):
     assert a['time_slot']==b['time_slot']
@@ -109,9 +133,23 @@ if corrections_path.exists():
             field_pattern=r'(?m)^\s*'+re.escape(field)+r'\s*=.*$'
             line='  '+field+' = {'+value+'},'
             if re.search(field_pattern,entry):entry=re.sub(field_pattern,lambda _:line,entry)
-            else:entry=entry.replace('\n}', '\n'+line+'\n}',1)
+            else:
+                closing=entry.rfind('\n}')
+                prefix=entry[:closing].rstrip()
+                if not prefix.endswith(','): prefix+=','
+                entry=prefix+'\n'+line+entry[closing:]
         bib=bib[:match.start()]+entry+bib[match.end():]
 bib+='\n@misc{sam_crf,\n author={{National Renewable Energy Laboratory}},\n title={{System Advisor Model: LCOE Calculator, capital recovery factor}},\n year={n.d.},\n howpublished={SAM Help},\n url={https://samrepo.nlr.gov/help/fin_lcoefcr.html},\n note={Accessed 8 September 2026}\n}\n'
 (HERE/'references.bib').write_text(bib,encoding='utf-8')
+# Record the final bytes, including bibliography corrections and generated tables.
+recorded={entry['package'] for entry in manifest}
+for directory in ('tables','data','evidence','source_snapshot'):
+    for path in sorted((HERE/directory).rglob('*')):
+        if not path.is_file() or path.name=='asset_manifest.json': continue
+        relative=path.relative_to(HERE).as_posix()
+        if relative not in recorded:
+            manifest.append({'source':'generated or retained package evidence', 'package':relative})
+for entry in manifest:
+    entry['sha256']=hashlib.sha256((HERE/entry['package']).read_bytes()).hexdigest()
 (HERE/'evidence/asset_manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
 print(f'Prepared {len(manifest)} snapshots; verified all 14 annual costs; generated tables from stored inputs/results. No solver executed.')
