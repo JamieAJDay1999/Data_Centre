@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Term-by-Term Equations Deep Dive | Data Centre IT Formulation</title>
+  <!-- KaTeX for crisp LaTeX formula rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Specific styling for the deep-dive document page */
+    .doc-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2rem;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .doc-layout {
+        grid-template-columns: 1fr;
+      }
+      .doc-toc {
+        display: none;
+      }
+    }
+
+    .doc-toc {
+      position: sticky;
+      top: 5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      height: fit-content;
+      max-height: calc(100vh - 7rem);
+      overflow-y: auto;
+    }
+
+    .doc-toc h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .toc-item a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.82rem;
+      display: block;
+      padding: 0.35rem 0.6rem;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+
+    .toc-item a:hover {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue-light);
+    }
+
+    .doc-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .eq-deep-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .eq-deep-header {
+      padding: 1.25rem 1.5rem;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .eq-deep-header-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .eq-deep-header-title h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .eq-deep-formula-banner {
+      background: #090d16;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .eq-deep-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .terms-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .terms-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background: rgba(31, 41, 55, 0.5);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terms-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: top;
+    }
+
+    .terms-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .terms-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .term-symbol {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-blue-light);
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    .term-unit {
+      font-family: var(--font-mono);
+      color: var(--accent-emerald);
+      font-size: 0.8rem;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sm);
+      display: inline-block;
+    }
+
+    .term-domain {
+      font-family: var(--font-mono);
+      color: var(--accent-amber);
+      font-size: 0.78rem;
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .term-desc {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .term-desc strong {
+      color: var(--text-primary);
+    }
+
+    .deep-callout {
+      background: rgba(15, 23, 42, 0.6);
+      border-left: 4px solid var(--accent-blue);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .deep-callout.correction {
+      border-left-color: var(--accent-rose);
+      background: rgba(244, 63, 94, 0.06);
+    }
+
+    .deep-callout.extension {
+      border-left-color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.06);
+    }
+
+    .deep-callout h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+        </div>
+        <div class="title-wrap">
+          <h1>Equations Deep Dive: Term-by-Term Reference</h1>
+          <p>Full Mathematical &amp; Physical Specifications for the Revised Data Centre Model</p>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <a href="index.html" class="btn btn-primary" style="text-decoration: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Back to Interactive Visualiser
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-layout">
+    
+    <!-- Table of Contents Sidebar -->
+    <aside class="doc-toc">
+      <h3>Equations Index</h3>
+      <ul class="toc-list">
+        <li class="toc-item"><a href="#eq-comp-demand">Eq. (1): Computational Demand</a></li>
+        <li class="toc-item"><a href="#eq-power-law">Eq. (2): IT Power Law</a></li>
+        <li class="toc-item"><a href="#eq-power-opt">Eq. (3): Optimised IT Power</a></li>
+        <li class="toc-item"><a href="#eq-util-bounds">Eq. (4): Utilisation Bounds</a></li>
+        <li class="toc-item"><a href="#eq-power-base">Eq. (5): Baseline IT Power</a></li>
+        <li class="toc-item"><a href="#eq-energy-base-opt">Eqs. (6–7): IT Energy</a></li>
+        <li class="toc-item"><a href="#eq-feasibility">Eq. (8): Permitted Windows</a></li>
+        <li class="toc-item"><a href="#eq-alpha-sum">Eq. (9): Tranche Shares</a></li>
+        <li class="toc-item"><a href="#eq-job-completion">Eq. (10): Work Completion</a></li>
+        <li class="toc-item"><a href="#eq-cpu-capacity">Eq. (11): CPU Capacity</a></li>
+        <li class="toc-item"><a href="#eq-cohort-handoff">Eq. (Handoff): Cohort Carryover</a></li>
+        <li class="toc-item"><a href="#eq-annual-cost">Eq. (Cost): Annual Settlement</a></li>
+        <li class="toc-item"><a href="#eq-ups-chaining">Eq. (18): UPS Continuity</a></li>
+        <li class="toc-item"><a href="#eq-tes-chaining">Eq. (551): TES Continuity</a></li>
+        <li class="toc-item"><a href="#eq-flex-window">Eqs. (675–676): Flexibility</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Articles -->
+    <main class="doc-main">
+
+      <!-- Equation 1: Computational Demand -->
+      <article class="eq-deep-card" id="eq-comp-demand">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (1)</span>
+            <h2>Constant Computational Demand Principle</h2>
+          </div>
+          <span class="cat-badge notation">Foundational Concept</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$R = u(t) \times \Delta T$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <p style="color: var(--text-secondary); font-size: 0.92rem;">
+            The core axiom of workload flexibility: an IT job requires a total accumulation of processor occupancy over time. This demand can be executed either at high utilisation over a short duration or low utilisation over a long duration, without altering the underlying volume of computational work.
+          </p>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">R</td>
+                <td>
+                  <span class="term-unit">CPU-hours</span>
+                  <span class="term-domain">Scalar &ge; 0</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Total Computational Demand:</strong> The aggregate volume of processing required to complete the job. For example, 1.0 CPU-hour can be satisfied by 100% CPU utilisation for 1 hour, or 50% CPU utilisation for 2 hours.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">u(t)</td>
+                <td>
+                  <span class="term-unit">Fraction [0, 1]</span>
+                  <span class="term-domain">0.0 &le; u(t) &le; u_max</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Allocated CPU Utilisation:</strong> The average fraction of server processor cores occupied by the workload during time interval \(t\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">\Delta T</td>
+                <td>
+                  <span class="term-unit">Hours</span>
+                  <span class="term-domain">\Delta T &gt; 0</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Execution Duration:</strong> The continuous or aggregated time over which processor resources are dedicated to the job.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 2: Power Law -->
+      <article class="eq-deep-card" id="eq-power-law">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (2)</span>
+            <h2>Server Power Consumption Model</h2>
+          </div>
+          <span class="cat-badge notation">Component Physics</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$P^{\mathrm{IT}}(t) = P^{\mathrm{IT}}_{\mathrm{idle}} + \left(P^{\mathrm{IT}}_{\mathrm{max}} - P^{\mathrm{IT}}_{\mathrm{idle}}\right) \times u(t)^{1.32}$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <p style="color: var(--text-secondary); font-size: 0.92rem;">
+            Empirical non-linear power curve relating processor activity to total electrical power draw of the server chassis. Derived from literature benchmarks (Dayarathna et al.), capturing baseline idle power plus super-linear dynamic power scaling.
+          </p>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">P^{\mathrm{IT}}(t)</td>
+                <td>
+                  <span class="term-unit">kW</span>
+                  <span class="term-domain">P_idle &le; P(t) &le; P_max</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Total Instantaneous IT Power:</strong> Electrical power drawn by the server hardware from the electrical distribution unit at interval \(t\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">P^{\mathrm{IT}}_{\mathrm{idle}}</td>
+                <td>
+                  <span class="term-unit">kW</span>
+                  <span class="term-domain">Constant = 200 kW</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Idle Power Draw:</strong> Power consumed when servers are powered on with 0% CPU utilisation. Represents motherboard circuitry, static leakage currents, memory refresh, power supply conversion losses, and minimum fan speeds.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">P^{\mathrm{IT}}_{\mathrm{max}}</td>
+                <td>
+                  <span class="term-unit">kW</span>
+                  <span class="term-domain">Constant = 1,000 kW (1 MW)</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Peak Rated IT Power:</strong> Maximum facility electrical draw when processor cores are operating at 100% capacity (\(u=1.0\)).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">u(t)^{1.32}</td>
+                <td>
+                  <span class="term-unit">Dimensionless</span>
+                  <span class="term-domain">Exponent = 1.32</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Non-linear Dynamic Scaling Exponent:</strong> Captures dynamic CMOS switching losses and voltage/frequency scaling under load. Because \(1.32 &gt; 1\), the curve is slightly convex: running two servers at 50% utilisation consumes less dynamic power than running one at 100% and leaving one idle.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 3: Optimised IT Power -->
+      <article class="eq-deep-card" id="eq-power-opt">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (3)</span>
+            <h2>Optimised IT Electrical Power Consumption</h2>
+          </div>
+          <span class="cat-badge correction">Substantive Correction</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$P^{\mathrm{IT}}_{\mathrm{opt}}(s) = \widehat f\!\left(u^{\mathrm{inflex}}(s) + \sum_{(t,k) \in \mathcal A_d :\, s \in W_{t,k}} u(t,k,s)\right), \quad s \in T^{\mathrm{ext}}$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <div class="deep-callout correction">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              Substantive Physical Correction &amp; Approximation Operator
+            </h4>
+            In Paper 1, extension power was calculated by subtracting baseline power: \(P_{\text{opt}} = f(u) - P_{\text{base}}\). This made \(P_{\text{opt}}\) an incremental delta rather than facility power. Paper 2 restores full physical electrical demand across all slots \(s \in T^{\text{ext}}\) and writes \(\widehat{f}\) to denote the exact 4-segment piecewise linear interpolation solved by the MILP.
+          </div>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">P^{\mathrm{IT}}_{\mathrm{opt}}(s)</td>
+                <td>
+                  <span class="term-unit">kW</span>
+                  <span class="term-domain">200 kW &le; P &le; 1,000 kW</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Full Optimised IT Physical Power Demand:</strong> The true electrical power consumed by all servers at quarter-hour interval \(s\). Directly feeds electrical converter supply (\(P_{\text{grid}} + P_{\text{ups}}\)) and thermal heat rejection (\(Q^{\text{IT}}\)).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">\widehat{f}(\cdot)</td>
+                <td>
+                  <span class="term-unit">Function: [0, 1] &rarr; [200, 1000]</span>
+                  <span class="term-domain">Piecewise Linear</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Continuous Piecewise-Linear Solver Approximation:</strong> A 4-segment linear interpolation of \(P(u) = 200 + 800 u^{1.32}\) implemented via Pyomo DLOG/SOS2 constraints. Uses breakpoints \(b_i = (i/4)^{1.5} \in [0.0, 0.125, 0.354, 0.650, 1.0]\). Peak approximation error is capped at 6.241 kW (0.624%).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">u^{\mathrm{inflex}}(s)</td>
+                <td>
+                  <span class="term-unit">Fraction [0, 1]</span>
+                  <span class="term-domain">Exogenous Input Profile</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Inflexible Workload Utilisation:</strong> The baseline CPU utilisation of mission-critical or non-shiftable computational jobs that must execute strictly in slot \(s\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">\mathcal{A}_d</td>
+                <td>
+                  <span class="term-unit">Set of Tuples (t, k)</span>
+                  <span class="term-domain">Active Cohort Ledger</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Active Horizon Cohorts:</strong> The set of all workload cohorts present during daily solve \(d\). Contains two types of jobs: (1) unfinished cohorts carried forward from earlier days, and (2) new workload arrivals arriving throughout the extended horizon \(T_d^{\mathrm{ext}}\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">W_{t,k}</td>
+                <td>
+                  <span class="term-unit">Set of Slot Indices</span>
+                  <span class="term-domain">W_{t,k} = [t, t + D_k] \cap T^{\mathrm{ext}}</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Permitted Execution Window:</strong> The discrete set of 15-minute timeslots between arrival \(t\) and deadline \(t + D_k\) during which cohort \((t,k)\) is legally allowed to execute.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">u(t,k,s)</td>
+                <td>
+                  <span class="term-unit">Fraction [0, 1]</span>
+                  <span class="term-domain">Continuous Decision Variable</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Cohort CPU Allocation Variable:</strong> The portion of server processor utilisation allocated to cohort \((t,k)\) to run during execution slot \(s\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">T^{\mathrm{ext}}</td>
+                <td>
+                  <span class="term-unit">Set of Intervals</span>
+                  <span class="term-domain">|T^{\mathrm{ext}}| = 108 slots (27 h)</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Extended Daily Horizon:</strong> Comprises the 96 quarter-hour slots of the local day core (\(T_d\)) plus 12 quarter-hour look-ahead slots (\(T^{\mathrm{ext}} \setminus T_d\)).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 4: Utilisation Bounds -->
+      <article class="eq-deep-card" id="eq-util-bounds">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (4)</span>
+            <h2>CPU Utilisation Allocation Bounds</h2>
+          </div>
+          <span class="cat-badge extension">Multi-Day Extension</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$0 \le u(t,k,s) \le u_{\max}, \quad (t,k) \in \mathcal A_d, \ s \in W_{t,k}$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <p style="color: var(--text-secondary); font-size: 0.92rem;">
+            Enforces physical processor allocation boundaries for each individual cohort. Replaces the single-day arrival index (\(t \in T, k \in K\)) with \((t,k) \in \mathcal{A}_d\) to ensure carried-over jobs are bound by the same operational limits.
+          </p>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">0</td>
+                <td>
+                  <span class="term-unit">Lower Bound</span>
+                  <span class="term-domain">Non-negativity</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Non-Negativity Constraint:</strong> Prevents negative processor utilisation (servers cannot "un-process" work or generate computational negative work).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">u_{\max}</td>
+                <td>
+                  <span class="term-unit">Fraction = 1.0</span>
+                  <span class="term-domain">Physical Upper Limit</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Maximum Server Capacity:</strong> The peak normalised processor capacity of the representative facility server (1.0 = 100% capacity).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">s \in W_{t,k}</td>
+                <td>
+                  <span class="term-unit">Index Qualifier</span>
+                  <span class="term-domain">Valid Window</span>
+                </td>
+                <td class="term-desc">
+                  Restricts decision variables to slots inside the permitted execution window. Decision variables outside \(W_{t,k}\) are fixed to zero by Equation (8).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 5: Baseline IT Power -->
+      <article class="eq-deep-card" id="eq-power-base">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (5)</span>
+            <h2>Baseline IT Power Benchmark</h2>
+          </div>
+          <span class="cat-badge notation">Linearisation Consistency</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$P^{\mathrm{IT}}_{\mathrm{base}}(s) = \widehat f\bigl(u^{\mathrm{inflex}}(s) + u^{\mathrm{flex,base}}(s)\bigr)$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <p style="color: var(--text-secondary); font-size: 0.92rem;">
+            Defines the benchmark power consumption profile of the facility in the absence of workload shifting. Evaluates the exact same piecewise linear interpolation \(\widehat{f}\) used in Equation (3).
+          </p>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">P^{\mathrm{IT}}_{\mathrm{base}}(s)</td>
+                <td>
+                  <span class="term-unit">kW</span>
+                  <span class="term-domain">Benchmark Profile</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Unoptimised Electrical Power:</strong> The facility power draw when all flexible workloads execute immediately upon arrival without temporal shifting.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">u^{\mathrm{flex,base}}(s)</td>
+                <td>
+                  <span class="term-unit">Fraction [0, 1]</span>
+                  <span class="term-domain">Arrival Workload</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Flexible Arrival Utilisation:</strong> The CPU utilisation that would be demanded if all shiftable jobs arriving at interval \(s\) were processed immediately at arrival.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equations 6-7: IT Energy -->
+      <article class="eq-deep-card" id="eq-energy-base-opt">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eqs. (6–7)</span>
+            <h2>Baseline and Optimised IT Electrical Energy</h2>
+          </div>
+          <span class="cat-badge notation">Energy Conversion</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$E^{\mathrm{IT}}_{\mathrm{base}}(t) = \Delta t \cdot P^{\mathrm{IT}}_{\mathrm{base}}(t), \quad E^{\mathrm{IT}}_{\mathrm{opt}}(t) = \Delta t \times P^{\mathrm{IT}}_{\mathrm{opt}}(t), \quad \forall t \in T^{\text{ext}}$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">E^{\mathrm{IT}}_{\mathrm{opt}}(t)</td>
+                <td>
+                  <span class="term-unit">kWh</span>
+                  <span class="term-domain">Physical Energy</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Optimised Electrical Energy:</strong> Real physical kilowatt-hours consumed across 15 minutes. In Paper 2, because \(P^{\mathrm{IT}}_{\mathrm{opt}}\) is true physical power, this is genuine facility energy throughout the entire 27-hour solve.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">\Delta t</td>
+                <td>
+                  <span class="term-unit">Hours = 0.25</span>
+                  <span class="term-domain">Fixed Step</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Time Step Duration:</strong> 15 minutes (\(0.25\) hours), matching Great Britain electricity settlement periods and market reference pricing intervals.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 8: Permitted Execution Times -->
+      <article class="eq-deep-card" id="eq-feasibility">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (8)</span>
+            <h2>Temporal Feasibility &amp; SLA Window Restriction</h2>
+          </div>
+          <span class="cat-badge notation">Causality &amp; SLA</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$u(t,k,s) = 0 \quad \text{if } s < t \text{ or } s > t + D_k, \quad (t,k) \in \mathcal A_d$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">s < t</td>
+                <td>
+                  <span class="term-unit">Logical Condition</span>
+                  <span class="term-domain">Pre-arrival Interval</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Temporal Causality Constraint:</strong> A job cannot be scheduled or executed before it has physically arrived in the system.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">s > t + D_k</td>
+                <td>
+                  <span class="term-unit">Logical Condition</span>
+                  <span class="term-domain">Post-deadline Interval</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Maximum Deferral Deadline:</strong> Execution is forbidden after interval start \(t + D_k\). Guarantees that flexible workloads strictly respect their delay tolerance.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">D_k</td>
+                <td>
+                  <span class="term-unit">Hours</span>
+                  <span class="term-domain">D \in \{0.5, 1.0, 2.0, 3.0\}</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Tranche Delay Allowance:</strong> The maximum allowable deferral duration for tranche \(k\): Tranche 1 allows up to 30 min (2 slots), Tranche 2 up to 1 h (4 slots), Tranche 3 up to 2 h (8 slots), and Tranche 4 up to 3 h (12 slots).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 9: Tranche Shares -->
+      <article class="eq-deep-card" id="eq-alpha-sum">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (9)</span>
+            <h2>Tranche Share Partitioning</h2>
+          </div>
+          <span class="cat-badge notation">Partition Conservation</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$\sum_{k \in K} \alpha_{t,k} = 1 \quad \text{for each new arrival } t$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">\alpha_{t,k}</td>
+                <td>
+                  <span class="term-unit">Fraction [0, 1]</span>
+                  <span class="term-domain">Exogenous Input Table</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Tranche Partition Share:</strong> The fraction of total flexible arrival demand at timeslot \(t\) allocated to tranche \(k\). Listed in Table 2 of the paper (time-of-day varying).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">\text{new arrival } t</td>
+                <td>
+                  <span class="term-unit">Domain Condition</span>
+                  <span class="term-domain">Fresh Arrivals Only</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Carried Cohort Clarification:</strong> Workload carried over from yesterday already has its tranche fixed at original arrival. This condition specifies that \(\alpha\) applies only when partitioning brand new arrivals.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 10: Work Completion -->
+      <article class="eq-deep-card" id="eq-job-completion">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (10)</span>
+            <h2>Work Completion &amp; Boundary Continuity Constraint</h2>
+          </div>
+          <span class="cat-badge extension">Multi-Day Extension (Crucial)</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$\sum_{s \in W_{t,k}} u(t,k,s)\Delta t \begin{cases} = A_{t,k,d}, & t + D_k \le L_d, \\[6pt] \le A_{t,k,d}, & t + D_k > L_d \end{cases}$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <div class="deep-callout extension">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Why the Split (= vs &le;) is Mathematically Required
+            </h4>
+            In continuous rolling annual operation, jobs arriving in the late evening or during the look-ahead have valid legal deadlines extending into the next day. Enforcing strict equality (\(=\)) would force the solver to execute 100% of the job within today's solve, prematurely truncating the user's allowable delay or causing MILP solver infeasibility. The inequality (\(\le\)) permits partial processing, and residual unexecuted work transfers cleanly into Day \(d+1\).
+          </div>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">\sum_{s \in W_{t,k}} u(t,k,s)\Delta t</td>
+                <td>
+                  <span class="term-unit">CPU-hours</span>
+                  <span class="term-domain">Accumulated Work</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Accumulated Execution:</strong> Total computational work delivered to cohort \((t,k)\) across all eligible slots in the current 27-hour horizon.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">A_{t,k,d}</td>
+                <td>
+                  <span class="term-unit">CPU-hours</span>
+                  <span class="term-domain">Available Demand</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Currently Available Workload:</strong> For a freshly arriving cohort, \(A_{t,k,d} = R_t \alpha_{t,k}\). For a cohort carried over from yesterday, \(A_{t,k,d}\) is the residual uncompleted work handed off from Day \(d-1\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">t + D_k \le L_d</td>
+                <td>
+                  <span class="term-unit">Condition: Equality (=)</span>
+                  <span class="term-domain">Inside Horizon Deadline</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Complete Execution Required:</strong> If the job's final legal interval start \(t + D_k\) falls inside or at the horizon boundary \(L_d\), all available work must be completely finished before the solve terminates.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">t + D_k > L_d</td>
+                <td>
+                  <span class="term-unit">Condition: Inequality (&le;)</span>
+                  <span class="term-domain">Crossing Horizon Deadline</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Partial Execution Permitted:</strong> If the job's deadline extends beyond the current solve horizon, the solver may process anywhere between 0% and 100% of available work today. The remaining work carries forward to tomorrow without penalty.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">L_d</td>
+                <td>
+                  <span class="term-unit">Timestamp / Slot</span>
+                  <span class="term-domain">L_d = 26.75 h (Slot 107)</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Final Horizon Interval Start:</strong> The opening timestamp of the last 15-minute slot in the 27-hour solve (02:45 UTC on the following day).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 11: CPU Capacity -->
+      <article class="eq-deep-card" id="eq-cpu-capacity">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (11)</span>
+            <h2>Per-Time-Slot Server CPU Capacity Bound</h2>
+          </div>
+          <span class="cat-badge notation">Capacity Constraint</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$u^{\mathrm{inflex}}(s) + \sum_{(t,k) \in \mathcal A_d :\, s \in W_{t,k}} u(t,k,s) \le u_{\max}, \quad s \in T^{\mathrm{ext}}$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <p style="color: var(--text-secondary); font-size: 0.92rem;">
+            Enforces that the aggregate processor load at execution interval \(s\) (inflexible baseline plus all executing flexible cohorts) never exceeds total server processor capacity (\(u_{\max} = 1.0\)).
+          </p>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">u^{\mathrm{inflex}}(s)</td>
+                <td>
+                  <span class="term-unit">Fraction [0, 1]</span>
+                  <span class="term-domain">Inflexible Core Load</span>
+                </td>
+                <td class="term-desc">
+                  Dedicated CPU capacity reserved for non-shiftable computational services during interval \(s\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">\sum_{(t,k) \in \mathcal{A}_d : s \in W_{t,k}} u(t,k,s)</td>
+                <td>
+                  <span class="term-unit">Fraction [0, 1]</span>
+                  <span class="term-domain">Sum of Flexible Jobs</span>
+                </td>
+                <td class="term-desc">
+                  Total CPU utilisation demanded by all flexible cohorts scheduled to execute during interval \(s\). Includes jobs arriving today and carried jobs from yesterday.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">u_{\max}</td>
+                <td>
+                  <span class="term-unit">1.0 (100%)</span>
+                  <span class="term-domain">Hardware Capacity</span>
+                </td>
+                <td class="term-desc">
+                  Physical capacity limit of the server processor cores.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation Handoff: Cohort Residual Handoff -->
+      <article class="eq-deep-card" id="eq-cohort-handoff">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Handoff Eq.</span>
+            <h2>Cohort Residual Workload Handoff</h2>
+          </div>
+          <span class="cat-badge extension">Annual Chaining Engine</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$A_{t,k,d+1} = A_{t,k,d} - \sum_{s \in T_d \cap W_{t,k}} u(t,k,s)\Delta t$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <div class="deep-callout extension">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              Found in annual_operation.tex (Line 6, Eq. 6)
+            </h4>
+            This equation defines the exact operational rule that links consecutive daily solves across the 365-day continuous year. It prevents double-counting by subtracting only execution that occurred during the <strong>committed</strong> 24-hour core day \(T_d\).
+          </div>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">A_{t,k,d+1}</td>
+                <td>
+                  <span class="term-unit">CPU-hours</span>
+                  <span class="term-domain">Opening Balance Day d+1</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Remaining Unexecuted Work:</strong> The exact workload residual passed into Day \(d+1\) for cohort \((t,k)\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">A_{t,k,d}</td>
+                <td>
+                  <span class="term-unit">CPU-hours</span>
+                  <span class="term-domain">Opening Balance Day d</span>
+                </td>
+                <td class="term-desc">
+                  The available computational demand at the start of Day \(d\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">s \in T_d \cap W_{t,k}</td>
+                <td>
+                  <span class="term-unit">Committed Subset</span>
+                  <span class="term-domain">Core Slots Only</span>
+                </td>
+                <td class="term-desc">
+                  <strong>The Committed Deduction Filter:</strong> Execution is subtracted <em>only</em> if slot \(s\) falls within the committed local day core \(T_d\) (slots 0 to 95). Advisory or trial execution during the 3-hour look-ahead (\(s > 95\)) is discarded and re-optimised the next morning, ensuring work is never prematurely deducted or double-counted!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation Annual Cost: Annual Settlement -->
+      <article class="eq-deep-card" id="eq-annual-cost">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Cost Eq.</span>
+            <h2>Annual Electricity Settlement Accounting</h2>
+          </div>
+          <span class="cat-badge extension">Annual Settlement</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$C^{(i)}_{\mathrm{year}} = \sum_{d=1}^{365} \sum_{t \in T_d} P^{\mathrm{Grid},(i)}(t) \pi(t) \Delta t / 1000$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">C^{(i)}_{\mathrm{year}}</td>
+                <td>
+                  <span class="term-unit">GBP (&pound;)</span>
+                  <span class="term-domain">Annual Total Cost</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Annual Electricity Bill:</strong> Total facility expenditure on imported grid electricity over all 365 days of 2025. Evaluated for Scenario 1 (\(i=1\), benchmark) and Scenario 2 (\(i=2\), optimised).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">\sum_{d=1}^{365} \sum_{t \in T_d}</td>
+                <td>
+                  <span class="term-unit">Summation</span>
+                  <span class="term-domain">35,040 quarter-hours</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Single-Settlement Guarantee:</strong> Sums each quarter-hour interval exactly once across 2025 (accounting for 92, 96, and 100 slots on daylight-saving transitions). Excludes look-ahead intervals until their day becomes committed.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">P^{\mathrm{Grid},(i)}(t)</td>
+                <td>
+                  <span class="term-unit">kW</span>
+                  <span class="term-domain">P &ge; 0</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Total Grid Electrical Import:</strong> Power imported from the utility grid to supply IT servers, cooling chillers, auxiliary devices (\(P^{\mathrm{Grid}}_{\mathrm{OD}}\)), and UPS battery charging.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">\pi(t)</td>
+                <td>
+                  <span class="term-unit">GBP / MWh</span>
+                  <span class="term-domain">Can be negative</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Day-Ahead Electricity Price:</strong> The 2025 Great Britain day-ahead Intermittent Market Reference Price (IMRP) published by LCCC.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">1 / 1000</td>
+                <td>
+                  <span class="term-unit">Conversion</span>
+                  <span class="term-domain">kW to MW</span>
+                </td>
+                <td class="term-desc">
+                  Converts electrical power in kW to MW to match the &pound;/MWh wholesale tariff rate.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 18: UPS State Chaining -->
+      <article class="eq-deep-card" id="eq-ups-chaining">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (18)</span>
+            <h2>UPS Battery State Chaining Across Days</h2>
+          </div>
+          <span class="cat-badge extension">Storage Arbitrage Continuity</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$E^{\mathrm{UPS}}_{d+1,\mathrm{start}} = E^{\mathrm{UPS}}_{d,\mathrm{core\ end}}, \quad E^{\mathrm{UPS}}_{1,\mathrm{start}} = E^{\mathrm{UPS}}_{\mathrm{base}}$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">E^{\mathrm{UPS}}_{d+1,\mathrm{start}}</td>
+                <td>
+                  <span class="term-unit">kWh</span>
+                  <span class="term-domain">Opening Energy Balance</span>
+                </td>
+                <td class="term-desc">
+                  The initial state of charge of the UPS battery system at 00:00 UTC on Day \(d+1\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">E^{\mathrm{UPS}}_{d,\mathrm{core\ end}}</td>
+                <td>
+                  <span class="term-unit">kWh</span>
+                  <span class="term-domain">Committed Closing State</span>
+                </td>
+                <td class="term-desc">
+                  The actual battery energy at the end of the committed 24-hour core day \(d\) (slot 96). Eliminates the artificial single-day constraint (\(E_{\text{start}} = E_{\text{end}} = 50\%\)) used in Paper 1.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">E^{\mathrm{UPS}}_{\mathrm{base}}</td>
+                <td>
+                  <span class="term-unit">kWh = 600</span>
+                  <span class="term-domain">Nominal Capacity</span>
+                </td>
+                <td class="term-desc">
+                  Initial baseline capacity of the battery pack. A 50% lower operational reserve (300 kWh) is preserved at all times for emergency power reliability.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equation 551: TES Chaining -->
+      <article class="eq-deep-card" id="eq-tes-chaining">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eq. (551)</span>
+            <h2>Thermal Energy Storage (TES) State Chaining</h2>
+          </div>
+          <span class="cat-badge extension">Thermal Buffer Continuity</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$E^{\mathrm{TES}}_{d+1,\mathrm{start}} = E^{\mathrm{TES}}_{d,\mathrm{core\ end}}, \quad E^{\mathrm{TES}}_{1,\mathrm{start}} = 0.5 E^{\mathrm{TES}}_{\max}$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">E^{\mathrm{TES}}_{d+1,\mathrm{start}}</td>
+                <td>
+                  <span class="term-unit">kWh</span>
+                  <span class="term-domain">Opening Chilled Water Energy</span>
+                </td>
+                <td class="term-desc">
+                  The thermal chilled water energy stored in the stratified TES tank at midnight opening Day \(d+1\). Inherits the committed closing thermal state from Day \(d\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">0.5 E^{\mathrm{TES}}_{\max}</td>
+                <td>
+                  <span class="term-unit">kWh = 500</span>
+                  <span class="term-domain">Initial Thermal State</span>
+                </td>
+                <td class="term-desc">
+                  The initial opening state on January 1, 2025, initialized to exactly 50% of the 1,000 kWh thermal tank capacity.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Equations 675-676: Flexibility Tracking -->
+      <article class="eq-deep-card" id="eq-flex-window">
+        <div class="eq-deep-header">
+          <div class="eq-deep-header-title">
+            <span class="eq-num-badge">Eqs. (675–676)</span>
+            <h2>Scenario 3 Flexibility Cohort Window Tracking</h2>
+          </div>
+          <span class="cat-badge notation">Flexibility SLA Integrity</span>
+        </div>
+        <div class="eq-deep-formula-banner">
+          <div class="math-display">$$W^{\mathrm{event}}_{t,k} = \bigl\{s : \max(t, t_0) \le s \le t + D_k\bigr\} \cap T^{\mathrm{event}}, \quad (t,k) \in \mathcal A_{t_0}$$</div>
+        </div>
+        <div class="eq-deep-body">
+          <p style="color: var(--text-secondary); font-size: 0.92rem;">
+            During demand response / grid balancing events starting at \(t_0\), Paper 2 maintains exact individual arrival/tranche cohorts \((t,k) \in \mathcal{A}_{t_0}\). Rather than discarding tranches, it strictly evaluates remaining allowable deferral.
+          </p>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Term</th>
+                <th style="width: 25%;">Role &amp; Units</th>
+                <th style="width: 60%;">Detailed Mathematical &amp; Physical Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="term-symbol">W^{\mathrm{event}}_{t,k}</td>
+                <td>
+                  <span class="term-unit">Set of Slots</span>
+                  <span class="term-domain">Certified Active Slots</span>
+                </td>
+                <td class="term-desc">
+                  The valid execution window available to cohort \((t,k)\) during the flexibility event.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">t_0</td>
+                <td>
+                  <span class="term-unit">Slot Index</span>
+                  <span class="term-domain">Event Start Time</span>
+                </td>
+                <td class="term-desc">
+                  The exact quarter-hour interval at which the grid operator requests an upward or downward power deviation.
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">\max(t, t_0)</td>
+                <td>
+                  <span class="term-unit">Lower Bound</span>
+                  <span class="term-domain">Causality &amp; Event Start</span>
+                </td>
+                <td class="term-desc">
+                  Ensures that execution cannot occur before event start \(t_0\) or before the job's actual arrival \(t\).
+                </td>
+              </tr>
+              <tr>
+                <td class="term-symbol">t + D_k</td>
+                <td>
+                  <span class="term-unit">Upper Bound</span>
+                  <span class="term-domain">Immutable SLA Deadline</span>
+                </td>
+                <td class="term-desc">
+                  <strong>Prevents Artificial Allowance Resets:</strong> If a job arriving at 10:00 with a 3-hour delay has already been deferred until 12:00 when an event begins at \(t_0 = 12:00\), its deadline remains strictly 13:00 (1 hour remaining). It cannot receive a fresh 3-hour deferral allowance.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

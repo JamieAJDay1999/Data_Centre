@@ -1,0 +1,497 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/ieeetran\IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/subfig\subfig.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\textcomp.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/sttools\stfloats.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\verbatim.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+))) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/cite\cite.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\afterpage.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1ptm.fd))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\longtable.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/babel\babel.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/babel\txtbabel.def)
+*************************************
+* Local config file bblopts.cfg used
+*
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/arabi\bblopts.cfg)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/babel/locale/en\babel
+-english.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/babel-english\english.l
+df)) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx)
+)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/frontendlayer\tikz.
+sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgf.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfrcs.st
+y
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil
+-common.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil
+-latex.def)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfrcs.
+code.tex
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf\pgf.revision.tex)
+))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgfcore.
+sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/systemlayer\pgfsys.
+sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+s.code.tex
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys
+.code.tex
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys
+libraryfiltered.code.tex))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgf.c
+fg)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+s-pdftex.def
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+s-common-pdf.def)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+ssoftpath.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+sprotocol.code.tex))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+e.code.tex
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.code
+.tex
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathutil.
+code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathparse
+r.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.basic.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.trigonometric.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.random.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.comparison.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.base.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.round.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.misc.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.integerarithmetics.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathcalc.
+code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfloat
+.code.tex))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfint.code.
+tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epoints.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epathconstruct.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epathusage.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+escopes.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+egraphicstate.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+etransformations.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+equick.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+eobjects.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epathprocessing.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+earrows.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+eshade.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+eimage.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+eexternal.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+elayers.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+etransparency.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epatterns.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+erdf.code.tex)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodule
+shapes.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodule
+plot.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfco
+mp-version-0-65.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfco
+mp-version-1-18.sty))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgffor.st
+y
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfkeys.s
+ty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys
+.code.tex))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/pgf/math\pgfmath.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.code
+.tex))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgffor.
+code.tex))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z\tikz.code.tex
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibr
+aryplothandlers.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodule
+matrix.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibrarytopaths.code.tex)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibr
+aryarrows.meta.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibrarypositioning.code.tex)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
+)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefine
+keys.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.s
+ty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds
+.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.s
+ty)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettit
+lestring.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
+)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.s
+ty) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
+) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
+) (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc
+.sty)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
+echeck.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquec
+ounter.sty)))
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/makecell\makecell.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mathtools.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mhsetup.sty))
+ (C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/xstring\xstring.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/generic/xstring\xstring.tex))
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+tex.def)
+
+LaTeX Warning: Unused global option(s):
+    [lettersize].
+
+(C:\GitHub\Data_Centre\paper\minimal_revision\build\main_green.aux)
+-- Lines per column: 58 (exact).
+
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.c
+fg)) (C:\GitHub\Data_Centre\paper\minimal_revision\build\main_green.out)
+(C:\GitHub\Data_Centre\paper\minimal_revision\build\main_green.out)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd)
+Underfull \vbox (badness 10000) has occurred while \output is active
+Underfull \hbox (badness 2343) in paragraph at lines 188--189
+[]\T1/ptm/m/n/10 According to the IEA, global data cen-tre elec-tric-ity
+
+Underfull \hbox (badness 1515) in paragraph at lines 188--189
+\T1/ptm/m/n/10 States and China [[]3[]]. More-over, ge-o-graph-i-cal clus-ter-i
+ng
+[1{C:/Users/jamie/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/ja
+mie/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}]
+Overfull \hbox (17.04126pt too wide) in alignment at lines 324--324
+ [] [] [] [] 
+
+Overfull \hbox (17.04126pt too wide) in alignment at lines 324--324
+ [] [] [] [] 
+
+Overfull \hbox (17.04126pt too wide) in alignment at lines 324--324
+ [] [] [] [] 
+
+Overfull \hbox (17.04126pt too wide) in alignment at lines 324--324
+ [] [] [] [] 
+
+Underfull \hbox (badness 2119) in paragraph at lines 324--324
+[]|\T1/ptm/m/n/9 92, 96 or 100
+
+Underfull \hbox (badness 10000) in paragraph at lines 324--324
+[]|\T1/ptm/m/n/9 CPU-
+
+Overfull \hbox (3.6054pt too wide) in paragraph at lines 324--324
+[]|\T1/ptm/m/n/9 kJ/(kg$\OMS/cmsy/m/n/9 ^^A$\T1/ptm/m/n/9 K)| 
+
+Overfull \hbox (3.15237pt too wide) in paragraph at lines 324--324
+[]|$\OML/cmm/m/it/9 Q[]\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 t\OT1/cmr/m/n/9 )$| 
+
+Overfull \hbox (3.84125pt too wide) in paragraph at lines 324--324
+[]|$\OML/cmm/m/it/9 Q[]\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 t\OT1/cmr/m/n/9 )$| 
+
+Overfull \hbox (3.04745pt too wide) in paragraph at lines 324--324
+[]|$\OML/cmm/m/it/9 P[]\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 t\OT1/cmr/m/n/9 )$| 
+
+Overfull \hbox (1.23668pt too wide) in paragraph at lines 324--324
+[]|$\OML/cmm/m/it/9 z[]\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 t\OT1/cmr/m/n/9 )$| 
+
+Overfull \hbox (10.04485pt too wide) in paragraph at lines 324--324
+[]|\T1/ptm/m/n/9 GBP/MWh| 
+
+Overfull \hbox (17.04126pt too wide) in alignment at lines 324--324
+ [] [] [] [] 
+main.tex:324: ignored error: Infinite glue shrinkage found in box being split
+[2] [3]
+Underfull \hbox (badness 1478) in paragraph at lines 329--330
+\T1/ptm/m/n/10 es-ti-mate into an op-er-a-tionally use-ful magnitude--duration
+
+Underfull \hbox (badness 1389) in paragraph at lines 331--333
+[]\T1/ptm/m/n/10 The []main con-tri-bu-tions are there-fore: (1) a tractable,
+
+Underfull \hbox (badness 2134) in paragraph at lines 356--357
+\T1/ptm/m/n/10 time win-dows with-out im-pact-ing ser-vice qual-ity. These
+[4]
+Underfull \hbox (badness 1490) in paragraph at lines 373--376
+[]\T1/ptm/m/n/10 While in-di-vid-ual as-sets of-fer flex-i-bil-ity, the flex-i-
+bil-ity
+[5 <./images/Figure_1.png>]
+Underfull \hbox (badness 1675) in paragraph at lines 379--380
+\T1/ptm/m/n/10 is per-formed to de-ter-mine, for a given start time and
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 413--413
+[]|\T1/ptm/m/n/7 Observed
+
+Underfull \hbox (badness 10000) in paragraph at lines 414--414
+[]|\T1/ptm/m/n/7 Delay-sensitivity
+
+Underfull \hbox (badness 10000) in paragraph at lines 414--415
+\T1/ptm/m/n/7 into flex-i-ble and in-flex-i-ble
+
+Underfull \hbox (badness 10000) in paragraph at lines 415--415
+[]|\T1/ptm/m/n/7 Batch work-load
+
+Underfull \hbox (badness 10000) in paragraph at lines 416--416
+[]|\T1/ptm/m/n/7 Flexibility case
+
+Overfull \hbox (0.72015pt too wide) in paragraph at lines 409--420
+ [][] 
+
+Underfull \hbox (badness 2245) in paragraph at lines 475--476
+\T1/ptm/m/n/10 Draw-ing on in-sights from var-i-ous stud-ies [[]1[]], [[]12[]],
+ a
+[7 <./images/Figure_2.png>] [8 <./images/Figure_3.png>] [9]
+Underfull \vbox (badness 10000) has occurred while \output is active
+Underfull \vbox (badness 10000) has occurred while \output is active [10]
+[11]
+Underfull \hbox (badness 1584) in paragraph at lines 737--738
+[]\T1/ptm/m/n/10 Note that the ob-jec-tive ex-plic-itly in-cludes grid with-
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 773.
+
+
+Underfull \hbox (badness 1377) in paragraph at lines 788--791
+\T1/ptm/m/n/10 ob-served prices and the adopted de-mand pro-file. These
+
+Underfull \hbox (badness 1603) in paragraph at lines 799--800
+\T1/ptm/m/n/10 par-tic-i-pa-tion in []de-mand re-sponse schemes and an-cil-lary
+
+[12]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 823.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 825.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 829.
+
+
+Underfull \hbox (badness 2452) in paragraph at lines 830--831
+[]\T1/ptm/m/n/10 On 22 Septem-ber, co-or-di-nated op-er-a-tion shifts some
+(C:\Users\jamie\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1phv.fd)
+[13]
+Underfull \hbox (badness 1584) in paragraph at lines 857--864
+\T1/ptm/m/n/10 the as-sessed start times are sam-pled hourly across the
+
+Underfull \vbox (badness 10000) has occurred while \output is active
+Underfull \hbox (badness 1803) in paragraph at lines 865--867
+[]\T1/ptm/m/n/10 Figure []7[] il-lus-trates sig-nif-i-cant vari-a-tions in flex
+-i-bil-ity
+[14 <./images/Figure_4a.png> <./images/Figure_4b.png>]
+Underfull \vbox (badness 10000) has occurred while \output is active
+Underfull \vbox (badness 10000) has occurred while \output is active [15 <./ima
+ges/Figure_5.png> <./images/Figure_6.png>]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 897.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 900--900
+[]\T1/ptm/m/n/10 The to-tal an-nual base and op-ti-mised costs are
+
+Underfull \hbox (badness 10000) in paragraph at lines 900--900
+\T1/ptm/m/n/10 GBP 550,503.59 and GBP 520,876.68, re-spec-tively,
+
+Underfull \hbox (badness 1418) in paragraph at lines 900--900
+\T1/ptm/m/n/10 but ex-cludes degra-da-tion, ad-di-tional op-er-at-ing costs and
+
+[16 <./images/Figure_7.png> <./images/Figure_8.png>]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 924.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 943.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 956.
+
+[17]
+Underfull \hbox (badness 1910) in paragraph at lines 967--967
+[]\T1/ptm/m/n/10 The work-load split is context-dependent: ap-pli-ca-tions,
+
+Underfull \hbox (badness 1515) in paragraph at lines 967--967
+\T1/ptm/m/n/10 other forms of com-pu-ta-tional flex-i-bil-ity are out-side the
+
+Underfull \hbox (badness 2088) in paragraph at lines 973--975
+\T1/ptm/m/n/10 cool-ing with ther-mal en-ergy stor-age, a cost-minimising
+
+Underfull \hbox (badness 2027) in paragraph at lines 973--975
+[]\T1/ptm/m/n/10 op-er-at-ing base-line was es-tab-lished through linked daily
+
+Underfull \hbox (badness 2229) in paragraph at lines 973--975
+\T1/ptm/m/n/10 and []the spec-i-fied com-par-a-tive re-cov-ery con-di-tions[]. 
+The
+
+Underfull \hbox (badness 2512) in paragraph at lines 977--979
+[]\T1/ptm/m/n/10 Promising fu-ture work in-cludes in-cor-po-rat-ing ex-plicit
+
+Underfull \vbox (badness 10000) has occurred while \output is active [18 <./ima
+ges/Figure_9.png>]
+(C:\GitHub\Data_Centre\paper\minimal_revision\build\main_green.bbl
+Underfull \hbox (badness 1383) in paragraph at lines 31--36
+\T1/ptm/m/n/8 tem,'' EEA and ACER, Tech. Rep. EEA/ACER Re-port 09/2023,
+
+Underfull \hbox (badness 10000) in paragraph at lines 38--40
+[]\T1/ptm/m/n/8 International En-ergy Agency. (2025) En-ergy and AI.
+
+Underfull \hbox (badness 10000) in paragraph at lines 89--93
+\T1/ptm/m/n/8 8589940795-[]System % 20Needs % 20and % 20Product % 20Strategy % 
+20-[] %
+
+Underfull \hbox (badness 2057) in paragraph at lines 139--143
+\T1/ptm/m/n/8 of re-new-ables on the power grid. Mi-crosoft In-no-va-tion Sto-r
+ies.
+
+Underfull \hbox (badness 10000) in paragraph at lines 139--143
+\T1/ptm/m/n/8 Https://news.microsoft.com/source/features/sustainability/microso
+ft-
+
+Underfull \hbox (badness 10000) in paragraph at lines 139--143
+\T1/ptm/m/n/8 datacenter-batteries-to-support-growth-of-renewables-on-the-power
+-
+
+Underfull \hbox (badness 1478) in paragraph at lines 232--236
+\T1/ptm/m/n/8 IBM Think Blog. Https://www.ibm.com/think/insights/are-your-data-
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 239--244
+\T1/ptm/m/n/8 dotcom / client _ service / Public % 20Sector / PDFS / McK % 20on
+ % 20Govt /
+[19])
+Underfull \hbox (badness 1728) in paragraph at lines 989--990
+\T1/ptm/m/n/10 to the En-ergy De-mand Re-search Cen-tre (grant num-ber
+[20] (C:\GitHub\Data_Centre\paper\minimal_revision\build\main_green.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ )
+(see the transcript file for additional information)<C:/Users/jamie/AppData/Loc
+al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/jamie/Ap
+pData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users
+/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><
+C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmm
+i6.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfont
+s/cm/cmmi7.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmmi8.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type
+1/public/amsfonts/cm/cmmi9.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fo
+nts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/jamie/AppData/Local/Programs/M
+iKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Users/jamie/AppData/Local/Pro
+grams/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/jamie/AppData/Lo
+cal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/jamie/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/ja
+mie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.pfb><C:/U
+sers/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.
+pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/c
+m/cmsy6.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
+sfonts/cm/cmsy7.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmsy8.pfb><C:/Users/jamie/AppData/Local/Programs/MiKTeX/fonts
+/type1/public/amsfonts/cm/cmsy9.pfb><C:/Users/jamie/AppData/Local/Programs/MiKT
+eX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/jamie/AppData/Local/Programs/Mi
+KTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Users/jamie/AppData/Local/Programs
+/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/jamie/AppData/Local/Programs
+/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/jamie/AppData/Local/Program
+s/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/jamie/AppData/Local/Program
+s/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
+Output written on C:\GitHub\Data_Centre\paper\minimal_revision\build\main_green
+.pdf (20 pages, 1741744 bytes).
+Transcript written on C:\GitHub\Data_Centre\paper\minimal_revision\build\main_g
+reen.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.

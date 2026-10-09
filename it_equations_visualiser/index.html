@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Workload Formulation Visualiser | Data Centre Flexibility</title>
+  <!-- KaTeX for crisp LaTeX formula rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+        </div>
+        <div class="title-wrap">
+          <h1>IT Workload Mathematical Formulation Visualiser</h1>
+          <p>Comparative Analysis: Original Submission vs. Minimal Revision (Equations 3–11 &amp; Cascades)</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" id="navTabs">
+        <button class="tab-btn active" data-tab="architecture">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Architecture Flow
+        </button>
+        <button class="tab-btn" data-tab="comparator">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"></path></svg>
+          Equation Comparator
+        </button>
+        <button class="tab-btn" data-tab="sim-carryover">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Sim: Horizon &amp; Carryover
+        </button>
+        <button class="tab-btn" data-tab="sim-power">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          Sim: Power Correction
+        </button>
+        <button class="tab-btn" data-tab="sim-curve">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="M18 9l-5 5-4-4-6 6"></path></svg>
+          Sim: Linear Approx \(\widehat{f}\)
+        </button>
+        <button class="tab-btn" data-tab="faq">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Deep Dive &amp; Verdict
+        </button>
+      </nav>
+
+      <div class="header-meta">
+        <a href="equations_deep_dive.html" class="btn btn-primary" style="text-decoration: none; font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          Term-by-Term Deep Dive Page &rarr;
+        </a>
+        <span class="meta-tag">Paper 1: Original</span>
+        <span class="meta-tag" style="border-color: var(--accent-blue);">Paper 2: Revised</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- TAB 1: SYSTEM ARCHITECTURE & PHYSICAL FLOW -->
+    <section id="tab-architecture" class="tab-panel active">
+      <div class="verdict-banner">
+        <div class="verdict-header">
+          <div class="verdict-title">
+            <span class="verdict-badge">Direct Answer</span>
+            <h3 style="font-size: 1.15rem; font-weight: 700;">Was Your Original Formulation Wrong?</h3>
+          </div>
+          <span style="font-size: 0.8rem; color: #9ca3af; font-family: var(--font-mono);">original_submission.tex vs. minimal_revision/main_clean.tex</span>
+        </div>
+        <p class="verdict-text">
+          <strong>No, your core workload-shifting concept was completely sound.</strong> The fundamental principle—that a job requires a constant computational demand \(R = u \times \Delta T\) that can be deferred across discrete tranches without quality-of-service loss—is identical across both papers. The revisions consist of three distinct types of improvements:
+        </p>
+
+        <div class="change-categories-grid">
+          <div class="category-card">
+            <span class="cat-badge notation">1. Notation Streamlining</span>
+            <h4>Equations 4, 8, 9, 11</h4>
+            <p>Replaced the clumsy double sum \(\sum_{j=0}^{D_{\max}} u(t-j,k,s)|_{s=t}\) with cohort set notation \(\sum_{(t,k)\in\mathcal{A}_d: s\in W_{t,k}} u(t,k,s)\). Cleans up indexing and eliminates non-existent or negative arrival lookups.</p>
+          </div>
+
+          <div class="category-card">
+            <span class="cat-badge extension">2. Multi-Day Chaining</span>
+            <h4>Equations 4, 10, 18, 51 &amp; Annual Cost</h4>
+            <p>Enables rolling annual operation. Equation 10 splits into equality (\(=\)) when deadlines fall inside the horizon and inequality (\(\le\)) when deadlines cross into the next day, allowing uncompleted work \(A_{t,k,d+1}\) to carry forward smoothly.</p>
+          </div>
+
+          <div class="category-card">
+            <span class="cat-badge correction">3. Substantive Correction</span>
+            <h4>Equation 3 (Extension Power)</h4>
+            <p><strong>The only substantive correction:</strong> Paper 1 subtracted baseline power \(P_{\text{base}}\) in the 3h extension. While intended as an incremental cost metric, \(P^{\mathrm{IT}}_{\mathrm{opt}}\) is physical electricity that feeds UPS balance and thermal cooling. Paper 2 restores full physical power everywhere.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive System Architecture Diagram -->
+      <div class="architecture-container">
+        <div class="section-header">
+          <h2>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            Interactive Data Centre Coupled Physical Flow
+          </h2>
+          <p>Click on any subsystem block below to inspect how Equations 3–11 and downstream physical balances interact.</p>
+        </div>
+
+        <div class="flow-interactive">
+          <div class="flow-svg-container">
+            <svg id="systemFlowSvg" viewBox="0 0 1100 380" width="100%" height="380">
+              <defs>
+                <linearGradient id="gradIT" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1e3a8a"/>
+                  <stop offset="100%" stop-color="#3b82f6"/>
+                </linearGradient>
+                <linearGradient id="gradPower" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#065f46"/>
+                  <stop offset="100%" stop-color="#10b981"/>
+                </linearGradient>
+                <linearGradient id="gradThermal" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#831843"/>
+                  <stop offset="100%" stop-color="#f43f5e"/>
+                </linearGradient>
+                <linearGradient id="gradStorage" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#581c87"/>
+                  <stop offset="100%" stop-color="#8b5cf6"/>
+                </linearGradient>
+                <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="blur"/>
+                  <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                </filter>
+                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748b"/>
+                </marker>
+                <marker id="arrowActive" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
+                </marker>
+              </defs>
+
+              <!-- Lines / Connecting Paths -->
+              <!-- Workload -> CPU Sum -->
+              <path class="flow-line active" d="M 190 70 L 250 70" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrowActive)" stroke-dasharray="4,4"/>
+              <!-- CPU Sum -> Power Approx -->
+              <path class="flow-line active" d="M 400 70 L 460 70" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrowActive)" stroke-dasharray="4,4"/>
+              <!-- Power Approx -> Power Balance -->
+              <path class="flow-line active" d="M 610 70 L 670 70" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrowActive)" stroke-dasharray="4,4"/>
+              
+              <!-- Power Approx -> Heat Conversion (Q_IT = P_IT) -->
+              <path class="flow-line active" d="M 535 110 L 535 220" stroke="#f43f5e" stroke-width="2.5" marker-end="url(#arrowActive)" stroke-dasharray="4,4"/>
+
+              <!-- UPS Storage <-> Power Balance -->
+              <path class="flow-line" d="M 745 220 L 745 110" stroke="#8b5cf6" stroke-width="2.5" marker-end="url(#arrow)" stroke-dasharray="4,4"/>
+
+              <!-- Heat Conversion -> Thermal Masses -->
+              <path class="flow-line active" d="M 460 265 L 390 265" stroke="#f43f5e" stroke-width="2.5" marker-end="url(#arrowActive)" stroke-dasharray="4,4"/>
+
+              <!-- Chiller / TES Cooling -> Thermal Masses -->
+              <path class="flow-line" d="M 190 265 L 240 265" stroke="#06b6d4" stroke-width="2.5" marker-end="url(#arrow)" stroke-dasharray="4,4"/>
+
+              <!-- Power Balance -> Grid Import / Cost -->
+              <path class="flow-line active" d="M 820 70 L 880 70" stroke="#10b981" stroke-width="2.5" marker-end="url(#arrowActive)" stroke-dasharray="4,4"/>
+
+              <!-- Interactive Nodes / Blocks -->
+              <!-- Block 1: IT Workload Cohorts -->
+              <g class="flow-node active" id="nodeWorkload" transform="translate(40, 30)" style="cursor: pointer;">
+                <rect width="150" height="80" rx="10" fill="url(#gradIT)" stroke="#60a5fa" stroke-width="2"/>
+                <text x="75" y="32" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">IT Workload Arrivals</text>
+                <text x="75" y="52" text-anchor="middle" fill="#bfdbfe" font-size="10">Cohorts \((t,k) \in \mathcal{A}_d\)</text>
+                <text x="75" y="68" text-anchor="middle" fill="#93c5fd" font-size="9" font-family="monospace">Demand \(R_t\), Tranches \(\alpha\)</text>
+              </g>
+
+              <!-- Block 2: CPU Allocation & Bounds -->
+              <g class="flow-node" id="nodeCPU" transform="translate(250, 30)" style="cursor: pointer;">
+                <rect width="150" height="80" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+                <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">CPU Allocation</text>
+                <text x="75" y="48" text-anchor="middle" fill="#94a3b8" font-size="10">Variables \(u(t,k,s)\)</text>
+                <text x="75" y="66" text-anchor="middle" fill="#cbd5e1" font-size="9.5" font-weight="600">Eqs. (4, 8, 10, 11)</text>
+              </g>
+
+              <!-- Block 3: Piecewise Power Model -->
+              <g class="flow-node" id="nodePowerModel" transform="translate(460, 30)" style="cursor: pointer;">
+                <rect width="150" height="80" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+                <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">IT Power Model \(\widehat{f}\)</text>
+                <text x="75" y="48" text-anchor="middle" fill="#94a3b8" font-size="10">Linearised DLOG / SOS2</text>
+                <text x="75" y="66" text-anchor="middle" fill="#fca5a5" font-size="9.5" font-weight="700">Eq. (3) &amp; Eq. (5)</text>
+              </g>
+
+              <!-- Block 4: Electrical Power Balance -->
+              <g class="flow-node" id="nodePowerBalance" transform="translate(670, 30)" style="cursor: pointer;">
+                <rect width="150" height="80" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+                <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Power Balance</text>
+                <text x="75" y="48" text-anchor="middle" fill="#94a3b8" font-size="10">\(P^{\mathrm{IT}}_{\mathrm{opt}} = P^{\mathrm{Grid}} + P^{\mathrm{UPS}}_{\mathrm{dis}}\)</text>
+                <text x="75" y="66" text-anchor="middle" fill="#cbd5e1" font-size="9.5" font-weight="600">Eq. (43) / Physical Balance</text>
+              </g>
+
+              <!-- Block 5: Grid Objective & Annual Cost -->
+              <g class="flow-node" id="nodeGridCost" transform="translate(880, 30)" style="cursor: pointer;">
+                <rect width="150" height="80" rx="10" fill="url(#gradPower)" stroke="#34d399" stroke-width="1.5"/>
+                <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Annual Grid Cost</text>
+                <text x="75" y="48" text-anchor="middle" fill="#d1fae5" font-size="10">\(\min \sum P^{\mathrm{Grid}} \pi \Delta t\)</text>
+                <text x="75" y="66" text-anchor="middle" fill="#a7f3d0" font-size="9.5">Committed Day Settlement</text>
+              </g>
+
+              <!-- Block 6: Cooling & Chiller / TES -->
+              <g class="flow-node" id="nodeCooling" transform="translate(40, 225)" style="cursor: pointer;">
+                <rect width="150" height="80" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+                <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Cooling System</text>
+                <text x="75" y="48" text-anchor="middle" fill="#94a3b8" font-size="10">Chiller, CRAC, TES</text>
+                <text x="75" y="66" text-anchor="middle" fill="#cbd5e1" font-size="9.5" font-weight="600">Eqs. (20–37 / 537–553)</text>
+              </g>
+
+              <!-- Block 7: Thermal Dynamic Masses -->
+              <g class="flow-node" id="nodeThermal" transform="translate(240, 225)" style="cursor: pointer;">
+                <rect width="150" height="80" rx="10" fill="url(#gradThermal)" stroke="#fb7185" stroke-width="1.5"/>
+                <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Thermal Dynamics</text>
+                <text x="75" y="48" text-anchor="middle" fill="#ffe4e6" font-size="10">5 Nodes: IT, R, CA, HA, Ain</text>
+                <text x="75" y="66" text-anchor="middle" fill="#fbcfe8" font-size="9.5">Euler State Coupling</text>
+              </g>
+
+              <!-- Block 8: Heat Generation -->
+              <g class="flow-node" id="nodeHeat" transform="translate(460, 225)" style="cursor: pointer;">
+                <rect width="150" height="80" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+                <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">ITE Heat Conversion</text>
+                <text x="75" y="48" text-anchor="middle" fill="#94a3b8" font-size="10">\(Q^{\mathrm{IT}}(t) = P^{\mathrm{IT}}(t)\)</text>
+                <text x="75" y="66" text-anchor="middle" fill="#fca5a5" font-size="9.5" font-weight="700">100% IT Power to Heat</text>
+              </g>
+
+              <!-- Block 9: UPS Energy Storage System -->
+              <g class="flow-node" id="nodeUPS" transform="translate(670, 225)" style="cursor: pointer;">
+                <rect width="150" height="80" rx="10" fill="url(#gradStorage)" stroke="#c084fc" stroke-width="1.5"/>
+                <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">UPS ESS Buffer</text>
+                <text x="75" y="48" text-anchor="middle" fill="#f3e8ff" font-size="10">Ch / Disch Binary Logic</text>
+                <text x="75" y="66" text-anchor="middle" fill="#e9d5ff" font-size="9.5">Multi-day Chaining Eq. (18)</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="flow-details-box" id="flowDetailsBox">
+            <h4 id="flowDetailTitle" style="color: var(--accent-blue-light); font-size: 1.05rem; margin-bottom: 0.4rem;">
+              IT Workload Arrivals &amp; Cohort Management (\(\mathcal{A}_d\))
+            </h4>
+            <div id="flowDetailContent" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+              In the revised formulation, incoming computational demand is tracked in discrete cohorts \((t,k) \in \mathcal{A}_d\). Each cohort encapsulates its original local arrival time \(t\), its assigned flexibility tranche \(k\) (with allowable delay \(D_k \in \{0.5, 1, 2, 3\}\) hours), its permitted execution interval window \(W_{t,k}\), and remaining work \(A_{t,k,d}\). Unfinished jobs carried from yesterday naturally exist in \(\mathcal{A}_d\) alongside today's fresh arrivals!
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: EQUATION COMPARATOR -->
+    <section id="tab-comparator" class="tab-panel">
+      <div class="comparator-controls">
+        <div class="filter-pills" id="eqFilterPills">
+          <button class="filter-pill active" data-filter="all">All Equations (3–11 + Downstream)</button>
+          <button class="filter-pill" data-filter="correction">Substantive Corrections</button>
+          <button class="filter-pill" data-filter="extension">Multi-Day Extensions</button>
+          <button class="filter-pill" data-filter="notation">Notation &amp; Clarity</button>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text-secondary);">
+          Showing <span id="eqCount" style="color: var(--text-primary); font-weight: 700;">11</span> equations
+        </div>
+      </div>
+
+      <div class="equations-grid" id="equationsGrid">
+        <!-- Rendered via JavaScript for high interactivity -->
+      </div>
+    </section>
+
+    <!-- TAB 3: SIMULATOR - HORIZON & WORKLOAD CARRYOVER -->
+    <section id="tab-sim-carryover" class="tab-panel">
+      <div class="section-header">
+        <h2>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Simulator: Rolling Horizon &amp; Job Carryover (Equation 10)
+        </h2>
+        <p>Explore why the revised Equation 10 split (\(=\) inside horizon vs \(\le\) crossing horizon) and cohort handoff (\(A_{t,k,d+1}\)) are mathematically required for multi-day continuity.</p>
+      </div>
+
+      <div class="sim-grid">
+        <div class="sim-sidebar">
+          <div class="sim-control-group">
+            <label class="control-label">
+              <span>Arrival Time of Job:</span>
+              <span class="control-val" id="jobArrivalVal">22:00</span>
+            </label>
+            <input type="range" id="jobArrivalSlider" min="0" max="26" step="0.5" value="22">
+          </div>
+
+          <div class="sim-control-group">
+            <label class="control-label">
+              <span>Delay Tranche \(k\):</span>
+              <span class="control-val" id="jobTrancheVal">Tranche 4 (3.0 Hours)</span>
+            </label>
+            <input type="range" id="jobTrancheSlider" min="1" max="4" step="1" value="4">
+          </div>
+
+          <div class="sim-control-group">
+            <label class="control-label">
+              <span>Equation Formulation Mode:</span>
+            </label>
+            <div class="sim-buttons-row">
+              <button class="btn btn-primary" id="btnModeNew">Revised Eq. (10) [Split = / &le;]</button>
+              <button class="btn" id="btnModeOld">Original Eq. (10) [Strict =]</button>
+            </div>
+          </div>
+
+          <div class="sim-metric-card">
+            <div class="sim-metric-title">Horizon Window Boundaries</div>
+            <div class="sim-metric-val" style="font-size: 1rem; color: #93c5fd;">Core: 00:00–24:00 | Look-ahead: 24:00–27:00</div>
+            <div class="sim-metric-sub">Horizon End (\(L_d\)) = 27:00 (Slot 108)</div>
+          </div>
+
+          <div class="sim-metric-card" id="carryoverResultCard">
+            <div class="sim-metric-title">Mathematical Feasibility Status</div>
+            <div class="sim-metric-val" id="carryoverStatus" style="color: var(--accent-emerald);">FEASIBLE &amp; PRESERVED</div>
+            <div class="sim-metric-sub" id="carryoverExplanation">Deadline is 01:00 (Day d+1). The job can execute partially today, and uncompleted work safely transfers to Day d+1 without shortening user SLA.</div>
+          </div>
+
+          <div class="sim-metric-card">
+            <div class="sim-metric-title">Residual Cohort Handoff (Eq. 7)</div>
+            <div class="math-code-sub" style="margin: 0; font-size: 0.72rem;">
+              \(A_{t,k,d+1} = A_{t,k,d} - \sum_{s \in T_d \cap W_{t,k}} u(t,k,s)\Delta t\)
+            </div>
+            <div class="sim-metric-sub" style="margin-top: 0.4rem;">Only work executed in committed core \(T_d\) is deducted. Advisory look-ahead execution is not double-counted.</div>
+          </div>
+        </div>
+
+        <div class="sim-canvas-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="font-size: 0.95rem;">Timeline Visualization: 24h Core + 3h Look-ahead + Day d+1</h4>
+            <div class="legend-bar">
+              <div class="legend-item"><span class="legend-swatch" style="background: #1e3a8a;"></span> 24h Core (\(T_d\))</div>
+              <div class="legend-item"><span class="legend-swatch" style="background: #065f46;"></span> 3h Look-ahead</div>
+              <div class="legend-item"><span class="legend-swatch" style="background: #374151;"></span> Day d+1 Core</div>
+              <div class="legend-item"><span class="legend-swatch" style="background: #f59e0b;"></span> Job Permitted Window \(W_{t,k}\)</div>
+            </div>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="carryoverCanvas"></canvas>
+            <div class="tooltip" id="canvasTooltip"></div>
+          </div>
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-blue); font-size: 0.85rem; color: var(--text-secondary);">
+            <strong>Key Insight:</strong> When a job arrives late in the look-ahead window (e.g. at 25:30 with a 3-hour delay), its true deadline is 28:30 (1.5 hours into Day d+1). Under the original strict equality \(\sum u \Delta t = R\), the solver would be forced to cram all execution into the 1.5 hours before slot 27:00, or become infeasible if CPU capacity is full. The revised \(\le\) bound preserves the job's true legal deadline and carries the remaining work \(A_{t,k,d+1}\) forward!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: SIMULATOR - POWER CORRECTION -->
+    <section id="tab-sim-power" class="tab-panel">
+      <div class="section-header">
+        <h2>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          Simulator: Physical Demand vs. Incremental Accounting (Equation 3)
+        </h2>
+        <p>Demonstrating the substantive correction: why subtracting baseline power \(P_{\text{base}}\) during the 3h extension broke physical conservation of energy for cooling and UPS conversion.</p>
+      </div>
+
+      <div class="sim-grid">
+        <div class="sim-sidebar">
+          <div class="sim-control-group">
+            <label class="control-label">
+              <span>Actual IT Facility Utilisation in Extension:</span>
+              <span class="control-val" id="extUtilVal">65% (585 kW)</span>
+            </label>
+            <input type="range" id="extUtilSlider" min="10" max="100" step="5" value="65">
+          </div>
+
+          <div class="sim-control-group">
+            <label class="control-label">
+              <span>Extension Baseline Utilisation:</span>
+              <span class="control-val" id="extBaseVal">50% (450 kW)</span>
+            </label>
+            <input type="range" id="extBaseSlider" min="10" max="100" step="5" value="50">
+          </div>
+
+          <div class="sim-control-group">
+            <label class="control-label">
+              <span>Power Accounting View:</span>
+            </label>
+            <div class="sim-buttons-row">
+              <button class="btn btn-primary" id="btnPowerRevised">Paper 2: Full Physical Power</button>
+              <button class="btn" id="btnPowerOriginal">Paper 1: Subtracted Baseline</button>
+            </div>
+          </div>
+
+          <div class="sim-metric-card">
+            <div class="sim-metric-title">Reported IT Power \(P^{\mathrm{IT}}_{\mathrm{opt}}\) in Extension</div>
+            <div class="sim-metric-val" id="metricReportedPower" style="color: var(--accent-blue-light);">585.2 kW</div>
+            <div class="sim-metric-sub" id="subReportedPower">True physical electrical load drawn by servers</div>
+          </div>
+
+          <div class="sim-metric-card">
+            <div class="sim-metric-title">Cooling Heat Removal Required (\(Q^{\mathrm{IT}}\))</div>
+            <div class="sim-metric-val" id="metricCoolingHeat" style="color: var(--accent-emerald);">585.2 kW</div>
+            <div class="sim-metric-sub" id="subCoolingHeat">Server heat dissipation into server racks</div>
+          </div>
+
+          <div class="sim-metric-card" id="powerVerdictCard">
+            <div class="sim-metric-title">Physical Conservation Consistency</div>
+            <div class="sim-metric-val" id="metricPhysicalVerdict" style="color: var(--accent-emerald); font-size: 1rem;">100% PHYSICALLY CONSERVED</div>
+            <div class="sim-metric-sub" id="subPhysicalVerdict">Grid + UPS supplies exactly what servers consume and CRAC/chiller cools.</div>
+          </div>
+        </div>
+
+        <div class="sim-canvas-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="font-size: 0.95rem;">24-Hour Core vs. 3-Hour Extension Power Trajectory</h4>
+            <div class="legend-bar">
+              <div class="legend-item"><span class="legend-swatch" style="background: #3b82f6;"></span> Optimised IT Power \(P^{\mathrm{IT}}_{\mathrm{opt}}\)</div>
+              <div class="legend-item"><span class="legend-swatch" style="background: #9ca3af;"></span> Baseline IT Power \(P^{\mathrm{IT}}_{\mathrm{base}}\)</div>
+              <div class="legend-item"><span class="legend-swatch" style="background: #f43f5e;"></span> Thermal Heat Generation \(Q^{\mathrm{IT}}\)</div>
+            </div>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="powerCanvas"></canvas>
+          </div>
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-rose); font-size: 0.85rem; color: var(--text-secondary);">
+            <strong>Why Paper 1 needed this correction:</strong> In Paper 1, subtracting \(P^{\mathrm{IT}}_{\mathrm{base}}\) made \(P^{\mathrm{IT}}_{\mathrm{opt}}\) equal to only the <em>incremental</em> demand (e.g. \(585 - 450 = 135\) kW). But because the physical constraints set \(P^{\mathrm{IT}}_{\mathrm{opt}} = P^{\mathrm{Grid}} + P^{\mathrm{UPS}}\) and \(Q^{\mathrm{IT}} = P^{\mathrm{IT}}_{\mathrm{opt}}\), the model was effectively assuming the data centre only needed 135 kW from the grid/UPS and only produced 135 kW of heat! In reality, the facility is running at 585 kW and generating 585 kW of thermal heat. Paper 2 corrects this by using full physical power everywhere, and handles annual cost accounting by settling only the 24-hour core day.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: SIMULATOR - PIECEWISE LINEAR APPROXIMATION -->
+    <section id="tab-sim-curve" class="tab-panel">
+      <div class="section-header">
+        <h2>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="M18 9l-5 5-4-4-6 6"></path></svg>
+          Simulator: The Piecewise-Linear Power Function \(\widehat{f}(u)\)
+        </h2>
+        <p>Interactive verification of Equation 3 &amp; Equation 5: comparing the continuous non-linear power law with the 4-segment / DLOG piecewise linear model solved by HiGHS/SCIP.</p>
+      </div>
+
+      <div class="sim-grid">
+        <div class="sim-sidebar">
+          <div class="sim-control-group">
+            <label class="control-label">
+              <span>Total CPU Utilisation \(u(s)\):</span>
+              <span class="control-val" id="curveUtilVal">0.650</span>
+            </label>
+            <input type="range" id="curveUtilSlider" min="0" max="1" step="0.01" value="0.65">
+          </div>
+
+          <div class="sim-control-group">
+            <label class="control-label">
+              <span>Segment Breakpoint Formula:</span>
+            </label>
+            <div class="math-code-sub" style="margin: 0; font-size: 0.75rem;">
+              \(b_i = (i / 4)^{1.5}, \quad i \in \{0, 1, 2, 3, 4\}\)
+            </div>
+            <div class="sim-metric-sub" style="margin-top: 0.3rem;">Breakpoints: [0.000, 0.125, 0.354, 0.650, 1.000]</div>
+          </div>
+
+          <div class="sim-metric-card">
+            <div class="sim-metric-title">Nonlinear Power Law (Eq. 1)</div>
+            <div class="sim-metric-val" id="metricNonlinearPower" style="color: #94a3b8;">572.3 kW</div>
+            <div class="sim-metric-sub">\(P_{\text{idle}} + (P_{\text{max}} - P_{\text{idle}}) \cdot u^{1.32}\)</div>
+          </div>
+
+          <div class="sim-metric-card">
+            <div class="sim-metric-title">Solver Approx Power \(\widehat{f}(u)\)</div>
+            <div class="sim-metric-val" id="metricLinearPower" style="color: var(--accent-blue-light);">576.1 kW</div>
+            <div class="sim-metric-sub">Interpolated across enclosing segment</div>
+          </div>
+
+          <div class="sim-metric-card">
+            <div class="sim-metric-title">Approximation Error \(\Delta P\)</div>
+            <div class="sim-metric-val" id="metricApproxError" style="color: var(--accent-amber);">+3.8 kW</div>
+            <div class="sim-metric-sub">Max error: 6.241 kW (0.624% of 1 MW rating)</div>
+          </div>
+        </div>
+
+        <div class="sim-canvas-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="font-size: 0.95rem;">Power Curve: Non-linear \(u^{1.32}\) vs. 4-Segment Piecewise Linear \(\widehat{f}(u)\)</h4>
+            <div class="legend-bar">
+              <div class="legend-item"><span class="legend-swatch" style="background: #94a3b8;"></span> Exact Non-Linear Curve</div>
+              <div class="legend-item"><span class="legend-swatch" style="background: #3b82f6;"></span> Piecewise Linear \(\widehat{f}(u)\)</div>
+              <div class="legend-item"><span class="legend-swatch" style="background: #f59e0b;"></span> Active Operating Point</div>
+            </div>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="curveCanvas"></canvas>
+          </div>
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-cyan); font-size: 0.85rem; color: var(--text-secondary);">
+            <strong>Why \(\widehat{f}\) is used in Paper 2:</strong> Writing \(\widehat{f}\) instead of \(u^{1.32}\) does not mean the power curve changed. It represents the fact that the Mixed-Integer Linear Program (MILP) uses a 4-segment piecewise linear approximation with SOS2/DLOG formulation to keep the problem linear and solvable by HiGHS. Crucially, applying \(\widehat{f}\) to <em>both</em> the baseline and optimised schedules guarantees that any measured cost savings are genuine operational savings, rather than numerical artifacts caused by curvature differences.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: DEEP DIVE & VERDICT -->
+    <section id="tab-faq" class="tab-panel">
+      <div class="section-header">
+        <h2>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Detailed Technical Explanation &amp; Comprehensive Summary
+        </h2>
+        <p>A structured, point-by-point breakdown addressing every question regarding the mathematical evolution of the paper.</p>
+      </div>
+
+      <div class="equations-grid">
+        <div class="eq-card">
+          <div class="eq-header">
+            <div class="eq-title-group">
+              <span class="eq-num-badge" style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7;">VERDICT</span>
+              <span class="eq-title">Was My Original Formulation Wrong?</span>
+            </div>
+          </div>
+          <div class="eq-body">
+            <p style="color: var(--text-primary); font-size: 0.95rem; margin-bottom: 0.75rem;">
+              <strong>Your core formulation was fundamentally correct in its physical and operational reasoning.</strong> It was not flawed in its understanding of data centre flexibility or job scheduling.
+            </p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">
+              The changes between the papers fall into three well-defined engineering categories:
+            </p>
+            <ul style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; padding-left: 1.5rem; margin-bottom: 0.75rem;">
+              <li><strong style="color: var(--badge-notation-text);">65% Notation Refinement:</strong> The original paper used double summations with time offsets (\(t-j\)) and evaluation bars (\(|_{s=t}\)). While mathematically valid for an isolated single-day solve, it was cumbersome and prone to indexing ambiguities at day boundaries. The revised cohort-set notation (\(\mathcal{A}_d, W_{t,k}\)) is cleaner, more elegant, and conforms to standard mathematical programming literature.</li>
+              <li><strong style="color: var(--badge-extension-text);">25% Rolling Horizon Extensions:</strong> The original paper was formulated for an isolated 24-hour day with a 3-hour extension. When transitioning to a continuous 365-day annual rolling horizon model, jobs arriving near midnight or in the look-ahead have legal deadlines extending into the next day. The formulation had to be generalized (Equations 10, 18, 51, and the cohort handoff equation) to carry unfinished work and state variables across daily boundaries without truncating deadlines.</li>
+              <li><strong style="color: var(--badge-correction-text);">10% Substantive Accounting Correction:</strong> In Equation 3 of the original paper, baseline power \(P_{\text{base}}\) was subtracted during the 3-hour extension window to isolate the "incremental cost" of deferred workloads. However, because \(P^{\mathrm{IT}}_{\mathrm{opt}}\) is not just a cost accumulator—it directly determines electrical grid/UPS import (\(P_{\mathrm{grid}} + P_{\mathrm{ups}}\)) and thermal heat rejection (\(Q^{\mathrm{IT}} = P^{\mathrm{IT}}\))—subtracting baseline power distorted the physical energy balance. Restoring full physical power throughout the horizon is the only true mathematical correction, with cost accounting properly handled by rolling the horizon.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="eq-card">
+          <div class="eq-header">
+            <div class="eq-title-group">
+              <span class="eq-num-badge">ANALYSIS</span>
+              <span class="eq-title">Downstream Equations: What Inherits These Terms?</span>
+            </div>
+          </div>
+          <div class="eq-body">
+            <div class="analysis-row" style="margin-bottom: 1rem;">
+              <div class="analysis-label" style="color: var(--accent-blue-light);">1. Grid &amp; UPS Balance<br><span style="font-size: 0.75rem; color: var(--text-muted);">Eq. (43) / Line 652</span></div>
+              <div class="analysis-val">
+                <strong>\(P^{\mathrm{IT}}_{\mathrm{opt}}(t) = P^{\mathrm{Grid}}_{\mathrm{IT}}(t) + P^{\mathrm{UPS}}_{\mathrm{disch}}(t)\)</strong><br>
+                Because Equation 3 now supplies true physical power rather than incremental power, the electrical converter balance is physically accurate across all time slots including the extension window.
+              </div>
+            </div>
+
+            <div class="analysis-row" style="margin-bottom: 1rem;">
+              <div class="analysis-label" style="color: var(--accent-rose);">2. Heat &amp; Cooling<br><span style="font-size: 0.75rem; color: var(--text-muted);">Eqs. (20–37 / 536–553)</span></div>
+              <div class="analysis-val">
+                <strong>\(Q^{\mathrm{IT}}(t) = P^{\mathrm{IT}}(t)\) and \(\dot{T}_{\text{nodes}} = f(Q^{\mathrm{IT}}, Q_{\text{cool}})\)</strong><br>
+                Data centre cooling removes heat generated by electrical resistance in the silicon. With full physical power restored to \(P^{\mathrm{IT}}\), the 5-node thermal model (IT equipment, server rack, cold aisle, hot aisle, supply air) correctly reflects physical thermodynamic heat dissipation throughout the look-ahead.
+              </div>
+            </div>
+
+            <div class="analysis-row" style="margin-bottom: 1rem;">
+              <div class="analysis-label" style="color: var(--accent-purple);">3. Multi-Day Continuity<br><span style="font-size: 0.75rem; color: var(--text-muted);">Eq. (18) &amp; Eq. (551)</span></div>
+              <div class="analysis-val">
+                <strong>\(E^{\mathrm{UPS}}_{d+1,\mathrm{start}} = E^{\mathrm{UPS}}_{d,\mathrm{core\ end}}\) &amp; \(E^{\mathrm{TES}}_{d+1,\mathrm{start}} = E^{\mathrm{TES}}_{d,\mathrm{core\ end}}\)</strong><br>
+                The original formulation imposed artificial daily cyclic constraints (\(E_{\text{start}} = E_{\text{end}} = 50\%\)). The revised formulation chains storage states across days, allowing the battery and thermal buffer to carry charge across midnight whenever economically or thermally optimal.
+              </div>
+            </div>
+
+            <div class="analysis-row">
+              <div class="analysis-label" style="color: var(--accent-amber);">4. Flexibility Tracking<br><span style="font-size: 0.75rem; color: var(--text-muted);">Scenario 3 / Line 675</span></div>
+              <div class="analysis-val">
+                <strong>\(W^{\mathrm{event}}_{t,k} = \{s: \max(t,t_0) \leq s \leq t + D_k\} \cap T^{\mathrm{event}}\)</strong><br>
+                Rather than replacing the 4 original tranches with 12 synthetic remaining-delay classes (as in Paper 1), Paper 2 maintains exact cohort history. An arrival that has already elapsed 2 hours of delay can only be shifted for its remaining 1 hour, strictly preventing "fresh allowance" exploits during balancing events.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive JavaScript Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

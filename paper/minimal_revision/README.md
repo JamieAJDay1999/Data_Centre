@@ -1,5 +1,9 @@
 # Minimal revision of first_edit.tex
 
+**15 September 2026 selective editorial pass:** Applied review groups 1, 4, 5, 7 and 8 only (ordinary compound hyphens, retained technical hyphens, grammar, terminology/references and typesetting). Groups 2, 3 and 6 were excluded. New edits and previously approved green wording appear green in `build/main_green.pdf`; other earlier revisions remain blue. `review/editorial_green_spans.json` records the additional green selections, and `review/selected_editorial_changes.json` records the replacements. The supplement was compiled as `build/supplement_green.pdf`.
+
+**14 September 2026 review colours:** The latest agreed wording changes are green; earlier revisions remain blue. `mark_original_changes.py` applies the green overlay using `mark_latest_changes.py` and `review/latest_green_phrases.json`. The current colour review PDFs are `build/main_green.pdf` and `build/supplement_green.pdf` (the previously opened PDFs could not be overwritten). `main_clean.tex` remains unmarked.
+
 **10 September 2026 corrected-results update:** The manuscript, affected figures/tables and supplement now use the corrected workload results (5.38% central annual saving). See `review/corrected_results_notes.md` and `review/corrected_results.patch` for this narrowly scoped update. Unrelated paper content and the blue comparison against the original submission are preserved.
 
 **Blue comparison against the original submission:** `main.tex` now marks added or changed text blue relative to `paper/original_submission.tex`, with deleted text suppressed. `main_clean.tex` preserves the unmarked manuscript. The first-edit comparison below remains available separately. Newly cited or corrected bibliography entries are also blue; embedded raster figures retain their original colours. Compile `main.tex` for the marked version or `main_clean.tex` for the clean version.

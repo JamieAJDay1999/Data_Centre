@@ -1,18 +1,18 @@
 \section{Annual evaluation and state transfer}
 Each annual case follows this procedure:
 \begin{enumerate}
-\item Build the continuous UTC price timeline and assign Europe/London date and profile-slot labels. Load the quarter-hour workload and tranche arrays.
+\item Build the continuous UTC price timeline and assign Europe/London date and \textcolor{LatestGreen}{profile slot} labels. Load the quarter-hour workload and tranche arrays.
 \item Initialise UPS/TES energy and the four thermal states once, at the beginning of the year; the initial unfinished-work ledger is empty.
 \item For local day $d$, select its 92, 96 or 100 core intervals and append twelve further intervals. Load the carried state and unfinished cohorts, and generate new arrivals throughout the horizon.
 \item Solve the reference or coordinated model, and record feasibility, objective bounds and accounting checks. Both core and look-ahead contain the full facility demand.
 \item Commit only core controls and processing. Accumulate signed-price settlement for those intervals, save their ending physical state and compute unfinished work from committed processing only.
 \item Pass the ending state and unfinished cohorts to the next local day. Reoptimise all future controls. Repeat through 31 December.
 \end{enumerate}
-In this supplement, $\mathcal C_d=T_d$ and $\mathcal H_d=T_d^{\mathrm{ext}}$ in the main-paper notation. A cohort $c$ identifies one arrival/tranche pair $(t,k)$; $r_c$ and $\ell_c$ are its arrival and final eligible interval start, $A_{c,d}$ its available work, and $R_{c,H}$ its residual at boundary $H$. Superscript $\mathrm{op}$ denotes Scenario 2, and $\mathrm{ref}$ denotes Scenario 1. Powers and stored energies use the main-paper units.
+In this supplement, $\mathcal C_d=T_d$ and $\mathcal H_d=T_d^{\mathrm{ext}}$ in the \textcolor{LatestGreen}{main paper} notation. A cohort $c$ identifies one arrival/tranche pair $(t,k)$; $r_c$ and $\ell_c$ are its arrival and final eligible interval start, $A_{c,d}$ its available work, and $R_{c,H}$ its residual at boundary $H$. Superscript $\mathrm{op}$ denotes Scenario 2, and $\mathrm{ref}$ denotes Scenario 1. Powers and stored energies use the \textcolor{LatestGreen}{main paper} units.
 
 If $\boldsymbol x$ contains the two energy states and four temperatures, physical transfer is $\boldsymbol x_{d+1}^{\mathrm{start}}=\boldsymbol x_d^{\mathrm{core,end}}$. There is no daily storage equality restoring the initial state. Storage and workload transfer are separate: an energy state alone cannot reconstruct which jobs remain eligible for execution.
 
-For annual committed set $\mathcal Y$, reported settlement is
+\textcolor{LatestGreen}{For the annual committed set} $\mathcal Y$, reported settlement is
 \begin{equation}
 C=\sum_{t\in\mathcal Y}\pi_tP_t^{\mathrm{grid}}\Delta t/1000.
 \end{equation}
@@ -22,12 +22,12 @@ The implementation records each day's controls, physical states, cohort residual
 
 \section{Representative-day and flexibility-event procedures}
 \subsection{Day selection}
-Daily features from central coordinated operation are: mean price, price standard deviation, minimum and maximum price, negative-price share, mean and peak grid import, mean total CPU utilisation, daily settlement cost, and opening UPS, TES and cold-aisle states. Each feature is centred on its mean across all annual daily observations and scaled by its population standard deviation; a zero standard deviation is replaced by one. For candidate day $d$, the score is
+Daily features from central coordinated operation are: mean price, price standard deviation, minimum and maximum price, negative-price share, mean and peak grid import, mean total CPU utilisation, daily settlement cost, and opening UPS, TES and \textcolor{LatestGreen}{cold aisle} states. Each feature is centred on its mean across all annual daily observations and scaled by its population standard deviation; a zero standard deviation is replaced by one. For candidate day $d$, the score is
 \begin{equation}
 s_d=\left[\frac{1}{12}\sum_{j=1}^{12}
 \left(\frac{v_{dj}-\bar v_j}{\sigma_j}\right)^2\right]^{1/2}.
 \end{equation}
-Candidates have 96 intervals and local date before 29 December 2025. The smallest score is selected, with date used to break a tie. This gives 22 September, score 0.23481769. The complete candidate table accompanies the package. The rule identifies a central multivariate illustration; it does not weight days by event availability, or guarantee a typical duration envelope.
+Candidates have 96 intervals \textcolor{LatestGreen}{and a local date before} 29 December 2025. The smallest score is selected, \textcolor{LatestGreen}{with the date used to break a tie}. This gives 22 September, score 0.23481769. The complete candidate table accompanies the package. The rule identifies a central multivariate illustration; it does not weight days by \textcolor{LatestGreen}{event availability or guarantee} a typical duration envelope.
 
 \subsection{Opening state and recovery}
 For each hourly $t_0$, load the undisturbed central trajectory and exact remaining work at that boundary. Pre-event execution is fixed by the stored history; the event solve starts at $t_0$. New arrivals from that point are generated with their original class rules. Any existing cohort retains only its remaining work and remaining eligible intervals.

@@ -30,20 +30,10 @@ sup=sup.replace('This document specifies the inputs, formulation and numerical i
 (HERE/'supplement.tex').write_text(sup,encoding='utf-8')
 
 # Current input figure: direct rendering of stored data, without running the simulation.
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-rows=list(csv.DictReader((HERE/'data/load_profiles.csv').open()))[:96]
-x=[j/4 for j in range(96)]
-inflex=[100*float(r['inflexible_load']) for r in rows]
-flex=[100*float(r['flexible_load']) for r in rows]
-fig,ax=plt.subplots(figsize=(8,3.5))
-ax.bar(x,inflex,width=.25,align='edge',label='Inflexible',color='#454545')
-ax.bar(x,flex,bottom=inflex,width=.25,align='edge',label='Flexible',color='#0072B2')
-ax.set(xlim=(0,24),ylim=(0,100),xlabel='Local time (h)',ylabel='CPU utilisation (%)')
-ax.set_xticks(range(0,25,3));ax.legend(ncol=2,frameon=False,loc='upper left')
-ax.grid(axis='y',alpha=.2);ax.set_axisbelow(True)
-fig.tight_layout();fig.savefig(HERE/'images/Figure_2.png',dpi=240);plt.close(fig)
+# The plotting module averages each four consecutive quarter-hour rows for the
+# displayed hourly values and checks that all 96 intervals are present.
+from generate_figure2 import generate as generate_figure2
+generate_figure2()
 
 # Review source mirrors the final main text plus inline additions; no generated PDF needed.
 original=(ROOT/'paper/first_edit.tex').read_text(encoding='utf-8')
