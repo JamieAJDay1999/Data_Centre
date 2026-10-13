@@ -1,0 +1,34 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} % outline fonts; T1 Computer Modern otherwise falls back to bitmaps
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,graphicx,booktabs,longtable,array,tabularx}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+\usepackage{xcolor}
+\definecolor{LatestGreen}{RGB}{0,0,0}
+\graphicspath{{images/}}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\newcommand{\op}{\mathrm{op}}
+\allowdisplaybreaks
+\hyphenpenalty=2500
+\exhyphenpenalty=2500
+\setlength{\emergencystretch}{3em}
+\title{Supplementary information\\\large Characterisation and Quantification of Data Centre Flexibility for Power System Support}
+\author{James Day, Mehmet T\"urker Takci and Meysam Qadrdan\\Cardiff University}
+\date{}
+\begin{document}
+\raggedbottom
+\maketitle
+\noindent This document supplies additional input records, annual and event procedures, numerical checks and investment assumptions.
+\input{supplement/inputs.tex}
+\input{supplement/procedures.tex}
+\input{supplement/evidence.tex}
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

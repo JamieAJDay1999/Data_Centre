@@ -1,0 +1,5 @@
+- An integrated model coordinates IT workloads, UPS batteries and cooling.
+- Flexibility is quantified by feasible power deviations and service durations.
+- Coordinated operation reduces annual electricity costs by 5.38%.
+- A 1 MW IT-rated site sustains a 100 kW load reduction for six hours at noon.
+- Workload flexibility has the largest savings effect among tested resources.

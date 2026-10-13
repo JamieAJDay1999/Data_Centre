@@ -1,0 +1,18 @@
+{
+  "status": "prepared locally; no public record or DOI",
+  "title": "Data and code for Characterisation and Quantification of Data Centre Flexibility for Power System Support",
+  "version": "1.0",
+  "resource_type": "dataset with computational source code",
+  "creators": [
+    {"name": "Day, James", "affiliation": "Cardiff University"},
+    {"name": "Takci, Mehmet Türker", "affiliation": "Cardiff University"},
+    {"name": "Qadrdan, Meysam", "affiliation": "Cardiff University"}
+  ],
+  "description": "Adopted workload and electricity-price inputs, computational model and retained outputs supporting an integrated assessment of data centre flexibility. The archive includes fourteen linked annual scenario chains for 2025, a 288-cell representative-day flexibility grid, 148 positive-duration event dispatches, numerical accounting and checkpoint audits, and reproducibility instructions. The central annual electricity cost saving is 5.38%. Workloads are stylised assumptions, and durations are certified feasible values subject to documented assessment caps and unresolved trials. No service revenue or network-stability validation is implied.",
+  "keywords": ["data centre", "demand-side flexibility", "mixed-integer linear programming", "UPS", "thermal energy storage", "workload scheduling"],
+  "funding": [{"funders": ["EPSRC", "ESRC"], "project": "Energy Demand Research Centre", "grant": "EP/Y010078/1"}],
+  "files": ["research_data_and_code.zip"],
+  "licence": null,
+  "doi": null,
+  "rights_note": "Authors must select the repository licence, respecting third-party LCCC price-data terms. No licence has been inferred."
+}

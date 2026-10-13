@@ -1,8 +1,11 @@
 # IT Workload Mathematical Formulation Visualiser
 
 An interactive web application providing a deep visual exploration and comparative breakdown of the mathematical equations governing data centre IT workload shifting, comparing:
-1. **Original Submission (`paper/original_submission.tex`)**
-2. **Minimal Revision (`paper/minimal_revision/main_clean.tex` & `build/main.pdf`)**
+1. **Original Submission** (historical source in Git commit `f1607db` at `paper/original_submission.tex`)
+2. **Revised manuscript** (now `paper/main.tex` and `paper/pdf/main.pdf`)
+
+The visualiser is a static historical comparison; it does not load the current
+manuscript dynamically.
 
 ---
 

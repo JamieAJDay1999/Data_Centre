@@ -39,7 +39,7 @@ ANNUAL = ROOT / "static/data/rolling_year_outputs"
 LOAD_PROFILE = ROOT / "static/data/inputs/load_profiles.csv"
 REPORT = ROOT / "reports/final_annual_results"
 IMAGES = ROOT / "paper/images"
-GENERATED = ROOT / "paper/generated"
+GENERATED = REPORT / "tables"
 
 BASELINE = "2025_baseline_reformulated"
 CENTRAL = "2025_optimised_cohort_trace"
@@ -398,7 +398,9 @@ def _plot_day_dispatch(baseline: pd.DataFrame, central: pd.DataFrame) -> None:
         align="edge",
         label="UPS discharge",
         color="#EBC3DD",
-        linewidth=0,
+        edgecolor="#66505F",
+        hatch="///",
+        linewidth=0.25,
     )
 
     # The stack is an exact decomposition of optimised grid import; assert it

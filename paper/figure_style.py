@@ -163,6 +163,9 @@ def save(fig, path, **kwargs) -> None:
     try:
         fig.savefig(temporary, **kwargs)
         os.replace(temporary, path)
+        if path.suffix.lower() == '.png':
+            # Keep a vector source for journal production and legible printed text.
+            fig.savefig(path.with_suffix('.pdf'))
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)

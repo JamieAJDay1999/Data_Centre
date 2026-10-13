@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-13",
+  "prior_manuscript": "APEN-D-25-21553",
+  "marked_baseline": "Editorial Manager PDF of APEN-D-25-21553 (Takci first; 10.02% single-day saving)",
+  "marked_vs_clean_word_streams_identical": true,
+  "clean_pages": 21,
+  "marked_pages": 21,
+  "supplement_pages": 9,
+  "cover_letter_pages": 1,
+  "response_pages": 7,
+  "source_zip_standalone_build": "passed (main.tex only)",
+  "research_archive": "10778 checksums verified; audit passed: 288 cells, 280 boundary/cap, 8 lower-bound",
+  "dataset_doi": "PENDING",
+  "submission_status": "not submitted"
+}

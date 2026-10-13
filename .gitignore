@@ -7,8 +7,8 @@
 /.pytest_cache/
 /lp_debug/
 /tmp/
-/paper/main_new.pdf
 /paper/highlights.txt
+/paper/build/
 __pycache__/
 *.pyc
 *.aux
@@ -16,3 +16,7 @@ __pycache__/
 *.blg
 *.log
 *.out
+
+# Rendered lecture video (multi-GB, regenerated from lecture/intro_video/src)
+/lecture/intro_video/build/
+/lecture/intro_video/output/

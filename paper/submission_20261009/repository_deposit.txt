@@ -1,0 +1,28 @@
+REPOSITORY DEPOSIT — prepared, not yet published
+
+Upload research_data_and_code.zip to the author's selected repository. Its README
+documents scope, inputs, results, verification and third-party price provenance.
+repository_metadata.json supplies title, authors, affiliation, description,
+version, keywords and funding without inventing a DOI or licence.
+
+For Zenodo: sign into the author's account and create a new upload. Add the ZIP,
+review the metadata and choose appropriate rights/licensing. The archive contains
+third-party LCCC prices; check their terms before assigning an overall licence.
+Do not publish under an assumed licence or present a reserved DOI as if its files
+were already accessible. Test the public record or an accepted reviewer link.
+
+After deposit:
+1. Add a real dataset reference to paper/references.bib: authors, title,
+   repository, version, year and persistent identifier.
+2. Cite/link the record in Data availability in paper/main.tex.
+3. Regenerate the marked manuscript and build all three PDFs.
+4. Refresh manuscript_sources.zip and the clean/marked upload PDFs.
+5. Update submission_metadata.docx and enter the same link in the portal.
+6. Check that the DOI/link opens the intended record and files.
+
+If sharing is impossible, use the author's factual reason. No commercial,
+privacy or confidentiality restriction has been established in this preparation.
+
+Official help:
+https://help.zenodo.org/docs/deposit/create-new-upload/
+https://help.zenodo.org/docs/deposit/describe-records/reserve-doi/

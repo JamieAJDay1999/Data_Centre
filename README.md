@@ -2,7 +2,16 @@
 
 This repository contains a comprehensive data center (DC) optimization framework that models and analyzes the operational flexibility of data centers, focusing on cost minimization, thermal management, and demand response capabilities.
 
-## Overview
+## Current paper
+
+The latest manuscript and all compilation inputs live in [`paper/`](paper/README.md).
+Read the [clean paper](paper/pdf/main.pdf),
+[marked review copy](paper/pdf/main_marked.pdf), or
+[supplement](paper/pdf/supplement.pdf). Build all three with `./paper/build.ps1`.
+Older drafts and submission exports are available in Git history (pre-cleanup
+commit `f1607db`); there is no separate `output/` paper package.
+
+## Model overview
 
 The codebase implements a mixed-integer linear programming (MILP) optimization model for data center operations using Pyomo. It simulates various aspects of data center operations including IT workload scheduling, cooling systems, energy storage (UPS and TES), and electricity cost optimization.
 
@@ -94,8 +103,8 @@ The codebase implements a mixed-integer linear programming (MILP) optimization m
   formulation benchmark, and monthly-week sensitivity workflow.
 - `sensitivity_analysis/`: legacy independent-day sensitivity sweep, IMRP
   annual sampler, and sensitivity figure generation.
-- `paper/regenerate_paper_figures.py`: rebuilds paper figures from existing
-  result data without rerunning the optimisation.
+- `paper/generate_annual_results.py`: rebuilds annual paper figures from stored
+  results without rerunning the optimisation.
 - `plotting_and_saving/gen_data_heatmap.py`: prepares the complete flexibility
   heatmap data grid.
 

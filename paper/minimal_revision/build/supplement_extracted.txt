@@ -1,452 +1,0 @@
-Supplementary information
-Characterisation and Quantication of Data Centre Flexibility for Power System
-Support
-James Day, Mehmet Türker Takci and Meysam Qadrdan
-Cardi University
-This document supplies additional input records, annual and event procedures, numerical checks
-and investment assumptions. The main paper retains its IT, UPS and cooling formulation and
-existing descriptive material. Tables of inputs and outputs accompany the source package as
-machine-readable CSV les. All equations describe the model used for the results with the
-corrected hourly tranche mapping.
-S1 Workload and electricity-price inputs
-S1.1 Adopted workload arrays and their interpretation
-Published studies describe diering utilisation levels, workload classes and temporal exibility
-across facilities [1, 2, 4, 6]. They motivate separating immediate work from work that may be
-rescheduled, but do not identify a universal exible/inexible ratio. The inputs used here are
-stylised proles selected with reference to that literature. They are not claimed to be a measured
-site trace, a statistically representative sample of facilities or a deterministic reconstruction of a
-particular published trace.
-The numerical inputs aredata/load_profiles.csvanddata/shiftability_profile.csv,
-whose active slots 196 are reproduced jointly in Table S1. The load le also contains legacy
-rows 97108; annual timeline construction does not use those rows. The former le species
-exible and inexible arrival utilisation at quarter-hour resolution. The main paper's workload
-table retains hourly means of these inputs: for example, exible utilisation at 00:00, 00:15, 00:30
-and 00:45 is 0.40, 0.38, 0.36 and 0.34, so its hourly mean is 0.37 rather than the hourly starting
-value of 0.40. The four individual values are used by the model. The contextual literature-range
-columns do not replace these exact inputs.
-The tranche-share le is constructed from the 24 hourly distributions in the main paper's
-tranche table. Each hourly row is repeated four consecutive times: the 00:00 distribution applies
-at 00:00, 00:15, 00:30 and 00:45, followed by four copies of the 01:00 distribution, and so on. This
-gives 96 quarter-hour rows, each summing to one. The whole 24-row sequence is not repeated
-four times across the day. Table S1 and the supplied CSV reproduce the intended expansion
-exactly.
-For an arrival in intervalt, classkreceives work
-at,k =u flex,arr
-t αt,k∆t, ℓ t,k =t+D k∆t,(D 1, D2, D3, D4) = (2,4,8,12).(S1)
-The nal execution interval starts atℓ t,k and closes atℓ t,k + ∆t. For example, a three-hour class
-arriving at 12:00 may execute in the interval starting at 15:00 and ending at 15:15. Thus the
-class names denote shifts between interval starts, not a guarantee of completion within exactly
-three continuous hours of an interval's opening. Cohort creation omits quantities no larger than
-the10 −7 CPU-hour numerical tolerance.
-For workload multiplierm, letv t =u inflex
-t +u flex,arr
-t in the original input. The sensitivity uses
-uflex,arr
-t (m) = min{muflex,arr
-t (1), vt}, u inflex
-t (m) =v t −u flex,arr
-t (m).(S2)
-1
-Tranche fractions remain xed. The clipping rule preserves total arriving CPU-hours and avoids
-creating more exible work than the total workload. A multiplier is therefore not always an
-exactly proportional increase in the realised exible share.
-Table S1: Actual quarter-hour workload inputs. Utilisations
-are fractions of rated CPU capacity; tranche shares are frac-
-tions of exible work.
-Local start Inexible Flexibleα 1 α2 α3 α4
-00:00 0.28 0.40 0.25 0.25 0.20 0.30
-00:15 0.27 0.38 0.25 0.25 0.20 0.30
-00:30 0.26 0.36 0.25 0.25 0.20 0.30
-00:45 0.25 0.34 0.25 0.25 0.20 0.30
-01:00 0.25 0.31 0.25 0.25 0.15 0.35
-01:15 0.23 0.32 0.25 0.25 0.15 0.35
-01:30 0.21 0.32 0.25 0.25 0.15 0.35
-01:45 0.19 0.32 0.25 0.25 0.15 0.35
-02:00 0.17 0.33 0.35 0.17 0.18 0.30
-02:15 0.16 0.30 0.35 0.17 0.18 0.30
-02:30 0.16 0.28 0.35 0.17 0.18 0.30
-02:45 0.16 0.26 0.35 0.17 0.18 0.30
-03:00 0.16 0.23 0.25 0.15 0.20 0.40
-03:15 0.14 0.24 0.25 0.15 0.20 0.40
-03:30 0.12 0.25 0.25 0.15 0.20 0.40
-03:45 0.10 0.26 0.25 0.15 0.20 0.40
-04:00 0.08 0.27 0.25 0.20 0.15 0.40
-04:15 0.07 0.27 0.25 0.20 0.15 0.40
-04:30 0.06 0.27 0.25 0.20 0.15 0.40
-04:45 0.06 0.27 0.25 0.20 0.15 0.40
-05:00 0.06 0.27 0.25 0.15 0.15 0.45
-05:15 0.07 0.24 0.25 0.15 0.15 0.45
-05:30 0.09 0.22 0.25 0.15 0.15 0.45
-05:45 0.10 0.20 0.25 0.15 0.15 0.45
-06:00 0.12 0.18 0.23 0.28 0.15 0.34
-06:15 0.14 0.19 0.23 0.28 0.15 0.34
-06:30 0.16 0.21 0.23 0.28 0.15 0.34
-06:45 0.18 0.22 0.23 0.28 0.15 0.34
-07:00 0.20 0.24 0.20 0.20 0.15 0.45
-07:15 0.21 0.24 0.20 0.20 0.15 0.45
-07:30 0.22 0.24 0.20 0.20 0.15 0.45
-07:45 0.23 0.24 0.20 0.20 0.15 0.45
-08:00 0.24 0.24 0.25 0.15 0.13 0.47
-08:15 0.26 0.25 0.25 0.15 0.13 0.47
-08:30 0.29 0.26 0.25 0.15 0.13 0.47
-08:45 0.31 0.27 0.25 0.15 0.13 0.47
-09:00 0.34 0.28 0.25 0.17 0.16 0.42
-09:15 0.35 0.25 0.25 0.17 0.16 0.42
-09:30 0.36 0.23 0.25 0.17 0.16 0.42
-09:45 0.37 0.21 0.25 0.17 0.16 0.42
-10:00 0.37 0.19 0.35 0.22 0.13 0.30
-10:15 0.38 0.18 0.35 0.22 0.13 0.30
-2
-Local start Inexible Flexibleα 1 α2 α3 α4
-10:30 0.39 0.17 0.35 0.22 0.13 0.30
-10:45 0.40 0.16 0.35 0.22 0.13 0.30
-11:00 0.42 0.16 0.32 0.20 0.15 0.33
-11:15 0.41 0.17 0.32 0.20 0.15 0.33
-11:30 0.40 0.18 0.32 0.20 0.15 0.33
-11:45 0.39 0.19 0.32 0.20 0.15 0.33
-12:00 0.40 0.20 0.45 0.25 0.15 0.15
-12:15 0.39 0.21 0.45 0.25 0.15 0.15
-12:30 0.39 0.22 0.45 0.25 0.15 0.15
-12:45 0.38 0.23 0.45 0.25 0.15 0.15
-13:00 0.36 0.24 0.50 0.20 0.15 0.15
-13:15 0.36 0.24 0.50 0.20 0.15 0.15
-13:30 0.35 0.25 0.50 0.20 0.15 0.15
-13:45 0.35 0.26 0.50 0.20 0.15 0.15
-14:00 0.35 0.27 0.40 0.20 0.25 0.15
-14:15 0.34 0.27 0.40 0.20 0.25 0.15
-14:30 0.33 0.27 0.40 0.20 0.25 0.15
-14:45 0.32 0.27 0.40 0.20 0.25 0.15
-15:00 0.33 0.27 0.45 0.25 0.15 0.15
-15:15 0.34 0.25 0.45 0.25 0.15 0.15
-15:30 0.35 0.23 0.45 0.25 0.15 0.15
-15:45 0.37 0.21 0.45 0.25 0.15 0.15
-16:00 0.40 0.20 0.50 0.15 0.20 0.15
-16:15 0.37 0.25 0.50 0.15 0.20 0.15
-16:30 0.33 0.30 0.50 0.15 0.20 0.15
-16:45 0.30 0.35 0.50 0.15 0.20 0.15
-17:00 0.27 0.40 0.50 0.20 0.15 0.15
-17:15 0.27 0.41 0.50 0.20 0.15 0.15
-17:30 0.27 0.42 0.50 0.20 0.15 0.15
-17:45 0.26 0.43 0.50 0.20 0.15 0.15
-18:00 0.26 0.45 0.10 0.20 0.30 0.40
-18:15 0.26 0.45 0.10 0.20 0.30 0.40
-18:30 0.26 0.45 0.10 0.20 0.30 0.40
-18:45 0.26 0.45 0.10 0.20 0.30 0.40
-19:00 0.26 0.45 0.15 0.20 0.25 0.40
-19:15 0.26 0.45 0.15 0.20 0.25 0.40
-19:30 0.25 0.46 0.15 0.20 0.25 0.40
-19:45 0.25 0.46 0.15 0.20 0.25 0.40
-20:00 0.25 0.47 0.18 0.12 0.25 0.45
-20:15 0.26 0.46 0.18 0.12 0.25 0.45
-20:30 0.27 0.45 0.18 0.12 0.25 0.45
-20:45 0.28 0.44 0.18 0.12 0.25 0.45
-21:00 0.29 0.41 0.22 0.18 0.25 0.35
-21:15 0.29 0.41 0.22 0.18 0.25 0.35
-21:30 0.29 0.41 0.22 0.18 0.25 0.35
-21:45 0.30 0.41 0.22 0.18 0.25 0.35
-22:00 0.30 0.40 0.20 0.16 0.24 0.40
-22:15 0.27 0.40 0.20 0.16 0.24 0.40
-22:30 0.25 0.41 0.20 0.16 0.24 0.40
-22:45 0.22 0.41 0.20 0.16 0.24 0.40
-3
-Local start Inexible Flexibleα 1 α2 α3 α4
-23:00 0.21 0.42 0.15 0.20 0.20 0.45
-23:15 0.21 0.42 0.15 0.20 0.20 0.45
-23:30 0.21 0.42 0.15 0.20 0.20 0.45
-23:45 0.21 0.42 0.15 0.20 0.20 0.45
-S1.2 Prices, calendar and settlement
-The source is LCCC's IMRP actuals dataset [3], whose reference product is the Great Britain
-day-ahead hourly price. Source elds identify local date, chronological hourly settlement period
-and IMRP amount in GBP/MWh. The 2025 series covers 8,760 physical hours. Hourly prices
-are replicated to four consecutive quarter-hours without smoothing, giving 35,040 committed
-intervals. The timeline uses UTC for physical ordering and Europe/London for local-date and
-workload-slot labels. Spring and autumn clock changes produce 92 and 100 quarter-hours in
-those local days; workload values for skipped/repeated local-clock periods are correspondingly
-skipped/repeated. No physical UTC interval is missing or duplicated.
-Negative prices remain signed in both optimisation and reported costs. There are 672
-negative-price quarter-hours in the retained annual data. IMRP is a reference-price signal, not
-a full retail tari. The rst three hourly prices on 1 January 2026 are GBP 46.49, 40.19 and
-28.99/MWh; they supply the twelve nal look-ahead intervals. The exact expanded central price
-timeline is included asdata/price_timeline.csv. Annual cost uses only committed intervals
-in calendar 2025.
-S2 Annual evaluation and state transfer
-Each annual case follows this procedure:
-1. Build the continuous UTC price timeline and assign Europe/London date and prole-slot
-labels. Load the quarter-hour workload and tranche arrays.
-2. Initialise UPS/TES energy and the four thermal states once, at the beginning of the year;
-the initial unnished-work ledger is empty.
-3. For local dayd, select its 92, 96 or 100 core intervals and append twelve further intervals.
-Load the carried state and unnished cohorts, and generate new arrivals throughout the
-horizon.
-4. Solve the reference or coordinated model, and record feasibility, objective bounds and
-accounting checks. Both core and look-ahead contain the full facility demand.
-5. Commit only core controls and processing. Accumulate signed-price settlement for those
-intervals, save their ending physical state and compute unnished work from committed
-processing only.
-6. Pass the ending state and unnished cohorts to the next local day. Reoptimise all future
-controls. Repeat through 31 December.
-In this supplement,C d =T d andH d =T ext
-d in the main-paper notation. A cohortcidenties
-one arrival/tranche pair(t, k);r c andℓ c are its arrival and nal eligible interval start,A c,d its
-available work, andR c,H its residual at boundaryH. Superscriptopdenotes Scenario 2, andref
-denotes Scenario 1. Powers and stored energies use the main-paper units.
-Ifxcontains the two energy states and four temperatures, physical transfer isx start
-d+1 =
-xcore,end
-d . There is no daily storage equality restoring the initial state. Storage and workload
-4
-transfer are separate: an energy state alone cannot reconstruct which jobs remain eligible for
-execution.
-For annual committed setY, reported settlement is
-C=
-X
-t∈Y
-πtP grid
-t ∆t/1000.(S3)
-This counts every 2025 interval once. The nal continuation contains ordinary January demand
-as well as outstanding December work, so its entire cost is not added to 2025 expenditure. The
-central ledger contains 0.787115 CPU-hours at midnight after 31 December, and the retained
-continuation serves that work within its permitted execution windows. The nal continuation's
-feasibility does not imply that its full dispatch is committed as an additional annual day.
-The implementation records each day's controls, physical states, cohort residuals, solver
-status and audits. Central operation also records actual processing by cohort and interval,
-permitting event initialisation from the exact unnished-work ledger. Recorded daily objectives
-include look-ahead decisions, whereas reported annual costs include committed decisions only.
-A daily MILP gap is therefore not an optimality certicate for a single full-year optimisation
-problem.
-S3 Representative-day and exibility-event procedures
-S3.1 Day selection
-Daily features from central coordinated operation are: mean price, price standard deviation,
-minimum and maximum price, negative-price share, mean and peak grid import, mean total
-CPU utilisation, daily settlement cost, and opening UPS, TES and cold-aisle states. Each
-feature is centred on its mean across all annual daily observations and scaled by its population
-standard deviation; a zero standard deviation is replaced by one. For candidate dayd, the score
-is
-sd =
-
- 1
-12
-12X
-j=1
- vd j−¯vj
-σj
-2
-
-
-1/2
-.(S4)
-Candidates have 96 intervals and local date before 29 December 2025. The smallest score is
-selected, with date used to break a tie. This gives 22 September, score 0.23481769. The complete
-candidate table accompanies the package. The rule identies a central multivariate illustration;
-it does not weight days by event availability, or guarantee a typical duration envelope.
-S3.2 Opening state and recovery
-For each hourlyt 0, load the undisturbed central trajectory and exact remaining work at that
-boundary. Pre-event execution is xed by the stored history; the event solve starts att 0. New
-arrivals from that point are generated with their original class rules. Any existing cohort retains
-only its remaining work and remaining eligible intervals.
-For durationτ, the trial ends atH=t 0 +τ+3h. Impose a grid deviation of∆Pwithin±0.1
-kW during the event, with no grid-target constraint during the recovery period. AtH, require
-UPS/TES energy no smaller than the undisturbed states, each temperature within 0.05 ◦C of its
-undisturbed value, and each cohort residual no larger than the undisturbed residual plus10 −7
-CPU-hours. Workload eligibility, storage modes and all physical limits hold throughout. Surplus
-stored energy is permitted at recovery; exact equality of storage states is not required.
-5
-S3.3 Search, certication and dispatch interpretation
-There are 24 start times, nine negative requests (−100to−500kW in 50 kW steps) and three
-positive requests (25, 50, 75 kW). For each pair, the assessment cap in intervals is the smaller of
-48 and the number of intervals remaining in the local day. The procedure rst tests that cap. If
-unsuccessful, it searches logarithmically for a feasible duration and checks the following interval.
-Trials in this assessment have a 60 s solver limit; unresolved adjacent trials are retained as lower
-bounds.
-A trial with an audited feasible incumbent is evidence that its duration can be delivered
-under the model. A trial without an incumbent can be either proven infeasible or unresolved;
-these outcomes are retained separately. During the search, an unsuccessful trial can narrow the
-region explored even when it is unresolved. Consequently the results should be interpreted as
-the feasible durations found by this procedure, rather than as an exhaustive exploration of every
-duration.
-The output agboundary_verifiedcovers both a feasible assessment cap and a proven-
-infeasible adjacent candidate. It is not, by itself, a proof that all longer durations are infeasible.
-Since extending an event changes the recovery boundary and undisturbed terminal reference,
-monotonic feasibility with duration has not been established for this formulation. The main
-paper therefore reports certied feasible durations. It retains plus signs for the eight unresolved
-adjacent cases and explains the cap convention separately. Unmarked cells do not acquire a
-stronger global-maximality interpretation merely because the next tested interval was infeasible.
-Blank cells mean that this search certied no positive duration.
-The accepted dispatch minimises signed event-plus-recovery electricity cost subject to the
-request. Where a solve terminates with a nonzero objective gap, it is an accepted incumbent
-for that objective, not a proven minimum-cost allocation. Even a proven optimum need not be
-unique. Thus component panels illustrate feasible coordinated mechanisms and exact electrical
-accounting; they are neither a unique attribution nor an independent valuation of the assets.
-The dashed target ends at the certied event duration. Grey regions contain no plotted recovery
-dispatch. A plus sign beside a duration denotes an unresolved adjacent trial.
-S4 Extended annual and component results
-All sensitivity points in Table S2 are completed annual chains. They supersede earlier
-representative-week intermediate comparisons. The common reference has the same total work-
-load arrivals as every exible-share case; storage is disabled in that reference. Percentage-point
-changes are relative to the central coordinated saving, while saving percentages use the common
-reference cost as denominator. More decimals are retained in the accompanying CSV les for
-calculation.
-The annual endpoints and event grid are supplied asdata/annual_endpoints.csvanddata/
-flexibility_results.csv. The representative-day component schedule remains in the main
-paper.
-The annual component-cost dierences are accounting terms within the same coordinated so-
-lution. In particular, electricity used to charge TES is positive in the charging-chiller row, while
-avoided direct cooling appears elsewhere. The UPS row is charging minus discharging evalu-
-ated at interval prices, not a storage-revenue settlement. The accounting identity remains valid
-under negative prices. Summed displayed values can dier from displayed totals by rounding;
-unrounded terms reconcile in the accompanying data.
-6
-Table S2: Full-year cost and resource sensitivity. Change is percentage points from the central
-coordinated saving; baseline denotes reference operation.
-Case Cost (GBP) Saving (%) Change (pp) Energy (GWh)
-Baseline 550,504 0.000 -5.382 6.718
-Flexible workload 0.5×529,934 3.737 -1.645 6.777
-Flexible workload 0.75×525,157 4.604 -0.778 6.781
-Flexible workload 1.0×520,877 5.382 +0.000 6.789
-Flexible workload 1.25×516,997 6.087 +0.705 6.797
-Flexible workload 1.5×513,989 6.633 +1.251 6.806
-UPS capacity 0.5×523,544 4.897 -0.484 6.766
-UPS capacity 0.75×522,187 5.144 -0.238 6.778
-UPS capacity 1.25×519,602 5.613 +0.232 6.799
-UPS capacity 1.5×518,417 5.829 +0.447 6.810
-TES capacity 0.5×522,268 5.129 -0.253 6.779
-TES capacity 0.75×521,496 5.269 -0.113 6.784
-TES capacity 1.25×520,502 5.450 +0.068 6.792
-TES capacity 1.5×520,229 5.499 +0.118 6.794
-S5 Numerical checks and solution quality
-The retained manuscript run record identies Python 3.12.0, Pyomo 6.10.1 and HiGHS 1.15.1,
-on Windows 11 with an eight-core AMD Ryzen 7 9800X3D. Annual scenarios request a relative
-MILP gap of 0.1%, with a standard daily time limit of 300 s and a normal acceptance threshold
-of 1%. Feasible exceptions in sensitivity cases are disclosed below rather than treating every solve
-as proven optimal. The main paper's 5.382% is computed from the retained annual settlements,
-not by summing daily objective bounds.
-All fourteen annual summaries contain 365 local dates and 35,040 committed intervals. Their
-stored checks cover timestamp continuity, physical state hando, workload conservation, storage
-mode exclusivity and signed-price settlement reconciliation. The stated audit tolerances are
-10−5 in the native state units,10 −3 kW for power ows and10 −7 CPU-hours for work. Central
-operation also stores a cohort execution trace. The three central time-limited daily solutions, on
-25 May, 6 August and 4 October, have reported relative gaps of approximately 0.868%, 0.228%
-and 0.612%, respectively, within the normal threshold.
-Table S3: Corrected annual-chain solver records. Non-optimal denotes the stored termination
-classication; each listed chain covers all 365 days.
-Case Non-optimal horizons Maximum recorded gap (%)
-Baseline 0 0.000
-Flexible workload 0.5×1 1.301
-Flexible workload 0.75×1 0.509
-Flexible workload 1.0×3 0.868
-Flexible workload 1.25×4 0.686
-Flexible workload 1.5×1 0.496
-UPS capacity 0.5×2 1.111
-UPS capacity 0.75×2 0.684
-UPS capacity 1.25×2 0.554
-UPS capacity 1.5×2 0.475
-TES capacity 0.5×2 1.009
-TES capacity 0.75×2 0.894
-TES capacity 1.25×3 0.572
-TES capacity 1.5×3 0.903
-7
-Table S3 records the maximum reported gap for each retained annual chain. Three 25 May
-sensitivity horizons exceed the normal 1% threshold: the 0.5 workload, 0.5 UPS and 0.5 TES
-cases have gaps of 1.301%, 1.111% and 1.009%, respectively. Their absolute daily objective-
-bound widths are GBP 0.103, 0.329 and 0.359. These feasible time-limited incumbents remain
-in the annual settlements and are disclosed as exceptions. Near-zero negative objectives can
-produce relative gaps above the threshold despite small absolute bounds. The accompanying
-data/corrected_solver_horizons.csvrecords every non-optimal termination in the corrected
-annual chains.
-The daily bounds apply to the corresponding core-plus-look-ahead optimisation, not to a
-globally optimised annual problem. They do not bound the downstream eect of dierent com-
-mitted decisions or certify an annual saving to the displayed rounding precision. Historical
-longer-limit diagnostic solves used the earlier tranche inputs and are not used to certify these
-corrected results. In particular, the event study's 1% criterion must not be interpreted as a claim
-that all annual horizons meet that threshold.
-The corrected central year-end checkpoint records 0.787115 CPU-hours outstanding at mid-
-night and zero unserved work after the planned continuation. Its complete nal look-ahead
-contains 2,531.359 kWh and GBP 98.275, including ordinary January demand. These quanti-
-ties come from the current checkpoint supplied inevidence/corrected_year_end_checkpoint.
-json. Earlier terminal-value tests used dierent tranche inputs; their report is retained as histor-
-ical context for the terminal convention, not as a terminal-sensitivity validation of the corrected
-central or enlarged-capacity cases.
-For the event study, all 288 cells pass the recorded validation checks: 280 carry the bound-
-ary/cap ag and eight an unresolved-next-step ag. The 148 positive-duration dispatches meet
-the event solver-gap criterion of 1% and the physical audits; the other 140 cells have no certied
-positive duration. Maximum target error is 0.1 kW, terminal-temperature error 0.05 ◦C, excess
-cohort residual10 −7 CPU-hours and component-sum residual approximately4.82×10 −11 kW.
-An independent accounting check reconciles all positive-duration component traces against me-
-tered deviations. These checks establish consistency with the formulated constraints. They do
-not eliminate the search qualications in S3, model approximation or uncertainty in the adopted
-facility parameters.
-S6 UPS investment-screen calculations
-Let the additional annual electricity-cost saving for energy capacityEbe∆S(E) =
-Cop(600)−C op(E). The retained results give GBP 1,274.7485/year forE= 750kWh
-and GBP 2,459.8888/year forE= 900kWh. Relative to the central capacity, the additional
-nameplate energies are 150 and 300 kWh, but the additional energy between operational bounds
-is 75 and 150 kWh because the 50% reserve fraction remains xed.
-For constant real annual benets, additional investmentIand additional annual non-
-electricity costsO, the screen is
-∆S−O−ICRF(r, n)≥0,CRF(r, n) = r(1 +r) n
-(1 +r) n −1 .(S5)
-Atr= 0, CRF is1/n. The capital recovery factor converts initial expenditure into an equivalent
-annual amount [5]. SettingO= 0givesI BE = ∆S/CRF. Dividing by addednameplatekWh
-gives a threshold directly comparable with a cost expressed on that same basis. The ten-year, 8%
-case has CRF 0.14902949. Table S4 shows additional illustrative rate/life combinations; these
-are assumptions for interpreting the result, not empirical estimates of project nance or battery
-life.
-No battery market price is assumed, so the calculation establishes a maximum supported
-expenditure rather than a positive investment recommendation. Comparing a vendor quotation
-8
-Table S4: Illustrative supported investment per added nameplate kWh, in GBP/kWh, before
-additional non-electricity costs.
-Life (years) Real rate (%) CRF 750 kWh case 900 kWh case
-5 4 0.22463 37.83 36.50
-5 8 0.25046 33.93 32.74
-5 12 0.27741 30.63 29.56
-10 4 0.12329 68.93 66.51
-10 8 0.14903 57.02 55.02
-10 12 0.17698 48.02 46.33
-15 4 0.08994 94.49 91.17
-15 8 0.11683 72.74 70.18
-15 12 0.14682 57.88 55.85
-would require its currency, price year, chemistry, installed scope, integration work, reserve policy
-and usable/nameplate capacity convention. Existing power electronics are held xed in the
-dispatch sensitivity; an upgrade requiring additional converter capacity cannot be evaluated by
-changing only a battery price per kWh.
-Losses already enter the dispatch costs through eciency and must not be charged twice.
-Degradation, additional O&M, replacements and nancing/tax detail are omitted. Introducing
-additional costs reduces supported investment under the same annual-benet assumption. A
-more complete lifetime treatment could also change the benet itself. In particular, initial UPS
-energy is proportional to capacity and terminal energy has no credit. The retained annual cases
-nish with 300, 375 and 450 kWh for 600, 750 and 900 kWh capacity, respectively. The resulting
-single-year dierences are not independently established steady-state annual benets. The earlier
-central terminal check in S5 does not resolve this for all enlarged-capacity cases.
-Accordingly, repeating the 2025 incremental saving overnyears is an explicit conditional
-assumption. The thresholds are gross screens before omitted costs, not forecasts of a site's
-investment return. They exclude the possible value of greater backup provision and any revenues
-from grid services. Neither the event heatmap nor the annual component accounting supplies
-those revenues. If credible installed incremental costs exceed the stated threshold, the assumed
-energy-arbitrage saving alone is insucient; if they are lower, the screen is favourable only within
-the stated operational and nancial assumptions.
-References
-[1] Yujie Cao, Ming Cheng, Sufang Zhang, Hongju Mao, Peng Wang, Chao Li, Yihui Feng, and
-Zhaohao Ding. Data-driven exibility assessment for internet data center towards periodic
-batch workloads.Applied Energy, 324:119665, oct 2022. doi: 10.1016/j.apenergy.2022.119665.
-URLhttps://doi.org/10.1016/j.apenergy.2022.119665.
-[2] Zhenhua Liu, Yuan Chen, Cullen Bash, Adam Wierman, Daniel Gmach, Zhikui Wang, Man-
-ish Marwah, and Chris Hyser. Renewable and cooling aware workload management for
-sustainable data centers.ACM SIGMETRICS Performance Evaluation Review, 40(1):175
-186, jun 2012. doi: 10.1145/2318857.2254779. URLhttps://doi.org/10.1145/2318857.
-2254779.
-[3] Low Carbon Contracts Company. IMRP actuals. LCCC Data Portal, 2026. URLhttps:
-//dp.lowcarboncontracts.uk/dataset/imrp-actuals.
-[4] M. Saeed Misaghian, Giovanni Tardioli, Adalberto Guerra Cabrera, Ilaria Salerno, Damian
-Flynn, and Ruth Kerrigan. Assessment of carbon-aware exibility measures from data centres
-9
-using machine learning.IEEE Transactions on Industry Applications, 59(1):7080, jan 2023.
-doi: 10.1109/TIA.2022.3213637. URLhttps://doi.org/10.1109/TIA.2022.3213637.
-[5] National Renewable Energy Laboratory. System Advisor Model: LCOE Calculator, capital
-recovery factor. SAM Help, n.d. URLhttps://samrepo.nlr.gov/help/fin_lcoefcr.html.
-Accessed 8 September 2026.
-[6] Md. Rasheduzzaman, Md. Amirul Islam, Tasvirul Islam, Tahmid Hossain, and Rashedur M
-Rahman. Task shape classication and workload characterization of google cluster trace. In
-2014 IEEE International Advance Computing Conference (IACC), pages 893898, 2014. doi:
-10.1109/IAdCC.2014.6779441.
-10

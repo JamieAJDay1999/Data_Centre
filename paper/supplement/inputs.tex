@@ -1,0 +1,29 @@
+\section{Workload and \textcolor{LatestGreen}{electricity price} inputs}
+\subsection{Adopted workload arrays and their interpretation}
+Published studies describe differing utilisation levels, workload classes and temporal flexibility across facilities~\cite{Cao2022ApEn,6779441,Misaghian2023TIA,Liu2012PER}. They motivate separating immediate work from work that may be rescheduled, but do not identify a universal flexible/inflexible ratio. The inputs used here are stylised profiles selected with reference to that literature. They are not claimed to be a measured site trace, a statistically representative sample of facilities or a deterministic reconstruction of a particular published trace.
+
+The numerical inputs are the quarter-hour arrival utilisations and tranche shares reproduced in Table~\ref{tab:workload-inputs}. The utilisation input specifies flexible and inflexible arrival utilisation at quarter-hour resolution. The main paper's workload table retains hourly means of these inputs: for example, flexible utilisation at 00:00, 00:15, 00:30 and 00:45 is 0.40, 0.38, 0.36 and 0.34, so its hourly mean is 0.37 rather than the hourly starting value of 0.40. The four individual values are used by the model. The contextual literature-range columns do not replace these exact inputs.
+
+The \textcolor{LatestGreen}{tranche shares} are constructed from the 24 hourly distributions in the main paper's tranche table. Each hourly row is repeated four consecutive times: the 00:00 distribution applies at 00:00, 00:15, 00:30 and 00:45, followed by four copies of the 01:00 distribution, and so on. This gives 96 quarter-hour rows, each summing to one. Table~\ref{tab:workload-inputs} lists the resulting 96 rows.
+
+For an arrival in interval $t$, class $k$ receives work
+\begin{equation}
+a_{t,k}=u_t^{\mathrm{flex,arr}}\alpha_{t,k}\Delta t,
+\quad \ell_{t,k}=t+D_k\Delta t,
+\quad (D_1,D_2,D_3,D_4)=(2,4,8,12).
+\end{equation}
+The final execution interval starts at $\ell_{t,k}$ and closes at $\ell_{t,k}+\Delta t$. For example, a three-hour class arriving at 12:00 may execute in the interval starting at 15:00 and ending at 15:15. Thus the class names denote shifts between interval starts, not a guarantee of completion within exactly three continuous hours of an interval's opening. Cohort creation omits quantities no larger than the $10^{-7}$ CPU-hour numerical tolerance.
+
+For workload multiplier $m$, let $v_t=u_t^{\mathrm{inflex}}+u_t^{\mathrm{flex,arr}}$ in the original input. The sensitivity uses
+\begin{equation}
+u_t^{\mathrm{flex,arr}}(m)=\min\{m u_t^{\mathrm{flex,arr}}(1),v_t\},
+\qquad u_t^{\mathrm{inflex}}(m)=v_t-u_t^{\mathrm{flex,arr}}(m).
+\end{equation}
+Tranche fractions remain fixed. The clipping rule preserves total arriving CPU-hours and avoids creating more flexible work than the total workload. A multiplier is therefore not always an exactly proportional increase in the realised flexible share.
+
+\input{tables/workload_inputs.tex}
+
+\subsection{Prices, calendar and settlement}
+The source is LCCC's IMRP actuals dataset~\cite{lccc_imrp_actuals}, whose reference product is the Great Britain day-ahead hourly price. Source fields identify local date, chronological hourly settlement period and IMRP amount in GBP/MWh. The 2025 series covers 8,760 physical hours. Hourly prices are replicated to four consecutive quarter-hours without smoothing, giving 35,040 committed intervals. The timeline uses UTC for physical ordering and Europe/London for \textcolor{LatestGreen}{local date} and \textcolor{LatestGreen}{workload slot} labels. Spring and autumn clock changes produce 92 and 100 quarter-hours in those local days; workload values for skipped/repeated local-clock periods are correspondingly skipped/repeated. No physical UTC interval is missing or duplicated.
+
+Negative prices remain signed in both optimisation and reported costs. There are 672 negative-price quarter-hours in the retained annual data. IMRP is a \textcolor{LatestGreen}{reference price} signal, not a full retail tariff. The first three hourly prices on 1 January 2026 are GBP~46.49, 40.19 and 28.99/MWh; they supply the twelve final look-ahead intervals. Annual cost uses only committed intervals in calendar 2025.
